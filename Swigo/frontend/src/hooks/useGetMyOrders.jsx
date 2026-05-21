@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMyOrders } from "../redux/userSlice";
 
-export const serverurl = "http://localhost:8000";
+export const serverurl = import.meta.env.VITE_API_URL;
 
 function useGetMyOrders() {
   const dispatch = useDispatch();

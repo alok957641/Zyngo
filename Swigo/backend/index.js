@@ -3,6 +3,8 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const database = require("./config/db.js");
+
+// Routes
 const router = require("./routes/authroute.js");
 const userroute = require("./routes/userroute.js");
 const shoprouter = require("./routes/shoproute.js");
@@ -10,17 +12,27 @@ const itemrouter = require("./routes/itemroute.js");
 const orderrouter = require("./routes/orderroute.js");
 const ratingrouter = require("./routes/rating.js");
 const payoutRouter = require("./routes/payoutRoute.js");
-const adminRoutes = require ("./routes/adminRoute.js");
-
+const adminRoutes = require("./routes/adminRoute.js");
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// ✅ Standard CORS Setup
+// ✅ FIXED CORS SETUP (Multi-origin support)
+const allowedOrigins = [
+  "http://localhost:5173", 
+  "https://zyngo-omega.vercel.app"
+];
+
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 
@@ -38,15 +50,15 @@ app.use("/api/payout", payoutRouter);
 app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
-  res.send("API Working 🔥 (Polling Mode Active)");
+  res.send("API Working 🔥");
 });
 
-// 🚀 Server Start Logic
+// 🚀 Server Start
 const startServer = async () => {
   try {
     await database();
     app.listen(port, () => {
-      console.log(`Server running on port ${port} 🚀 (Clean Mode)`);
+      console.log(`Server running on port ${port} 🚀`);
     });
   } catch (err) {
     console.log("Server start error:", err);

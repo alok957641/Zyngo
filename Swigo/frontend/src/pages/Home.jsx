@@ -1,14 +1,11 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import UserDeshboard from "../components/UserDeshboard";
-import DelevryBoyDeshboard from "../components/DelevryBoyDeshboard";
-import OwnerDeshboard from "../components/OwnerDeshboard";
-import { Link } from "react-router-dom"; 
+import { Link, Navigate } from "react-router-dom";
 
 function Home() {
   const { userData, loading } = useSelector((state) => state.user);
 
-  // 🛡️ STEP 1: Jab tak backend se jawaab na aaye (White Screen ya Spinner)
+  // 1. Loading state (Spinners)
   if (loading) {
     return (
       <div className="h-screen w-full flex items-center justify-center bg-white">
@@ -17,30 +14,40 @@ function Home() {
     );
   }
 
-  // 🛡️ STEP 2: Agar User mil gaya (Dashboard)
+  // 2. Agar user logged-in hai, toh yahan rukna hi nahi hai, 
+  // App.jsx ka gateway automatically use dashboard bhej dega.
   if (userData) {
-    return (
-      <div className="min-h-screen w-full bg-[#fcfcfc] relative">
-         <div className="relative z-10">
-            {userData.role === "user" && <UserDeshboard />}
-            {userData.role === "owner" && <OwnerDeshboard />}
-            {userData.role === "deliveryboy" && <DelevryBoyDeshboard />}
-         </div>
-      </div>
-    );
+    return <Navigate to="/" replace />;
   }
 
-  // 🛡️ STEP 3: Sirf tab dikhao jab loading band ho aur user na mile (Splash/Video)
+  // 3. Landing Page (Video + Login Button) - Yeh tabhi dikhega jab user logged out hai
   return (
-    <div className="relative h-screen w-full flex items-center justify-center">
-       {/* Tera Video wala poora code... */}
-       <video autoPlay loop muted playsInline className="absolute z-0 w-full h-full object-cover">
-          <source src="frontvideo.mp4" type="video/mp4" />
-       </video>
-       <div className="relative z-10 text-center">
-          <h1 className="text-white text-8xl font-black italic">Swigo</h1>
-          <Link to="/signin" className="mt-5 bg-orange-500 text-white px-10 py-3 rounded-xl font-bold">Go to Login</Link>
-       </div>
+    <div className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+      {/* Video Background */}
+      <video 
+        autoPlay 
+        loop 
+        muted 
+        playsInline 
+        className="absolute z-0 w-full h-full object-cover"
+      >
+        <source src="frontvideo.mp4" type="video/mp4" />
+      </video>
+
+      {/* Overlay Content */}
+      <div className="absolute inset-0 bg-black/40 z-[1]" />
+      
+      <div className="relative z-10 text-center text-white">
+        <h1 className="text-8xl font-black italic tracking-tighter">Zyngo</h1>
+        <p className="mt-2 text-lg font-medium">Fastest Food Delivery in Your City</p>
+        
+        <Link 
+          to="/signin" 
+          className="mt-8 inline-block bg-orange-500 hover:bg-orange-600 transition-all text-white px-10 py-3 rounded-xl font-bold text-lg"
+        >
+          Go to Login
+        </Link>
+      </div>
     </div>
   );
 }

@@ -37,7 +37,7 @@ function UserOrderCard({ data }) {
 
     try {
       setIsSubmitting(true);
-      const response = await axios.post(`http://localhost:8000/api/rating/add`, {
+      const response = await axios.post(`import.meta.env.VITE_API_URL/api/rating/add`, {
         orderId: data._id,
         shopId: data.shopOrders[0]?.shop?._id, 
         rating: ratingValue

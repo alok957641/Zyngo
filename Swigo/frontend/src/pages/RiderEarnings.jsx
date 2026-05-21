@@ -8,7 +8,7 @@ import {
 } from "react-icons/fi";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
-const serverurl = "http://localhost:8000";
+const serverurl = import.meta.env.VITE_API_URL;
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {

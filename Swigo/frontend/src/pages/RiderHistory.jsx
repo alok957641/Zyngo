@@ -7,7 +7,7 @@ const RiderHistory = () => {
 
     useEffect(() => {
         const fetchHistory = async () => {
-            const res = await axios.get("http://localhost:8000/api/order/rider-history", { withCredentials: true });
+            const res = await axios.get("import.meta.env.VITE_API_URL/api/order/rider-history", { withCredentials: true });
             setHistory(res.data);
         };
         fetchHistory();

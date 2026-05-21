@@ -12,7 +12,7 @@ import {
   FiCreditCard,
 } from "react-icons/fi";
 
-const serverurl = "http://localhost:8000";
+const serverurl = import.meta.env.VITE_API_URL;
 
 const OwnerEarnings = () => {
   const navigate = useNavigate();

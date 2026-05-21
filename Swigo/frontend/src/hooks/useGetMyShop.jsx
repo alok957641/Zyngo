@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";
 
-export const serverurl = "http://localhost:8000";
+export const serverurl = import.meta.env.VITE_API_URL;
 
 function useGetMyShop() {
   const dispatch = useDispatch();

@@ -8,7 +8,7 @@ import {
 } from "react-icons/fi";
 import axios from "axios";
 
-const serverurl = "http://localhost:8000";
+const serverurl = import.meta.env.VITE_API_URL;
 
 const RiderProfile = () => {
     const navigate = useNavigate();

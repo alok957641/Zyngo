@@ -9,7 +9,7 @@ import { FiArrowLeft, FiArrowRight, FiClock, FiLock } from "react-icons/fi";
 import { setSelectedCategory } from "../redux/userSlice";
 import axios from "axios";
 
-const serverurl = "http://localhost:8000";
+const serverurl = import.meta.env.VITE_API_URL;
 
 function UserDeshboard() {
   const dispatch = useDispatch();
