@@ -28,11 +28,7 @@ const allowedOrigins = [
 app.use(cors({
   origin: ["https://zyngo-omega.vercel.app"],
   credentials: true,
-  // Ye line bahut important hai production ke liye
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
 }));
-
 app.use(express.json());
 app.use(cookieParser());
 
