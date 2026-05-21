@@ -4,16 +4,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    chunkSizeWarningLimit: 1000, 
-    
+    chunkSizeWarningLimit: 1600, // Limit badha di
     rollupOptions: {
       output: {
-        manualChunks(id) {
-       
-          if (id.includes('node_modules')) {
-            return 'vendor'; 
-          }
-        }
+        manualChunks: undefined // Filhal manualChunks hata do, error wahi se ho sakta hai
       }
     }
   }
