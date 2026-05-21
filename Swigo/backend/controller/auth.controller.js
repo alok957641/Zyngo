@@ -1,7 +1,7 @@
 const User = require("../models/user/usermodel.js")
 const generatetocken = require("../utils/tocken.js")
 const bscrypt = require("bcryptjs");
-const { sendOtpEmail} = require("../utils/mail.js");
+const { sendOtpEmail } = require("../utils/mail.js");
 
 
 
@@ -29,18 +29,19 @@ const signup = async (req, res) => {
         })
 
         const token = generatetocken(user._id);
+        // Signup, Signin, aur Googleauth sab mein ye use karo
         res.cookie("token", token, {
-            secure: false,
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
             httpOnly: true,
-        })
+            secure: true,        
+            sameSite: "none",     
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
         return res.status(201).json(user)
 
-    } catch (error)
-    {
-        return res.status(500).json({ message: `sign up  error ${error}` });
-    }
+   // Googleauth catch block fix:
+} catch (error) { // Yahan 'error' karo
+    return res.status(500).json({ message: `Googleauth error ${error.message}` });
+}
 }
 
 
@@ -68,9 +69,10 @@ const signin = async (req, res) => {
         })
         console.log(user);
         return res.status(201).json(user)
-    } catch (err) {
-        return res.status(500).json({ message: ` sign in  error ${err}` });
-    }
+    // Googleauth catch block fix:
+} catch (error) { // Yahan 'error' karo
+    return res.status(500).json({ message: `Googleauth error ${error.message}` });
+}
 }
 
 
@@ -80,9 +82,10 @@ const signout = async (req, res) => {
     try {
         res.clearCookie("token");
         return res.status(200).json({ message: "Logut Sucessfully" });
-    } catch (error) {
-        return res.status(500).json({ message: ` sign out  error ${error}` });
-    }
+  // Googleauth catch block fix:
+} catch (error) { // Yahan 'error' karo
+    return res.status(500).json({ message: `Googleauth error ${error.message}` });
+}
 }
 
 
@@ -100,22 +103,22 @@ const sendOtp = async (req, res) => {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.resetOtp = otp;
         user.otpExpiry = Date.now() + 5 * 60 * 1000;
-        
+
         console.log("Saving OTP to DB..."); // Step 2
         await user.save();
 
         console.log("Attempting to send Email..."); // Step 3
-        await sendOtpEmail(email, otp); 
+        await sendOtpEmail(email, otp);
 
         return res.status(200).json({ success: true, message: "OTP sent to email" });
 
     } catch (error) {
         // 🔥 Ye tere VS Code terminal mein laal rang ka error dikhayega
-        console.error("CRITICAL ERROR IN SEND-OTP:", error); 
-        return res.status(500).json({ 
-            success: false, 
+        console.error("CRITICAL ERROR IN SEND-OTP:", error);
+        return res.status(500).json({
+            success: false,
             message: "Email bhejte waqt server fat gaya!",
-            debug_error: error.message 
+            debug_error: error.message
         });
     }
 }
@@ -156,9 +159,10 @@ const resetpassword = async (req, res) => {
         user.isOtpVerified = false;
         await user.save();
         return res.status(200).json({ message: "Password Reset Successfully" });
-    } catch (error) {
-        return res.status(500).json({ message: "Error resetting password" });
-    }
+   // Googleauth catch block fix:
+} catch (error) { // Yahan 'error' karo
+    return res.status(500).json({ message: `Googleauth error ${error.message}` });
+}
 }
 
 
@@ -169,12 +173,12 @@ const googleauth = async (req, res) => {
     try {
 
 
-        const { fullname, email, mobile ,role} = req.body
+        const { fullname, email, mobile, role } = req.body
         let user = await User.findOne({ email })
 
         if (!user) {
             user = await User.create({
-                fullname, email, mobile ,role
+                fullname, email, mobile, role
             })
         }
         const token = generatetocken(user._id);
@@ -188,9 +192,9 @@ const googleauth = async (req, res) => {
         return res.status(200).json(user)
 
     } catch (error) {
-          return res.status(500).json({ message: ` Googleauth   error ${err}` });
+        return res.status(500).json({ message: ` Googleauth   error ${err}` });
     }
 
 }
 
-module.exports = { signup, signin, signout, sendOtp, varifyOtp, resetpassword , googleauth};
+module.exports = { signup, signin, signout, sendOtp, varifyOtp, resetpassword, googleauth };

@@ -26,9 +26,11 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: ["https://zyngo-omega.vercel.app"],
-  credentials: true,
+  origin: "https://zyngo-omega.vercel.app",
+  credentials: true // Yeh TRUE hona hi chahiye!
 }));
+
+
 app.use(express.json());
 app.use(cookieParser());
 
