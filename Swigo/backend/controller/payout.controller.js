@@ -1,6 +1,6 @@
 const PayoutRequest = require("../models/payout/payoutModel");
 const User = require("../models/user/usermodel");
-const Shop = require("../models/shop/shopModel"); 
+const Shop = require("../models/shop/shopmodel"); 
 const Order = require("../models/order/orderModel"); 
 
 // ==========================================
