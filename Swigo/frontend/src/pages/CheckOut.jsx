@@ -11,7 +11,7 @@ import { addMyOrder } from "../redux/userSlice";
 // 🚨 Icons for Online Payment
 import { SiGooglepay, SiPhonepe, SiPaytm } from "react-icons/si";
 
-export const serverurl = import.meta.env.VITE_API_URL;
+export const serverurl = "import.meta.env.VITE_API_URL";
 
 // Real Distance Formula
 const calculateKm = (lat1, lon1, lat2, lon2) => {

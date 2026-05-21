@@ -3,7 +3,7 @@ import { FiUser, FiPhone, FiMapPin, FiChevronDown, FiLoader, FiNavigation, FiLoc
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import axios from "axios";
 
-const serverurl = import.meta.env.VITE_API_URL;
+const serverurl = "import.meta.env.VITE_API_URL";
 
 function OwnerOrderCard({ data }) {
   if (!data || !data.shopOrders || data.shopOrders.length === 0) return null;

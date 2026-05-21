@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios"; 
 import { FiUsers, FiShoppingBag, FiTruck, FiActivity, FiLoader } from "react-icons/fi";
 
-const serverurl = import.meta.env.VITE_API_URL;
+const serverurl = "import.meta.env.VITE_API_URL";
 
 const AdminDashboardOverview = () => {
   const [stats, setStats] = useState({ totalUsers: 0, totalShops: 0, totalRiders: 0, activeOrders: 0 });

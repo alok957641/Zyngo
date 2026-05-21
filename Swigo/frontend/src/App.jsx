@@ -48,11 +48,12 @@ import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
 function App() {
-  // 🔥 Global Axios Setup for Production
+  // Global Axios Setup
   useEffect(() => {
     axios.defaults.baseURL = import.meta.env.VITE_API_URL;
     axios.defaults.withCredentials = true;
   }, []);
+
 
   // Global Hooks
   useGetCurruser();
@@ -63,7 +64,7 @@ function App() {
   useGetMyOrders();
   useGetUpdateLocation();
 
-  const { userData } = useSelector((state) => state.user);
+const { userData } = useSelector((state) => state.user);
 
   return (
     <>

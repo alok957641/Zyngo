@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";
 
 import axios from "axios";
-export const serverurl = import.meta.env.VITE_API_URL;
+export const serverurl = "import.meta.env.VITE_API_URL";
 
 // 👈 Function ka naam theek karke EditItem kar diya
 function EditItem() {

@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setCity, setShopsOfMyCity } from "../redux/userSlice";
 
-export const serverurl = import.meta.env.VITE_API_URL;
+export const serverurl = "import.meta.env.VITE_API_URL";
 
 function useGetShopbyCity() {
   // ⚠️ DHYAN RAKHNA: Redux me tune 'City' (Capital C) rakha hai ya 'city' (Small c). 

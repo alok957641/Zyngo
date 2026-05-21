@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
-export const serverurl = import.meta.env.VITE_API_URL;
+export const serverurl = "import.meta.env.VITE_API_URL";
 
 function useGetUpdateLocation() {
   const { userData } = useSelector((state) => state.user);

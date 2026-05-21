@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux"; 
 import { setUserData, setLoading } from "../redux/userSlice"; 
 
-export const serverurl = import.meta.env.VITE_API_URL;
+export const serverurl = "import.meta.env.VITE_API_URL";
 
 function useGetCurruser() {
   const dispatch = useDispatch();

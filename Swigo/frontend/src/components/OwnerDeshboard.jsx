@@ -15,7 +15,7 @@ import { FiEdit3, FiPlus, FiStar, FiRadio, FiPower } from "react-icons/fi";
 import { FaMapLocationDot } from "react-icons/fa6";
 import OwnerItemCard from "./OwnerItemCard";
 
-const serverurl = import.meta.env.VITE_API_URL;
+const serverurl = "import.meta.env.VITE_API_URL";
 
 function OwnerDeshboard() {
   const navigate = useNavigate();

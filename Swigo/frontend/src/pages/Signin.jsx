@@ -9,7 +9,7 @@ import { use } from "react";
 
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice.js";
-export const serverurl = import.meta.env.VITE_API_URL;
+export const serverurl = "import.meta.env.VITE_API_URL";
 
 function Signin() {
   const [showpassword, setShowpassword] = useState(false);
