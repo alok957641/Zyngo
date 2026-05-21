@@ -3,10 +3,6 @@ import axios from "axios";
 import { useDispatch } from "react-redux"; 
 import { setUserData, setLoading } from "../redux/userSlice"; 
 
-// 1. Quotes hata diye! Ab ye asli environment variable lega
-// Aise likho (Bina quotes ke)
-export const serverurl = import.meta.env.VITE_API_URL;
-
 function useGetCurruser() {
   const dispatch = useDispatch();
 
@@ -14,8 +10,8 @@ function useGetCurruser() {
     const fetchUser = async () => {
       dispatch(setLoading(true));
       try {
-        // Yahan baseURL direct use karo ya `${serverurl}`
-        const result = await axios.get(`${serverurl}/api/user/getcurruser`);
+        // Yahan baseURL ki zaroorat nahi, kyuki App.jsx mein setup hai
+        const result = await axios.get("/api/user/getcurruser");
         if (result.data) {
           dispatch(setUserData(result.data.user || result.data));
         }
