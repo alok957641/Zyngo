@@ -1,7 +1,7 @@
 const PayoutRequest = require("../models/payout/payoutModel");
 const User = require("../models/user/usermodel");
 const Shop = require("../models/shop/shopmodel"); 
-const Order = require("../models/order/orderModel"); 
+const Order = require("../models/order/ordermodel"); 
 
 // ==========================================
 // 1. Request Payout (Rider & Owner Dono Ke Liye Validation 🔥)
