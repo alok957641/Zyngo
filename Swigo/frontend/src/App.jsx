@@ -49,12 +49,8 @@ import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
 function App() {
   // Global Axios Setup
-useEffect(() => {
-  // Debugging ke liye: console mein check kar kya value aa rahi hai
-  console.log("API URL from Env:", import.meta.env.VITE_API_URL);
-
-  // Fallback add kar taaki agar variable load na ho, toh default URL le le
-  axios.defaults.baseURL = import.meta.env.VITE_API_URL || "https://zyngo.onrender.com";
+ useEffect(() => {
+  axios.defaults.baseURL = "https://zyngo.onrender.com";
   axios.defaults.withCredentials = true;
 }, []);
 

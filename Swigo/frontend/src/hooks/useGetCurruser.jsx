@@ -11,7 +11,7 @@ function useGetCurruser() {
       dispatch(setLoading(true));
       try {
         // Yahan baseURL ki zaroorat nahi, kyuki App.jsx mein setup hai
-        const result = await axios.get("/api/user/getcurruser");
+    const result = await axios.get("https://zyngo.onrender.com/api/user/getcurruser");
         if (result.data) {
           dispatch(setUserData(result.data.user || result.data));
         }
