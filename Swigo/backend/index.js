@@ -26,10 +26,18 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: "https://zyngo-omega.vercel.app",
-  credentials: true // Yeh TRUE hona hi chahiye!
+  origin: function (origin, callback) {
+    // !origin allowed hai kyunki server-to-server request mein origin nahi hota
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // Yeh TRUE hona hi chahiye!
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
-
 
 app.use(express.json());
 app.use(cookieParser());

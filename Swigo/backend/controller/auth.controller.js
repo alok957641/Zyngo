@@ -1,134 +1,103 @@
-const User = require("../models/user/usermodel.js")
-const generatetocken = require("../utils/tocken.js")
+const User = require("../models/user/usermodel.js");
+const generatetocken = require("../utils/tocken.js");
 const bscrypt = require("bcryptjs");
 const { sendOtpEmail } = require("../utils/mail.js");
 
+// ✅ HELPER FUNCTION (Cookie Setting ke liye)
+const setAuthCookie = (res, token) => {
+    res.cookie("token", token, {
+        httpOnly: true,
+        secure: true,       // Production HTTPS ke liye true
+        sameSite: "none",   // Cross-domain access ke liye 'none' mandatory hai
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+};
 
-
+// SIGNUP
 const signup = async (req, res) => {
     try {
         const { fullname, email, password, mobile, role } = req.body;
         let user = await User.findOne({ email });
-        if (user) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-        if (password.length < 6) {
-            return res.status(400).json({ message: "Password must be at least 6 characters long" });
-        }
-        if (mobile.length !== 10) {
-            return res.status(400).json({ message: "mobile number must be exactly 10 digit long " });
-        }
+        if (user) return res.status(400).json({ message: "User already exists" });
+        if (password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
+        if (mobile.length !== 10) return res.status(400).json({ message: "Mobile number must be 10 digits" });
 
         const hashedpassword = await bscrypt.hash(password, 10);
-        user = await User.create({
-            fullname,
-            email,
-            mobile,
-            role,
-            password: hashedpassword,
-        })
+        user = await User.create({ fullname, email, mobile, role, password: hashedpassword });
 
         const token = generatetocken(user._id);
-        // Signup, Signin, aur Googleauth sab mein ye use karo
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,        
-            sameSite: "none",     
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-        return res.status(201).json(user)
+        setAuthCookie(res, token);
+        return res.status(201).json(user);
+    } catch (error) {
+        return res.status(500).json({ message: `Signup error: ${error.message}` });
+    }
+};
 
-   // Googleauth catch block fix:
-} catch (error) { // Yahan 'error' karo
-    return res.status(500).json({ message: `Googleauth error ${error.message}` });
-}
-}
-
-
-// signin
+// SIGNIN
 const signin = async (req, res) => {
-
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "Invalid email or password" });
-        }
+        if (!user) return res.status(400).json({ message: "Invalid email or password" });
 
-        const ismatch = await bscrypt.compare(password, user.password)
-        if (!ismatch) {
-            return res.status(400).json({ message: "password incorrect " });
-        }
+        const ismatch = await bscrypt.compare(password, user.password);
+        if (!ismatch) return res.status(400).json({ message: "Password incorrect" });
 
         const token = generatetocken(user._id);
-        res.cookie("token", token, {
-            secure: false,
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true,
-        })
-        console.log(user);
-        return res.status(201).json(user)
-    // Googleauth catch block fix:
-} catch (error) { // Yahan 'error' karo
-    return res.status(500).json({ message: `Googleauth error ${error.message}` });
-}
-}
+        setAuthCookie(res, token);
+        return res.status(200).json(user);
+    } catch (error) {
+        return res.status(500).json({ message: `Signin error: ${error.message}` });
+    }
+};
 
-
-
-// signout
+// SIGNOUT
 const signout = async (req, res) => {
     try {
-        res.clearCookie("token");
-        return res.status(200).json({ message: "Logut Sucessfully" });
-  // Googleauth catch block fix:
-} catch (error) { // Yahan 'error' karo
-    return res.status(500).json({ message: `Googleauth error ${error.message}` });
-}
-}
+        res.clearCookie("token", { httpOnly: true, secure: true, sameSite: "none" });
+        return res.status(200).json({ message: "Logout Successfully" });
+    } catch (error) {
+        return res.status(500).json({ message: `Signout error: ${error.message}` });
+    }
+};
 
+// GOOGLE AUTH
+const googleauth = async (req, res) => {
+    try {
+        const { fullname, email, mobile, role } = req.body;
+        let user = await User.findOne({ email });
+        if (!user) {
+            user = await User.create({ fullname, email, mobile, role, password: "google-user-dummy-pass" });
+        }
+        const token = generatetocken(user._id);
+        setAuthCookie(res, token);
+        return res.status(200).json(user);
+    } catch (error) {
+        return res.status(500).json({ message: `Googleauth error: ${error.message}` });
+    }
+};
 
-// send otp
+// OTP functions (Yahan koi badlav nahi, bas try-catch mein 'error' fix kar diya)
 const sendOtp = async (req, res) => {
     try {
         const { email } = req.body;
-        console.log("Request for Email:", email); // Step 1
-
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "Bhai, user nahi mila!" });
-        }
-
+        if (!user) return res.status(400).json({ message: "User not found" });
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.resetOtp = otp;
         user.otpExpiry = Date.now() + 5 * 60 * 1000;
-
-        console.log("Saving OTP to DB..."); // Step 2
         await user.save();
-
-        console.log("Attempting to send Email..."); // Step 3
         await sendOtpEmail(email, otp);
-
-        return res.status(200).json({ success: true, message: "OTP sent to email" });
-
+        return res.status(200).json({ success: true, message: "OTP sent" });
     } catch (error) {
-        // 🔥 Ye tere VS Code terminal mein laal rang ka error dikhayega
-        console.error("CRITICAL ERROR IN SEND-OTP:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Email bhejte waqt server fat gaya!",
-            debug_error: error.message
-        });
+        return res.status(500).json({ message: `OTP error: ${error.message}` });
     }
-}
+};
 
-// varify otp
 const varifyOtp = async (req, res) => {
     try {
         const { email, otp } = req.body;
         const user = await User.findOne({ email });
-
         if (!user || user.resetOtp !== otp || user.otpExpiry < Date.now()) {
             return res.status(400).json({ message: "Invalid or Expired OTP" });
         }
@@ -136,65 +105,25 @@ const varifyOtp = async (req, res) => {
         user.resetOtp = undefined;
         user.otpExpiry = undefined;
         await user.save();
-
-        return res.status(200).json({ message: "OTP Varified Successfully" })
-
+        return res.status(200).json({ message: "OTP Verified" });
     } catch (error) {
-        return res.status(500).json({ message: "Error verifying OTP" })
+        return res.status(500).json({ message: `OTP verify error: ${error.message}` });
     }
-}
+};
 
-// reset password
 const resetpassword = async (req, res) => {
-
     try {
         const { email, newpassword } = req.body;
-        const user = await User.findOne({ email })
-        if (!user || !user.isOtpVerified) {
-            return res.status(400).json({ message: "User Does not Exist or OTP not verified" })
-        }
-
+        const user = await User.findOne({ email });
+        if (!user || !user.isOtpVerified) return res.status(400).json({ message: "OTP not verified" });
         const hashedpassword = await bscrypt.hash(newpassword, 10);
         user.password = hashedpassword;
         user.isOtpVerified = false;
         await user.save();
         return res.status(200).json({ message: "Password Reset Successfully" });
-   // Googleauth catch block fix:
-} catch (error) { // Yahan 'error' karo
-    return res.status(500).json({ message: `Googleauth error ${error.message}` });
-}
-}
-
-
-// googlerauth
-
-const googleauth = async (req, res) => {
-
-    try {
-
-
-        const { fullname, email, mobile, role } = req.body
-        let user = await User.findOne({ email })
-
-        if (!user) {
-            user = await User.create({
-                fullname, email, mobile, role
-            })
-        }
-        const token = generatetocken(user._id);
-        res.cookie("token", token, {
-            secure: false,
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true,
-        })
-
-        return res.status(200).json(user)
-
     } catch (error) {
-        return res.status(500).json({ message: ` Googleauth   error ${err}` });
+        return res.status(500).json({ message: `Reset error: ${error.message}` });
     }
-
-}
+};
 
 module.exports = { signup, signin, signout, sendOtp, varifyOtp, resetpassword, googleauth };
