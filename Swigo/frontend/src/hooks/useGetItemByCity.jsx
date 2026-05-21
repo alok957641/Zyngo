@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setItemsInMyCity } from "../redux/userSlice"; 
 
-export const serverurl = "import.meta.env.VITE_API_URL";
+export const serverurl = "https://zyngo.onrender.com";
 
 function useGetItemByCity() {
   // 🔥 Redux se exact Capital 'City' field nikali

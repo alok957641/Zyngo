@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";
 
-export const serverurl = "import.meta.env.VITE_API_URL";
+export const serverurl = "https://zyngo.onrender.com";
 
 function useGetMyShop() {
   const dispatch = useDispatch();

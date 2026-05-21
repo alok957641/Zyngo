@@ -13,7 +13,7 @@ import {
 import { RiMotorbikeFill, RiWallet3Fill } from "react-icons/ri";
 import { setUserData } from "../redux/userSlice"; // Check if imported correctly
 
-const serverurl = "import.meta.env.VITE_API_URL";
+const serverurl = "https://zyngo.onrender.com";
 
 // --- Custom Icons (Sharp Style) ---
 const riderIcon = new L.Icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/2972/2972185.png', iconSize: [36, 36], iconAnchor: [18, 36] });

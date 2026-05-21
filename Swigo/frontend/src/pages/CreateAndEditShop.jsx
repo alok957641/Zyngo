@@ -16,7 +16,7 @@ const markerIcon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-export const serverurl = "import.meta.env.VITE_API_URL";
+export const serverurl = "https://zyngo.onrender.com";
 
 function CreateAndEditShop() {
   const navigate = useNavigate();

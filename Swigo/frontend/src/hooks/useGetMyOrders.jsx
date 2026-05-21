@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMyOrders } from "../redux/userSlice";
 
-export const serverurl = "import.meta.env.VITE_API_URL";
+export const serverurl = "https://zyngo.onrender.com";
 
 function useGetMyOrders() {
   const dispatch = useDispatch();

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiTruck, FiUser, FiMapPin, FiPhone, FiLoader, FiTrendingUp, FiActivity } from "react-icons/fi";
 
-const serverurl = "import.meta.env.VITE_API_URL";
+const serverurl = "https://zyngo.onrender.com";
 
 const AdminRiderManagement = () => {
   const [riders, setRiders] = useState([]);
