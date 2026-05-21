@@ -1,4 +1,4 @@
-const Rating = require("../models/rating/ratingModel");
+const Rating = require("../models/rating/ratingmodel");
 const Shop = require("../models/shop/shopmodel");
 const Order = require("../models/order/ordermodel"); 
 
