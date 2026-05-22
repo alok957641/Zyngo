@@ -24,16 +24,30 @@ function UserNav() {
   };
 
   // ✅ FIXED: 400 Error Resolve - Backend logic match
-  const handleLocationUpdate = async () => {
-    if (!manualAddress.trim()) return;
+ const handleLocationUpdate = async () => {
+    if (!manualAddress.trim()) {
+      alert("Address toh daal bhai!");
+      return;
+    }
+    
     try {
-      await axios.post("https://zyngo.onrender.com/api/user/update-location", 
-        { address: manualAddress }, { withCredentials: true }
+      console.log("📤 Backend ko bhej rahe hain:", { address: manualAddress });
+      
+      const response = await axios.post(
+        "https://zyngo.onrender.com/api/user/update-location", 
+        { address: manualAddress }, // Yahi object format backend ko chahiye
+        { withCredentials: true }
       );
-      alert("Location updated!");
-      setIsLocationModalOpen(false);
-      window.location.reload(); 
-    } catch (err) { alert("Failed to update location."); }
+      
+      if (response.data.success) {
+        alert("Location updated!");
+        setIsLocationModalOpen(false);
+        window.location.reload(); 
+      }
+    } catch (err) {
+      console.error("❌ Update Fail:", err.response?.data?.message || err.message);
+      alert("Server ko data nahi mila, console check kar!");
+    }
   };
 
   return (
