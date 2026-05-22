@@ -5,13 +5,14 @@ import UserDeshboard from "../components/UserDeshboard";
 import LocationRestricted from "../components/LocationRestricted";
 
 function Home() {
-  const { userData, loading } = useSelector((state) => state.user);
-  // City ka data jo tune global hook se fetch kiya hai
-  const { city } = useSelector((state) => state.city || {}); 
+  const { userData, loading, City } = useSelector((state) => state.user); 
+  
+  // 1. City logic check: Agar City 'null', 'Unknown', ya 'Locating...' hai toh restricted
+  // Apni supported cities yahan add karo
+  const supportedCities = ["Bhagalpur", "Patna", "Delhi"];
+  const isCitySupported = City && supportedCities.includes(City);
 
-  // Location logic: agar city valid hai toh supported
-  const isCitySupported = city && city !== "Unknown" && city !== null;
-
+  // 2. Loading State
   if (loading) return (
     <div className="h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
       <div className="relative w-16 h-16">
@@ -22,11 +23,14 @@ function Home() {
     </div>
   );
 
-  // 1. Agar User Logged In hai
+  // 3. User Logged In
   if (userData) {
-    if (!isCitySupported) return <LocationRestricted />;
+    // Location check: Sirf tab restricted dikhao jab location mil chuki ho aur wo supported na ho
+    if (City && City !== "Locating..." && !isCitySupported) {
+      return <LocationRestricted />;
+    }
     
-    // Gateway Role Redirects
+    // Role based gateway
     if (userData.role === "admin") return <Navigate to="/admin/dashboard" replace />;
     if (userData.role === "deliveryboy") return <Navigate to="/rider/dashboard" replace />;
     if (userData.role === "owner") return <Navigate to="/owner/dashboard" replace />;
@@ -34,20 +38,16 @@ function Home() {
     return <UserDeshboard />;
   }
 
-  // 2. Guest User View (Video Hero)
+  // 4. Guest User View (Video Hero)
   return (
     <div className="relative h-screen w-full overflow-hidden bg-black">
       <video 
-        autoPlay 
-        loop 
-        muted 
-        playsInline 
+        autoPlay loop muted playsInline 
         className="absolute inset-0 w-full h-full object-cover opacity-60"
       >
         <source src="/frontvideo.mp4" type="video/mp4" />
       </video>
       
-      {/* Overlay */}
       <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-white px-6">
         <h1 className="text-7xl md:text-9xl font-black italic tracking-tighter uppercase mb-2 drop-shadow-2xl">Zyngo</h1>
         <p className="text-sm font-black uppercase tracking-[0.4em] text-orange-500 mb-10">Fast. Fresh. Digital.</p>
@@ -57,11 +57,8 @@ function Home() {
           className="group relative bg-white text-black px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl hover:scale-105 transition-all duration-300"
         >
           <span className="relative z-10 group-hover:text-orange-600 transition-colors">Initialize Login</span>
-          <div className="absolute inset-0 bg-white opacity-20 blur-xl group-hover:opacity-40 transition-opacity"></div>
         </Link>
       </div>
-      
-      {/* Gradient for smooth transition */}
       <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black to-transparent z-10"></div>
     </div>
   );
