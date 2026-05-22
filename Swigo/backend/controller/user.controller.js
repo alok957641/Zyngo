@@ -18,7 +18,7 @@ const getcurruser = async (req ,res) => {
     }
 }
 
-export const updateUserLocation = async (req, res) => {
+ const updateUserLocation = async (req, res) => {
     try {
         // Standardizing input from both common formats
         const lat = req.body.lat || req.body.latitude;
