@@ -29,6 +29,7 @@ function UserNav() {
       await axios.post("https://zyngo.onrender.com/api/user/update-location", 
         { address: manualAddress }, { withCredentials: true }
       );
+      setIsLocationModalOpen(false);
       window.location.reload(); 
     } catch (err) { alert("Failed to update location."); }
   };
@@ -38,57 +39,91 @@ function UserNav() {
       <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
+            
+            {/* 1. Logo & Desktop Location */}
             <div className="flex-shrink-0 flex items-center gap-4">
-              <Link to="/" className="text-3xl sm:text-4xl font-extrabold text-red-600 tracking-tighter">Swigo</Link>
-              {/* Desktop Location */}
-              <div onClick={() => setIsLocationModalOpen(true)} className="hidden md:flex items-center gap-1 text-gray-600 hover:text-orange-500 cursor-pointer ml-4">
+              <Link to="/" className="text-3xl sm:text-4xl font-extrabold text-red-600 tracking-tighter hover:scale-105 transition-transform">
+                Zyngo
+              </Link>
+
+              <div onClick={() => setIsLocationModalOpen(true)} className="hidden md:flex items-center gap-1 text-gray-600 hover:text-orange-500 cursor-pointer group ml-4">
                 <FaMapMarkerAlt className="text-orange-500 text-lg" />
-                <div className="flex flex-col"><span className="text-[10px] font-bold text-gray-400 uppercase">Deliver to</span>
-                  <span className="text-sm font-bold flex items-center">{City || "Locating..."} <MdKeyboardArrowDown /></span>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Deliver to</span>
+                  <span className="text-sm font-bold flex items-center gap-1 border-b-2 border-transparent group-hover:border-orange-500 transition-colors">
+                    {City || "Locating..."} <MdKeyboardArrowDown className="text-lg" />
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Desktop Search */}
+            {/* 2. Desktop Search Box */}
             <div className="flex-1 max-w-2xl mx-8 hidden lg:block">
-              <div className="relative group"><input type="text" value={searchTerm} onChange={(e) => dispatch(setSearchTerm(e.target.value))} placeholder="Search..." className="w-full bg-gray-100 border p-2.5 rounded-2xl pl-12" />
-                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <div className="relative group">
+                <input
+                  type="text"
+                  value={searchTerm} 
+                  onChange={(e) => dispatch(setSearchTerm(e.target.value))}
+                  placeholder="Search for restaurants, items or more..."
+                  className="w-full bg-gray-100 border border-transparent text-gray-700 px-5 py-2.5 rounded-2xl pl-12 focus:outline-none focus:bg-white focus:border-orange-400 transition-all shadow-sm"
+                />
+                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
               </div>
             </div>
 
-            {/* Icons */}
-            <div className="flex items-center gap-4 sm:gap-6">
-              <button onClick={() => setIsSearchOpen(true)} className="lg:hidden text-xl"><FaSearch /></button>
-              {userData && <Link to="/my-orders" className="hidden sm:flex items-center gap-2 text-gray-700 hover:text-orange-500"><FaShoppingBag className="text-xl" /><span className="font-bold">Orders</span></Link>}
-              <Link to="/Cart" className="relative text-gray-700"><FaShoppingCart className="text-2xl" /><span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] h-5 w-5 rounded-full flex items-center justify-center">{cartItems.length}</span></Link>
+            {/* 3. Right Icons */}
+            <div className="flex items-center gap-4 sm:gap-6">          
+              <button onClick={() => setIsSearchOpen(true)} className="lg:hidden text-gray-600 hover:text-orange-500 transition-colors">
+                <FaSearch className="text-xl" />
+              </button>
+
+              {userData && (
+                <Link to="/my-orders" className="hidden sm:flex items-center gap-2 text-gray-700 hover:text-orange-500 transition-colors group">
+                  <FaShoppingBag className="text-xl" />
+                  <span className="font-bold">Orders</span>
+                </Link>
+              )}
+
+              <Link to="/Cart" className="relative flex items-center gap-2 text-gray-700 hover:text-orange-500 transition-colors group">
+                <div className="relative">
+                  <FaShoppingCart className="text-2xl" />
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                    {cartItems.length}
+                  </span>
+                </div>
+                <span className="font-bold hidden sm:block">Cart</span>
+              </Link>
+
               {userData ? (
-                <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="w-9 h-9 rounded-full bg-orange-500 text-white font-black">{userData.fullname.charAt(0).toUpperCase()}</button>
+                <div className="relative">
+                  <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 text-white font-extrabold text-base shadow-md transition-all">
+                    {userData.fullname.charAt(0).toUpperCase()}
+                  </button>
+
+                  {isProfileOpen && (
+                    <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border p-2 z-50">
+                      <div className="px-4 py-3 border-b"><p className="font-extrabold truncate">{userData.fullname}</p></div>
+                      <Link to="/my-orders" className="sm:hidden flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl font-bold"><FaShoppingBag /> My Orders</Link>
+                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600 rounded-xl font-bold"><FiLogOut /> Logout</button>
+                    </div>
+                  )}
+                </div>
               ) : (
-                <Link to="/signin" className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold">Sign In</Link>
+                <Link to="/signin" className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md">Sign In</Link>
               )}
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Profile Dropdown */}
-      {isProfileOpen && (
-        <div className="absolute right-4 mt-2 w-56 bg-white rounded-2xl shadow-2xl border p-2 z-[60]">
-          <p className="px-4 py-3 border-b font-extrabold truncate">{userData?.fullname}</p>
-          <Link to="/my-orders" className="sm:hidden flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-xl font-bold"><FaShoppingBag /> My Orders</Link>
-          <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-600 rounded-xl font-bold"><FiLogOut /> Logout</button>
-        </div>
-      )}
-
-      {/* Mobile Search Overlay with Location */}
+      {/* Mobile Search Overlay */}
       {isSearchOpen && (
-        <div className="fixed top-0 left-0 w-full bg-white shadow-xl z-[70] p-4 lg:hidden h-full">
+        <div className="fixed top-0 left-0 w-full bg-white shadow-xl z-[60] p-4 lg:hidden border-b-4 border-orange-500">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-black italic">Search</h2>
-            <button onClick={() => setIsSearchOpen(false)}><MdClose size={24} /></button>
+            <button onClick={() => setIsSearchOpen(false)} className="p-2"><MdClose size={24} /></button>
           </div>
-          {/* Mobile Location Trigger (Under search header) */}
-          <div onClick={() => setIsLocationModalOpen(true)} className="mb-4 p-4 bg-gray-50 rounded-xl flex items-center gap-2 cursor-pointer border border-gray-200">
+          <div onClick={() => { setIsSearchOpen(false); setIsLocationModalOpen(true); }} className="mb-4 p-4 bg-gray-50 rounded-xl flex items-center gap-2 cursor-pointer border border-gray-200">
             <FaMapMarkerAlt className="text-orange-500" />
             <span className="font-bold text-sm">{City || "Set Location"}</span>
           </div>
@@ -98,9 +133,9 @@ function UserNav() {
 
       {/* Location Modal */}
       {isLocationModalOpen && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-3xl w-full max-w-sm shadow-2xl">
-            <div className="flex justify-between items-center mb-4"><h2 className="font-black">Set Location</h2><button onClick={() => setIsLocationModalOpen(false)}><MdClose size={24}/></button></div>
+            <div className="flex justify-between items-center mb-4"><h2 className="font-black italic">Set Location</h2><button onClick={() => setIsLocationModalOpen(false)}><MdClose size={24}/></button></div>
             <input className="w-full bg-gray-100 p-4 rounded-xl mb-4 font-bold" value={manualAddress} onChange={(e) => setManualAddress(e.target.value)} placeholder="Enter area..." />
             <button onClick={handleLocationUpdate} className="w-full bg-orange-600 text-white py-3 rounded-xl font-black">Confirm</button>
           </div>
