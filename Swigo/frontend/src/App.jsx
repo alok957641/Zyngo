@@ -31,8 +31,7 @@ import AdminDashboardOverview from "./pages/AdminDashboardOverview.jsx";
 import AdminRiderManagement from "./pages/AdminRiderManagement.jsx";
 import AdminShopManagement from "./pages/AdminShopManagement.jsx";
 import AdminSettings from "./pages/AdminSettings.jsx";
-import OwnerDashboard from "./components/OwnerDeshboard.jsx";
-
+import OwnerDashboard from "./components/OwnerDeshboard.jsx"; // Sahi path
 
 // Hooks
 import useGetCurruser from "./hooks/useGetCurruser.jsx";
@@ -65,13 +64,12 @@ function App() {
     <>
       <Toaster position="top-center" toastOptions={{ style: { fontSize: "12px", borderRadius: "15px", background: "#1e293b", color: "#fff" } }} />
       <Routes>
-        {/* Gateway */}
+        {/* 🌐 CORE GATEWAY */}
         <Route path="/" element={
           !userData ? <Navigate to="/signin" replace /> :
           userData.role === "admin" ? <Navigate to="/admin/dashboard" replace /> :
           userData.role === "deliveryboy" ? <Navigate to="/rider/dashboard" replace /> :
-         userData.role === "owner" ? <Navigate to="/owner/dashboard" replace /> :
-        
+          userData.role === "owner" ? <Navigate to="/owner/dashboard" replace /> :
           <Home />
         } />
 
@@ -101,13 +99,14 @@ function App() {
         <Route path="/shop/:shopId" element={userData ? <ShopPage /> : <Navigate to="/signin" replace />} />
         <Route path="/track-order/:orderId" element={userData ? <TrackOrderPage /> : <Navigate to="/signin" replace />} />
 
-        {/* Rider Routes */}
+        {/* Rider */}
         <Route path="/rider/dashboard" element={userData?.role === "deliveryboy" ? <DelevryBoyDeshboard /> : <Navigate to="/signin" replace />} />
         <Route path="/rider/earnings" element={userData?.role === "deliveryboy" ? <RiderEarnings /> : <Navigate to="/signin" replace />} />
         <Route path="/rider/history" element={userData?.role === "deliveryboy" ? <RiderHistory /> : <Navigate to="/signin" replace />} />
         <Route path="/rider/profile" element={userData?.role === "deliveryboy" ? <RiderProfile /> : <Navigate to="/signin" replace />} />
 
-        {/* Owner Routes */}
+        {/* Owner */}
+        <Route path="/owner/dashboard" element={userData?.role === "owner" ? <OwnerDashboard /> : <Navigate to="/signin" replace />} />
         <Route path="/owner/earnings" element={userData?.role === "owner" ? <OwnerEarnings /> : <Navigate to="/signin" replace />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
