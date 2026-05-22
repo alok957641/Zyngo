@@ -1,6 +1,8 @@
 const uploadoncloudinary = require("../utils/cloudinary.js");
 const Shop = require("../models/shop/shopmodel.js");
-// 🚨 LINE 1: Apne dynamic Order model ko sahi path se yahan import karo bhai!
+
+
+
 const Order = require("../models/order/ordermodel.js"); 
 
 const CreateAndEditShop = async (req, res) => {
@@ -9,7 +11,7 @@ const CreateAndEditShop = async (req, res) => {
         const ownerId = req.user?._id || req.userId || req.id;
 
         if (!ownerId) {
-            return res.status(401).json({ message: "User not authenticated" });
+            return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
         let image;
@@ -20,40 +22,45 @@ const CreateAndEditShop = async (req, res) => {
 
         let shopData = await Shop.findOne({ owner: ownerId });
 
+        // Coordinates ko safely parse karo
+        const lat = parseFloat(latitude);
+        const lon = parseFloat(longitude);
         const locationData = {
             type: "Point",
-            coordinates: [parseFloat(longitude), parseFloat(latitude)]
+            coordinates: [lon, lat] // MongoDB GeoJSON: [longitude, latitude]
         };
 
         if (!shopData) {
-            if (!image) return res.status(400).json({ message: "Image is required" });
-            if (!latitude || !longitude) return res.status(400).json({ message: "Bhai, map ke liye location coordinates zaruri hain!" });
+            // New Shop Creation
+            if (!image) return res.status(400).json({ success: false, message: "Image is required for new shop" });
+            if (isNaN(lat) || isNaN(lon)) return res.status(400).json({ success: false, message: "Valid coordinates required" });
 
             shopData = await Shop.create({
                 name, city, state, address, image, owner: ownerId,
                 location: locationData 
             });
         } else {
+            // Update Existing Shop
             const updateData = { name, city, state, address };
             if (image) updateData.image = image;
-            
-            if (latitude && longitude) {
+            if (!isNaN(lat) && !isNaN(lon)) {
                 updateData.location = locationData;
             }
 
-            shopData = await Shop.findByIdAndUpdate(shopData._id, updateData, { new: true });
+            await Shop.findByIdAndUpdate(shopData._id, { $set: updateData }, { new: true });
         }
 
+        // Final Fetch with Populate
         const finalShop = await Shop.findOne({ owner: ownerId }).populate([
             { path: "owner" },
             { path: "items", options: { sort: { updatedAt: -1 } } }
         ]);
 
-        return res.status(201).json(finalShop);
+        return res.status(200).json({ success: true, shop: finalShop });
 
     } catch (error) {
         console.error("🔥 CreateShop Error:", error.message);
-        return res.status(500).json({ message: `Server Error: ${error.message}` });
+        return res.status(500).json({ success: false, message: `Server Error: ${error.message}` });
     }
 }
 
@@ -62,7 +69,7 @@ const getMyShop = async (req, res) => {
         const ownerId = req.user?._id || req.userId || req.id;
 
         if (!ownerId) {
-            return res.status(401).json({ message: "ID missing in request" });
+            return res.status(401).json({ message: "ID missing in request", success: false });
         }
 
         const shop = await Shop.findOne({ owner: ownerId }).populate([
@@ -70,13 +77,14 @@ const getMyShop = async (req, res) => {
             { path: "items", options: { sort: { updatedAt: -1 } } }
         ]);
 
+        // Yahan 404 mat bhejo agar shop nahi mili, 200 bhejo aur shop: null
         if (!shop) {
-            return res.status(404).json({ message: "Shop not found", success: false });
+            return res.status(200).json({ success: true, shop: null, message: "Shop not created yet" });
         }
 
-        return res.status(200).json(shop);
+        return res.status(200).json({ success: true, shop });
     } catch (error) {
-        return res.status(500).json({ message: `getMyshop Error: ${error.message}` });
+        return res.status(500).json({ message: `getMyshop Error: ${error.message}`, success: false });
     }
 }
 
