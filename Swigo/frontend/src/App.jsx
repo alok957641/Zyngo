@@ -19,24 +19,20 @@ import MyOrders from "./pages/MyOrders.jsx";
 import TrackOrderPage from "./pages/TrackOrderPage.jsx";
 import CategoryPage from "./pages/CategoryPage.jsx";
 import ShopPage from "./pages/ShopPage.jsx";
-
-// Rider Panel
 import DelevryBoyDeshboard from "./components/DelevryBoyDeshboard.jsx";
 import RiderEarnings from "./pages/RiderEarnings";
 import RiderHistory from "./pages/RiderHistory";
 import RiderProfile from "./pages/RiderProfile";
-
-// Owner & Billing
 import OwnerEarnings from "./pages/OwnerEarnings.jsx";
 import AdminPayouts from "./pages/AdminPayouts.jsx";
-
-// Admin Panel
 import AdminRoute from "./components/AdminRoute.jsx";
 import AdminSidebar from "./components/AdminSidebar.jsx";
 import AdminDashboardOverview from "./pages/AdminDashboardOverview.jsx";
 import AdminRiderManagement from "./pages/AdminRiderManagement.jsx";
 import AdminShopManagement from "./pages/AdminShopManagement.jsx";
 import AdminSettings from "./pages/AdminSettings.jsx";
+import OwnerDashboard from "./components/OwnerDeshboard.jsx";
+
 
 // Hooks
 import useGetCurruser from "./hooks/useGetCurruser.jsx";
@@ -48,14 +44,11 @@ import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
 function App() {
-  // Global Axios Setup
- useEffect(() => {
-  axios.defaults.baseURL = "https://zyngo.onrender.com";
-  axios.defaults.withCredentials = true;
-}, []);
+  useEffect(() => {
+    axios.defaults.baseURL = "https://zyngo.onrender.com";
+    axios.defaults.withCredentials = true;
+  }, []);
 
-
-  // Global Hooks
   useGetCurruser();
   useGetCity();
   useGetMyShop();
@@ -64,27 +57,24 @@ function App() {
   useGetMyOrders();
   useGetUpdateLocation();
 
-const { userData } = useSelector((state) => state.user);
+  const { userData, loading } = useSelector((state) => state.user);
+
+  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
 
   return (
     <>
-      <Toaster position="top-center" toastOptions={{ style: { fontSize: "12px", fontWeight: "bold", borderRadius: "15px", background: "#1e293b", color: "#fff" } }} />
-
+      <Toaster position="top-center" toastOptions={{ style: { fontSize: "12px", borderRadius: "15px", background: "#1e293b", color: "#fff" } }} />
       <Routes>
-      {/* Gateway - Yahan hum check kar rahe hain role kya hai */}
-<Route path="/" element={
-  !userData ? (
-    <Navigate to="/signin" replace />
-  ) : userData.role === "admin" ? (
-    <Navigate to="/admin/dashboard" replace />
-  ) : userData.role === "deliveryboy" ? (
-    <Navigate to="/rider/dashboard" replace />
-  ) : userData.role === "owner" ? (
-    <Navigate to="/owner/earnings" replace /> 
-  ) : (
-    <Home /> // Yeh sirf customer/user ke liye
-  )
-} />
+        {/* Gateway */}
+        <Route path="/" element={
+          !userData ? <Navigate to="/signin" replace /> :
+          userData.role === "admin" ? <Navigate to="/admin/dashboard" replace /> :
+          userData.role === "deliveryboy" ? <Navigate to="/rider/dashboard" replace /> :
+         userData.role === "owner" ? <Navigate to="/owner/dashboard" replace /> :
+        
+          <Home />
+        } />
+
         {/* Auth */}
         <Route path="/signup" element={!userData ? <Signup /> : <Navigate to="/" replace />} />
         <Route path="/signin" element={!userData ? <Signin /> : <Navigate to="/" replace />} />
@@ -99,7 +89,7 @@ const { userData } = useSelector((state) => state.user);
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* Customer/User Protected Routes */}
+        {/* Customer Routes */}
         <Route path="/CreateAndEditShop" element={userData ? <CreateAndEditShop /> : <Navigate to="/signin" replace />} />
         <Route path="/AddItem" element={userData ? <AddItem /> : <Navigate to="/signin" replace />} />
         <Route path="/EditItem/:itemId" element={userData ? <EditItem /> : <Navigate to="/signin" replace />} />
@@ -111,17 +101,16 @@ const { userData } = useSelector((state) => state.user);
         <Route path="/shop/:shopId" element={userData ? <ShopPage /> : <Navigate to="/signin" replace />} />
         <Route path="/track-order/:orderId" element={userData ? <TrackOrderPage /> : <Navigate to="/signin" replace />} />
 
-        {/* Rider */}
+        {/* Rider Routes */}
         <Route path="/rider/dashboard" element={userData?.role === "deliveryboy" ? <DelevryBoyDeshboard /> : <Navigate to="/signin" replace />} />
         <Route path="/rider/earnings" element={userData?.role === "deliveryboy" ? <RiderEarnings /> : <Navigate to="/signin" replace />} />
         <Route path="/rider/history" element={userData?.role === "deliveryboy" ? <RiderHistory /> : <Navigate to="/signin" replace />} />
         <Route path="/rider/profile" element={userData?.role === "deliveryboy" ? <RiderProfile /> : <Navigate to="/signin" replace />} />
 
-        {/* Owner */}
-        <Route path="/owner/earnings" element={userData ? <OwnerEarnings /> : <Navigate to="/signin" replace />} />
+        {/* Owner Routes */}
+        <Route path="/owner/earnings" element={userData?.role === "owner" ? <OwnerEarnings /> : <Navigate to="/signin" replace />} />
 
-        {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/signin" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
   );
