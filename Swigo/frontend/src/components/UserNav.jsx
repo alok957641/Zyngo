@@ -44,7 +44,7 @@ function UserNav() {
             {/* 1. Logo & Location (Mobile + Desktop Clickable) */}
             <div className="flex-shrink-0 flex items-center gap-4">
               <Link to="/" className="text-3xl sm:text-4xl font-extrabold text-red-600 tracking-tighter hover:scale-105 transition-transform">
-                Swigo
+                Zyngo
               </Link>
 
               {/* ✅ Ye div ab mobile aur desktop dono pe clickable hai */}
