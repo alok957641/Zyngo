@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { FaMapMarkerAlt, FaSearch, FaShoppingCart, FaShoppingBag } from "react-icons/fa";
 import { MdKeyboardArrowDown, MdClose } from "react-icons/md";
-import { FiLogOut, FiUser } from "react-icons/fi";
+import { FiLogOut, FiMapPin } from "react-icons/fi";
 import { setUserData, setSearchTerm } from "../redux/userSlice";
 import axios from "axios";
 
@@ -32,9 +32,11 @@ function UserNav() {
   const handleLocationUpdate = async () => {
     if (!manualAddress.trim()) return;
     try {
+      // Backend ko address bhej rahe hain
       await axios.post("https://zyngo.onrender.com/api/user/update-location", 
         { address: manualAddress }, { withCredentials: true }
       );
+      alert("Location updated!");
       setIsLocationModalOpen(false);
       window.location.reload(); 
     } catch (err) { alert("Failed to update location."); }
@@ -42,12 +44,13 @@ function UserNav() {
 
   return (
     <>
-      <nav className="bg-white shadow-md border-b border-gray-100 sticky top-0 z-50 h-20 flex items-center">
-        <div className="max-w-7xl mx-auto px-4 w-full flex justify-between items-center">
+      {/* Main Navbar */}
+      <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 h-20 flex justify-between items-center">
           
-          {/* Logo & Location */}
+          {/* Logo & Location Trigger */}
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-3xl font-extrabold text-red-600 tracking-tighter">Zyngo</Link>
+            <Link to="/" className="text-3xl font-extrabold text-red-600 tracking-tighter">Swigo</Link>
             <div onClick={() => setIsLocationModalOpen(true)} className="hidden md:flex items-center cursor-pointer hover:text-orange-500">
               <FaMapMarkerAlt className="text-orange-500 mr-2" />
               <div className="flex flex-col">
@@ -57,10 +60,10 @@ function UserNav() {
             </div>
           </div>
 
-          {/* Actions */}
+          {/* Icons: Search, Cart, Profile */}
           <div className="flex items-center gap-5">
-            <button onClick={() => setIsSearchOpen(true)} className="text-xl text-gray-600 hover:text-orange-500"><FaSearch /></button>
-            <Link to="/Cart" className="relative text-gray-600 hover:text-orange-500">
+            <button onClick={() => setIsSearchOpen(true)} className="text-xl text-gray-600"><FaSearch /></button>
+            <Link to="/Cart" className="relative text-gray-600">
               <FaShoppingCart className="text-xl" />
               {cartItems.length > 0 && <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] h-4 w-4 rounded-full flex items-center justify-center">{cartItems.length}</span>}
             </Link>
@@ -76,7 +79,7 @@ function UserNav() {
         </div>
       </nav>
 
-      {/* Profile Menu */}
+      {/* Profile/Menu Dropdown */}
       {isProfileOpen && (
         <div className="absolute right-4 mt-2 w-48 bg-white rounded-2xl shadow-2xl p-2 z-[60] border border-gray-100">
           <p className="px-4 py-2 text-xs font-bold text-gray-400 truncate">{userData?.fullname}</p>
@@ -85,14 +88,14 @@ function UserNav() {
         </div>
       )}
 
-      {/* Unified Search Modal */}
+      {/* Search Modal (Works for Mobile & Desktop) */}
       {isSearchOpen && (
         <div className="fixed inset-0 z-[100] bg-white p-6 animate-in slide-in-from-top-10">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="font-black text-2xl italic">Search Zyngo</h2>
+            <h2 className="font-black text-2xl italic">Search</h2>
             <button onClick={() => setIsSearchOpen(false)}><MdClose size={32}/></button>
           </div>
-          <input autoFocus value={searchTerm} onChange={(e) => dispatch(setSearchTerm(e.target.value))} className="w-full bg-gray-100 p-5 rounded-2xl font-bold text-lg outline-none" placeholder="Search restaurants or dishes..." />
+          <input autoFocus value={searchTerm} onChange={(e) => dispatch(setSearchTerm(e.target.value))} className="w-full bg-gray-100 p-5 rounded-2xl font-bold text-lg outline-none" placeholder="Search food, restaurants..." />
         </div>
       )}
 
@@ -100,8 +103,8 @@ function UserNav() {
       {isLocationModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
-            <h2 className="font-black text-lg mb-4">Update Location</h2>
-            <input className="w-full bg-gray-100 p-4 rounded-xl mb-4 font-bold" value={manualAddress} onChange={(e) => setManualAddress(e.target.value)} placeholder="Enter area..." />
+            <h2 className="font-black text-lg mb-4">Set Location</h2>
+            <input className="w-full bg-gray-100 p-4 rounded-xl mb-4 font-bold" value={manualAddress} onChange={(e) => setManualAddress(e.target.value)} placeholder="Type your area..." />
             <button onClick={handleLocationUpdate} className="w-full bg-orange-600 text-white py-4 rounded-xl font-black uppercase">Confirm</button>
           </div>
         </div>
