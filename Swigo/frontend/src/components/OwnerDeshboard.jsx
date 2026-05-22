@@ -63,17 +63,27 @@ function OwnerDeshboard() {
     }
   };
 
+  // --- 🔥 FIX: Spinner tabhi dikhao jab data bilkul nahi aaya (undefined) ---
+  if (myShopData === undefined) {
+    return (
+      <div className="w-full min-h-screen bg-[#FDFCFB] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // --- 🔥 FIX: Agar shop nahi hai, toh redirect karo (taaki spinner na ghoome) ---
+  if (myShopData === null) {
+     navigate("/CreateAndEditShop");
+     return null;
+  }
+
   return (
     <div className="w-full min-h-screen bg-[#FDFCFB] flex flex-col font-sans relative overflow-x-hidden">
       <OwnerNav />
 
       <div className="flex-grow flex flex-col items-center p-4 sm:p-8 relative gap-10">
-        {!myShopData ? (
-          <div className="py-20 flex flex-col items-center">
-            <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : (
-          <div className="w-full max-w-5xl z-10 flex flex-col gap-8">
+        <div className="w-full max-w-5xl z-10 flex flex-col gap-8">
             
             {/* TOP BAR GRID CONTROL SYSTEM */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -143,7 +153,7 @@ function OwnerDeshboard() {
                 {/* 🛑 DYNAMIC CLOSED MASK LOG OVERLAY */}
                 {!isShopOnline && (
                   <div className="absolute top-6 right-6 bg-red-600 text-white font-mono font-black text-[8px] tracking-[3px] uppercase px-3 py-1.5 rounded-xl shadow-xl border border-red-500/20">
-                     STORE OFFLINE
+                      STORE OFFLINE
                   </div>
                 )}
 
@@ -170,14 +180,13 @@ function OwnerDeshboard() {
                 {myShopData?.items?.map((item, index) => (
                   // 🔥 LOGIC: Agar poora kitchen offline hai, toh inventory items cards par automatic smooth opacity logic shift chalega
                   <div key={index} className={!isShopOnline ? "opacity-50 pointer-events-none select-none transition-all duration-300" : "transition-all duration-300"}>
-                     <OwnerItemCard data={item} />
+                      <OwnerItemCard data={item} />
                   </div>
                 ))}
-              </div>
+               </div>
             </div>
 
           </div>
-        )}
       </div>
     </div>
   );
