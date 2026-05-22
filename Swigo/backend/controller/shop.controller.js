@@ -88,7 +88,7 @@ const getMyShop = async (req, res) => {
     }
 }
 
-// 🔥 CONTROLLER FIXED: Ab koi default fallback logic nahi chalega, direct collection counting hogi
+
 const getShopByCity = async (req, res) => {
     try {
         const { city } = req.params;
@@ -98,20 +98,16 @@ const getShopByCity = async (req, res) => {
             .populate('owner')
             .populate('items');
 
+        // 🔥 FIX: 404 error ke bajaye 200 OK aur khali array bhejo
         if (!shops || shops.length === 0) {
-            return res.status(404).json({ message: "No shops found in this city" });
+            return res.status(200).json([]); 
         }
 
-        // 🚀 LIVE ABSOLUTE REAL AGGREGATION:
-        // Yeh database ke Order table mein jaakar ginega ki Alok Bakery ke sach mein kitne orders hain
         const shopsWithRealOrders = await Promise.all(
             shops.map(async (shop) => {
-                // Check karo tumhare Order model mein dukan ki key 'shop' hai ya 'shopId'
                 const actualCount = await Order.countDocuments({ shop: shop._id });
-                
                 const shopObj = shop.toObject();
-                shopObj.totalOrders = actualCount; // Direct real absolute tracking feed jodi
-                
+                shopObj.totalOrders = actualCount;
                 return shopObj;
             })
         );
