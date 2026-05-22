@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
-// Pages
+// Pages & Components
 import Signup from "./pages/Signup.jsx";
 import Signin from "./pages/Signin.jsx";
 import Home from "./pages/Home.jsx";
@@ -31,7 +31,8 @@ import AdminDashboardOverview from "./pages/AdminDashboardOverview.jsx";
 import AdminRiderManagement from "./pages/AdminRiderManagement.jsx";
 import AdminShopManagement from "./pages/AdminShopManagement.jsx";
 import AdminSettings from "./pages/AdminSettings.jsx";
-import OwnerDashboard from "./components/OwnerDeshboard.jsx"; // Sahi path
+import OwnerDashboard from "./components/OwnerDeshboard.jsx";
+import Footer from "./components/Footer.jsx";
 
 // Hooks
 import useGetCurruser from "./hooks/useGetCurruser.jsx";
@@ -43,6 +44,8 @@ import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
 function App() {
+  const location = useLocation();
+
   useEffect(() => {
     axios.defaults.baseURL = "https://zyngo.onrender.com";
     axios.defaults.withCredentials = true;
@@ -58,13 +61,24 @@ function App() {
 
   const { userData, loading } = useSelector((state) => state.user);
 
-  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
+  // 🚀 PREMIUM LOADER
+  if (loading) return (
+    <div className="h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
+      <div className="relative w-16 h-16">
+        <div className="absolute inset-0 border-4 border-slate-800 rounded-full"></div>
+        <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
+      </div>
+      <p className="text-[10px] font-black uppercase tracking-[4px] text-orange-500 animate-pulse font-mono">Syncing Zyngo Node...</p>
+    </div>
+  );
+
+  // Footer Logic: Sirf in pages par dikhega
+  const showFooter = ["/", "/cart", "/my-orders", "/CheckOut"].includes(location.pathname) || location.pathname.startsWith("/shop/") || location.pathname.startsWith("/category/");
 
   return (
     <>
       <Toaster position="top-center" toastOptions={{ style: { fontSize: "12px", borderRadius: "15px", background: "#1e293b", color: "#fff" } }} />
       <Routes>
-        {/* 🌐 CORE GATEWAY */}
         <Route path="/" element={
           !userData ? <Navigate to="/signin" replace /> :
           userData.role === "admin" ? <Navigate to="/admin/dashboard" replace /> :
@@ -73,7 +87,6 @@ function App() {
           <Home />
         } />
 
-        {/* Auth */}
         <Route path="/signup" element={!userData ? <Signup /> : <Navigate to="/" replace />} />
         <Route path="/signin" element={!userData ? <Signin /> : <Navigate to="/" replace />} />
         <Route path="/forgetpassword" element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />} />
@@ -87,7 +100,7 @@ function App() {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* Customer Routes */}
+        {/* Customer */}
         <Route path="/CreateAndEditShop" element={userData ? <CreateAndEditShop /> : <Navigate to="/signin" replace />} />
         <Route path="/AddItem" element={userData ? <AddItem /> : <Navigate to="/signin" replace />} />
         <Route path="/EditItem/:itemId" element={userData ? <EditItem /> : <Navigate to="/signin" replace />} />
@@ -111,6 +124,8 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+
+      {showFooter && <Footer />}
     </>
   );
 }
