@@ -5,14 +5,9 @@ import UserDeshboard from "../components/UserDeshboard";
 import LocationRestricted from "../components/LocationRestricted";
 
 function Home() {
-  const { userData, loading, City } = useSelector((state) => state.user); 
+  const { userData, loading, City } = useSelector((state) => state.user);
   
-  // 1. City logic check: Agar City 'null', 'Unknown', ya 'Locating...' hai toh restricted
-  // Apni supported cities yahan add karo
-  const supportedCities = ["Bhagalpur", "Patna", "Delhi"];
-  const isCitySupported = City && supportedCities.includes(City);
-
-  // 2. Loading State
+  // 1. Syncing State (Loading)
   if (loading) return (
     <div className="h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
       <div className="relative w-16 h-16">
@@ -23,14 +18,17 @@ function Home() {
     </div>
   );
 
-  // 3. User Logged In
+  // 2. Gateway: Agar user login hai, seedha dashboard bhej do
   if (userData) {
-    // Location check: Sirf tab restricted dikhao jab location mil chuki ho aur wo supported na ho
+    const supportedCities = ["Bhagalpur", "Patna", "Delhi"];
+    const isCitySupported = City && supportedCities.includes(City);
+
+    // Location check (sirf tab jab location mil chuki ho)
     if (City && City !== "Locating..." && !isCitySupported) {
       return <LocationRestricted />;
     }
     
-    // Role based gateway
+    // Role based routing
     if (userData.role === "admin") return <Navigate to="/admin/dashboard" replace />;
     if (userData.role === "deliveryboy") return <Navigate to="/rider/dashboard" replace />;
     if (userData.role === "owner") return <Navigate to="/owner/dashboard" replace />;
@@ -38,7 +36,7 @@ function Home() {
     return <UserDeshboard />;
   }
 
-  // 4. Guest User View (Video Hero)
+  // 3. Guest User: Ye screen sirf tab dikhegi jab user LOGIN NAHI HAI
   return (
     <div className="relative h-screen w-full overflow-hidden bg-black">
       <video 

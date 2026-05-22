@@ -43,6 +43,8 @@ import useGetItemByCity from "./hooks/useGetItemByCity.jsx";
 import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
+
+
 function App() {
   const location = useLocation();
 
@@ -51,6 +53,7 @@ function App() {
     axios.defaults.withCredentials = true;
   }, []);
 
+  // Hooks (Sahi jagah par)
   useGetCurruser();
   useGetCity();
   useGetMyShop();
@@ -72,15 +75,20 @@ function App() {
     </div>
   );
 
-  // Footer Logic: Sirf in pages par dikhega
-  const showFooter = ["/", "/cart", "/my-orders", "/CheckOut"].includes(location.pathname) || location.pathname.startsWith("/shop/") || location.pathname.startsWith("/category/");
+  // Footer Logic: Lowercase karke check kar rahe hain taaki path mismatch na ho
+  const path = location.pathname.toLowerCase();
+  const showFooter = ["/", "/cart", "/my-orders", "/checkout", "/order-success"].includes(path) || 
+                     path.startsWith("/shop/") || 
+                     path.startsWith("/category/");
 
   return (
     <>
       <Toaster position="top-center" toastOptions={{ style: { fontSize: "12px", borderRadius: "15px", background: "#1e293b", color: "#fff" } }} />
+      
       <Routes>
+        {/* Protected Root Gateway */}
         <Route path="/" element={
-          !userData ? <Navigate to="/signin" replace /> :
+          !userData ? <Home /> : 
           userData.role === "admin" ? <Navigate to="/admin/dashboard" replace /> :
           userData.role === "deliveryboy" ? <Navigate to="/rider/dashboard" replace /> :
           userData.role === "owner" ? <Navigate to="/owner/dashboard" replace /> :
@@ -91,7 +99,7 @@ function App() {
         <Route path="/signin" element={!userData ? <Signin /> : <Navigate to="/" replace />} />
         <Route path="/forgetpassword" element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />} />
 
-        {/* Admin */}
+        {/* Admin Routes */}
         <Route path="/admin" element={<AdminRoute><AdminSidebar /></AdminRoute>}>
           <Route path="dashboard" element={<AdminDashboardOverview />} />
           <Route path="payouts" element={<AdminPayouts />} />
@@ -100,7 +108,7 @@ function App() {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* Customer */}
+        {/* Customer & Protected Routes */}
         <Route path="/CreateAndEditShop" element={userData ? <CreateAndEditShop /> : <Navigate to="/signin" replace />} />
         <Route path="/AddItem" element={userData ? <AddItem /> : <Navigate to="/signin" replace />} />
         <Route path="/EditItem/:itemId" element={userData ? <EditItem /> : <Navigate to="/signin" replace />} />
@@ -112,13 +120,13 @@ function App() {
         <Route path="/shop/:shopId" element={userData ? <ShopPage /> : <Navigate to="/signin" replace />} />
         <Route path="/track-order/:orderId" element={userData ? <TrackOrderPage /> : <Navigate to="/signin" replace />} />
 
-        {/* Rider */}
+        {/* Rider Routes */}
         <Route path="/rider/dashboard" element={userData?.role === "deliveryboy" ? <DelevryBoyDeshboard /> : <Navigate to="/signin" replace />} />
         <Route path="/rider/earnings" element={userData?.role === "deliveryboy" ? <RiderEarnings /> : <Navigate to="/signin" replace />} />
         <Route path="/rider/history" element={userData?.role === "deliveryboy" ? <RiderHistory /> : <Navigate to="/signin" replace />} />
         <Route path="/rider/profile" element={userData?.role === "deliveryboy" ? <RiderProfile /> : <Navigate to="/signin" replace />} />
 
-        {/* Owner */}
+        {/* Owner Routes */}
         <Route path="/owner/dashboard" element={userData?.role === "owner" ? <OwnerDashboard /> : <Navigate to="/signin" replace />} />
         <Route path="/owner/earnings" element={userData?.role === "owner" ? <OwnerEarnings /> : <Navigate to="/signin" replace />} />
 

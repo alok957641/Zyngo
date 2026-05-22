@@ -14,6 +14,7 @@ const setAuthCookie = (res, token) => {
 };
 
 // SIGNUP
+// SIGNUP
 const signup = async (req, res) => {
     try {
         const { fullname, email, password, mobile, role } = req.body;
@@ -23,7 +24,19 @@ const signup = async (req, res) => {
         if (mobile.length !== 10) return res.status(400).json({ message: "Mobile number must be 10 digits" });
 
         const hashedpassword = await bscrypt.hash(password, 10);
-        user = await User.create({ fullname, email, mobile, role, password: hashedpassword });
+        
+        // ✅ FIX: Location field ko default structure ke saath bhejo
+        user = await User.create({ 
+            fullname, 
+            email, 
+            mobile, 
+            role, 
+            password: hashedpassword,
+            location: {
+                type: "Point",
+                coordinates: [0, 0] // Default longitude, latitude
+            }
+        });
 
         const token = generatetocken(user._id);
         setAuthCookie(res, token);
@@ -62,12 +75,20 @@ const signout = async (req, res) => {
 };
 
 // GOOGLE AUTH
+// GOOGLE AUTH
 const googleauth = async (req, res) => {
     try {
         const { fullname, email, mobile, role } = req.body;
         let user = await User.findOne({ email });
         if (!user) {
-            user = await User.create({ fullname, email, mobile, role, password: "google-user-dummy-pass" });
+            user = await User.create({ 
+                fullname, 
+                email, 
+                mobile, 
+                role, 
+                password: "google-user-dummy-pass",
+                location: { type: "Point", coordinates: [0, 0] } // ✅ FIX: Yahan bhi add kar
+            });
         }
         const token = generatetocken(user._id);
         setAuthCookie(res, token);
