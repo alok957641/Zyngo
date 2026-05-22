@@ -141,7 +141,7 @@ function OrderSuccess() {
         <div className="mt-10 flex flex-col items-center gap-2">
            <div className="flex items-center gap-2 text-green-700/40">
               <FiShoppingBag />
-              <span className="text-[8px] font-black uppercase tracking-[5px]">Swigo Express Surajgarha</span>
+              <span className="text-[8px] font-black uppercase tracking-[5px]">Zyngo Express Surajgarha</span>
            </div>
         </div>
       </motion.div>

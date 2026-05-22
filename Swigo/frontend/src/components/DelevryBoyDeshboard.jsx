@@ -152,17 +152,24 @@ function DelevryBoyDeshboard() {
         }
     };
 
-    const handleLogout = async () => {
-        try {
-            localStorage.clear(); 
-            dispatch(setUserData(null));
-            await axios.get(`${serverurl}/api/user/logout`, { withCredentials: true });
-            window.location.href = "/signin"; 
-        } catch (err) {
-            window.location.href = "/signin"; 
-        }
-    };
-
+   const handleLogout = async () => {
+    try {
+        // 1. Backend call to destroy cookie
+        await axios.get(`${serverurl}/api/auth/signout`, { withCredentials: true });
+    } catch (err) {
+        console.error("Backend logout call failed, forcing client-side logout...");
+    } finally {
+        // 2. Clear Redux
+        dispatch(setUserData(null));
+        
+        // 3. Clear Local Storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // 4. Force browser to clear everything and redirect
+        window.location.href = "/signin";
+    }
+};
     const handleStartFinish = async () => {
         try {
             if (!activeOrder?.orderId || !activeOrder?.shopOrder?._id) return;
