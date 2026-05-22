@@ -8,24 +8,28 @@ export const serverurl = "https://zyngo.onrender.com";
 function useGetMyShop() {
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.user);
-  const { myShopData } = useSelector((state) => state.owner || {});
-
+  
   useEffect(() => {
-    // 🚀 Logic: Sirf Owner ke liye call karo aur tabhi jab data na ho
-    if (!userData || userData.role !== "owner" || myShopData) return;
+    // Sirf Owner ke liye aur tabhi jab user load ho gaya ho
+    if (!userData || userData.role !== "owner") return;
 
     const fetchShop = async () => {
       try {
-        const result = await axios.get(`${serverurl}/api/shop/getMyShop`, {
+        const res = await axios.get(`${serverurl}/api/shop/getMyShop`, {
           withCredentials: true,
         });
-        if (result.data) {
-          dispatch(setMyShopData(result.data));
+
+        // Backend se { success: true, shop: ... } aa raha hai
+        if (res.data && res.data.shop) {
+          dispatch(setMyShopData(res.data.shop));
+        } else {
+          // Shop nahi mili toh null set karo
+          dispatch(setMyShopData(null));
         }
       } catch (error) {
-        if (error.response?.status === 404) {
-          dispatch(setMyShopData(false)); // Confirm shop nahi hai
-        }
+        console.error("Shop fetch error:", error);
+        // Error aaye (jaise 404), toh null set karo
+        dispatch(setMyShopData(null));
       }
     };
 
