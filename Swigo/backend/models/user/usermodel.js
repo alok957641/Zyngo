@@ -23,11 +23,11 @@ const userSchema = new mongoose.Schema(
             enum: ["user", "owner", "deliveryboy", "admin"],
             required: true,
         },
-        
-       
+
+
         isOnline: {
             type: Boolean,
-            default: true, 
+            default: true,
         },
 
         resetOtp: {
@@ -41,15 +41,8 @@ const userSchema = new mongoose.Schema(
             type: Date,
         },
         location: {
-            type: {
-                type: String,
-                enum: ['Point'],
-                default: 'Point'
-            },
-            coordinates: {
-                type: [Number],
-                default: [0, 0],
-            }
+            type: { type: String, default: "Point" },
+            coordinates: { type: [Number], index: "2dsphere" } // Index zaroori hai location queries ke liye
         },
         wallet: {
             type: Number,
@@ -57,7 +50,7 @@ const userSchema = new mongoose.Schema(
         },
         cashInHand: {
             type: Number,
-            default: 0 
+            default: 0
         },
         lifetimeEarnings: { type: Number, default: 0 }
     },

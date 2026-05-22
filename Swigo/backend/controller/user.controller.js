@@ -18,56 +18,53 @@ const getcurruser = async (req ,res) => {
     }
 }
 
-const updateUserLocation = async (req, res) => {
+export const updateUserLocation = async (req, res) => {
     try {
-        // 1. Dono format support karega (lat/latitude aur lon/longitude)
+        // Standardizing input from both common formats
         const lat = req.body.lat || req.body.latitude;
         const lon = req.body.lon || req.body.longitude;
 
-        // 2. ID Check (Jo bhi tere auth middleware mein set ho)
+        // Checking user session/auth
         const userId = req.user?._id || req.userId;
-
         if (!userId) {
-            return res.status(401).json({ success: false, message: "Bhai, login session nahi mila!" });
+            return res.status(401).json({ success: false, message: "Unauthorized access: User session not found." });
         }
 
-        // 3. Validation: Coordinates zero ya missing nahi honi chahiye
+        // Input Validation
         if (lat === undefined || lon === undefined) {
-            return res.status(400).json({ success: false, message: "Latitude aur Longitude dono zaroori hain!" });
+            return res.status(400).json({ success: false, message: "Invalid coordinates provided." });
         }
 
-        // 4. Update Database
+        // Updating User Location (GeoJSON Point)
         const user = await User.findByIdAndUpdate(
             userId,
             {
                 $set: {
                     location: {
                         type: "Point",
-                        // 🚨 MongoDB Rules: Hamesha [Longitude, Latitude] ka order hona chahiye
+                        // Note: GeoJSON order is [longitude, latitude]
                         coordinates: [parseFloat(lon), parseFloat(lat)]
                     }
                 }
             },
-            { new: true } // Taaki update ke baad naya data return kare
+            { new: true }
         );
 
         if (!user) {
-            return res.status(404).json({ success: false, message: "User nahi mila!" });
+            return res.status(404).json({ success: false, message: "User record not found." });
         }
-
-        // console.log(`📍 Location Synced for: ${user.fullname}`); // Debugging ke liye sahi hai
 
         return res.status(200).json({ 
             success: true, 
-            message: "Location updated successfully",
+            message: "Location successfully synchronized.",
             location: user.location 
         });
 
     } catch (error) {
-        console.error("🔥 Update Location Error:", error.message);
+        console.error("Location Update Error:", error.message);
         return res.status(500).json({ 
             success: false, 
-            message: "Server internal error", 
+            message: "Internal server error during location sync.", 
             error: error.message 
         });
     }
