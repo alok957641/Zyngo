@@ -71,14 +71,20 @@ const { userData } = useSelector((state) => state.user);
       <Toaster position="top-center" toastOptions={{ style: { fontSize: "12px", fontWeight: "bold", borderRadius: "15px", background: "#1e293b", color: "#fff" } }} />
 
       <Routes>
-        {/* Gateway */}
-        <Route path="/" element={
-          !userData ? <Navigate to="/signin" replace /> :
-          userData.role === "admin" ? <Navigate to="/admin/dashboard" replace /> :
-          userData.role === "deliveryboy" ? <Navigate to="/rider/dashboard" replace /> :
-          <Home />
-        } />
-
+      {/* Gateway - Yahan hum check kar rahe hain role kya hai */}
+<Route path="/" element={
+  !userData ? (
+    <Navigate to="/signin" replace />
+  ) : userData.role === "admin" ? (
+    <Navigate to="/admin/dashboard" replace />
+  ) : userData.role === "deliveryboy" ? (
+    <Navigate to="/rider/dashboard" replace />
+  ) : userData.role === "owner" ? (
+    <Navigate to="/owner/earnings" replace /> 
+  ) : (
+    <Home /> // Yeh sirf customer/user ke liye
+  )
+} />
         {/* Auth */}
         <Route path="/signup" element={!userData ? <Signup /> : <Navigate to="/" replace />} />
         <Route path="/signin" element={!userData ? <Signin /> : <Navigate to="/" replace />} />
