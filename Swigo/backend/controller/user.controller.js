@@ -18,7 +18,7 @@ const getcurruser = async (req, res) => {
     }
 }
 
-export const updateUserLocation = async (req, res) => {
+const updateUserLocation = async (req, res) => {
     try {
         const { address, lat, latitude, lon, longitude } = req.body;
         const latitudeVal = lat || latitude;
