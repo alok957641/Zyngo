@@ -3,22 +3,22 @@ const User = require("../models/user/usermodel.js")
 
 
 // controller/user.controller.js
-const getcurruser = async (req ,res) => {
+const getcurruser = async (req, res) => {
     try {
         const userId = req.userId;
-        if(!userId) return res.status(401).json({message : "UserId not found"});
+        if (!userId) return res.status(401).json({ message: "UserId not found" });
 
         const user = await User.findById(userId).select("-password");
-        if(!user) return res.status(401).json({message : "User not found"});
+        if (!user) return res.status(401).json({ message: "User not found" });
 
         // 🚨 CULPRIT: {user} ki jagah sirf user bhejo!
-        return res.status(200).json(user); 
+        return res.status(200).json(user);
     } catch (error) {
-        return res.status(500).json({message : "Get current user error"});
+        return res.status(500).json({ message: "Get current user error" });
     }
 }
 
- const updateUserLocation = async (req, res) => {
+const updateUserLocation = async (req, res) => {
     try {
         // Standardizing input from both common formats
         const lat = req.body.lat || req.body.latitude;
@@ -33,6 +33,9 @@ const getcurruser = async (req ,res) => {
         // Input Validation
         if (lat === undefined || lon === undefined) {
             return res.status(400).json({ success: false, message: "Invalid coordinates provided." });
+        }
+        if (!req.body.address && !req.body.latitude) {
+            return res.status(400).json({ success: false, message: "Bhai, address ya coordinates bhejo!" });
         }
 
         // Updating User Location (GeoJSON Point)
@@ -54,18 +57,18 @@ const getcurruser = async (req ,res) => {
             return res.status(404).json({ success: false, message: "User record not found." });
         }
 
-        return res.status(200).json({ 
-            success: true, 
+        return res.status(200).json({
+            success: true,
             message: "Location successfully synchronized.",
-            location: user.location 
+            location: user.location
         });
 
     } catch (error) {
         console.error("Location Update Error:", error.message);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Internal server error during location sync.", 
-            error: error.message 
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error during location sync.",
+            error: error.message
         });
     }
 };
@@ -83,10 +86,10 @@ const toggleAvailabilityStatus = async (req, res) => {
         user.isOnline = !user.isOnline;
         await user.save();
 
-        return res.status(200).json({ 
-            success: true, 
-            message: `Status switched to ${user.isOnline ? 'ONLINE' : 'OFFLINE'}`, 
-            isOnline: user.isOnline 
+        return res.status(200).json({
+            success: true,
+            message: `Status switched to ${user.isOnline ? 'ONLINE' : 'OFFLINE'}`,
+            isOnline: user.isOnline
         });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });
