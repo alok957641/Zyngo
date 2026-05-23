@@ -88,65 +88,34 @@ const signin = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (!user) {
-
             return res.status(400).json({
-                success: false,
                 message: "Invalid email or password"
             });
-
         }
 
         const ismatch = await bscrypt.compare(password, user.password);
 
         if (!ismatch) {
-
             return res.status(400).json({
-                success: false,
                 message: "Password incorrect"
             });
-
         }
 
         const token = generatetocken(user._id);
 
-        // ✅ COOKIE SET
-        res.cookie("token", token, {
+        setAuthCookie(res, token);
 
-            httpOnly: true,
-
-            secure: true,
-
-            sameSite: "none",
-
-            maxAge: 7 * 24 * 60 * 60 * 1000
-
-        });
-
-        // ✅ PASSWORD REMOVE
-        const userWithoutPassword = await User.findById(user._id).select("-password");
-
-        return res.status(200).json({
-
-            success: true,
-
-            user: userWithoutPassword
-
-        });
+        return res.status(200).json(user);
 
     } catch (error) {
 
         return res.status(500).json({
-
-            success: false,
-
             message: `Signin error: ${error.message}`
-
         });
 
     }
 
 };
-
 
 // SIGNOUT
 const signout = async (req, res) => {
