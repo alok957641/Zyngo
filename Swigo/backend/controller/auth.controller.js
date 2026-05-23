@@ -22,100 +22,95 @@ const setAuthCookie = (res, token) => {
 
 // SIGNUP
 const signup = async (req, res) => {
-
     try {
-
         const { fullname, email, password, mobile, role } = req.body;
 
+        // 1. Basic validation
+        if (!fullname || !email || !password || !mobile || !role) {
+            return res.status(400).json({ message: "Sabhi fields bharna zaroori hai!" });
+        }
+
+        // 2. Already exists check
         let user = await User.findOne({ email });
-
         if (user) {
-            return res.status(400).json({
-                message: "User already exists"
-            });
+            return res.status(400).json({ message: "User already exists" });
         }
 
+        // 3. Length validation
         if (password.length < 6) {
-            return res.status(400).json({
-                message: "Password must be at least 6 characters"
-            });
+            return res.status(400).json({ message: "Password kam se kam 6 characters ka ho" });
         }
-
         if (mobile.length !== 10) {
-            return res.status(400).json({
-                message: "Mobile number must be 10 digits"
-            });
+            return res.status(400).json({ message: "Mobile number exactly 10 digit ka hona chahiye" });
         }
 
-        const hashedpassword = await bscrypt.hash(password, 10);
-
+        // 4. Password hashing
+        const hashedPassword = await bscrypt.hash(password, 10);
+        
+        // 5. Create user
         user = await User.create({
             fullname,
             email,
             mobile,
             role,
-            password: hashedpassword,
-
-            location: {
-                type: "Point",
-                coordinates: [0, 0]
-            }
+            password: hashedPassword,
         });
 
-        const token = generatetocken(user._id);
+        // 6. Token aur Cookie
+        const token = generatetoken(user._id); // Spelling check: 'generatetoken'
+        res.cookie("token", token, {
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+        });
 
-        setAuthCookie(res, token);
-
-        return res.status(201).json(user);
+        // 7. Success response (password hatakar)
+        const userResponse = user.toObject();
+        delete userResponse.password;
+        
+        return res.status(201).json(userResponse);
 
     } catch (error) {
-
-        return res.status(500).json({
-            message: `Signup error: ${error.message}`
-        });
-
+        console.error("Signup Error:", error);
+        return res.status(500).json({ message: "Signup ke dauran server error aaya" });
     }
+}
 
-};
 
 // SIGNIN
 const signin = async (req, res) => {
-
     try {
-
         const { email, password } = req.body;
-
         const user = await User.findOne({ email });
-
+        
         if (!user) {
-            return res.status(400).json({
-                message: "Invalid email or password"
-            });
+            return res.status(400).json({ message: "Invalid email ya password" });
         }
 
-        const ismatch = await bscrypt.compare(password, user.password);
-
-        if (!ismatch) {
-            return res.status(400).json({
-                message: "Password incorrect"
-            });
+        const isMatch = await bscrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: "Password galat hai" });
         }
 
-        const token = generatetocken(user._id);
-
-        setAuthCookie(res, token);
-
-        return res.status(200).json(user);
-
-    } catch (error) {
-
-        return res.status(500).json({
-            message: `Signin error: ${error.message}`
+        const token = generatetoken(user._id);
+        res.cookie("token", token, {
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
         });
 
+        const userResponse = user.toObject();
+        delete userResponse.password;
+        
+        return res.status(200).json(userResponse);
+    } catch (err) {
+        console.error("Signin Error:", err);
+        return res.status(500).json({ message: "Signin ke dauran server error" });
     }
+}
 
-};
 
 // SIGNOUT
 const signout = async (req, res) => {
