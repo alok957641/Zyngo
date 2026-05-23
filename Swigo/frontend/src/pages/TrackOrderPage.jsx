@@ -43,7 +43,7 @@ const TrackOrderPage = () => {
     // 🔄 Fetch Logic: Har baar naya data lane ke liye
     const fetchOrder = async (isInitial = false) => {
         try {
-            const { data } = await axios.get(`https://zyngo.onrender.com/api/order/get-order-by-id/${orderId}`, { withCredentials: true });
+            const { data } = await axios.get(`http://localhost:8000/api/order/get-order-by-id/${orderId}`, { withCredentials: true });
             const orderData = data.order || data;
             if (orderData) {
                 setCurrentOrder(orderData);

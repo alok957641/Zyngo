@@ -10,7 +10,7 @@ const ItemCard = ({ item = {} }) => {
 
   const isInCart = cartItems.some((i) => (i.id || i._id) === item._id);
 
-  // ✅ SHOP NAME LOGIC: Multiple keys check taaki Zyngo Partner na dikhe
+  // ✅ SHOP NAME LOGIC: Multiple keys check taaki Swigo Partner na dikhe
   const shopName = item?.shop?.shopName || item?.shop?.name || item?.restaurantName || "Restaurant Name";
   const shopAddress = item?.shop?.address || City || "Local Area";
   const displayRating = item?.rating?.average || (typeof item?.rating === 'number' ? item.rating : "4.2");

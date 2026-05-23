@@ -3,44 +3,57 @@ import { useDispatch } from "react-redux";
 import { setCity } from "../redux/userSlice";
 import { setLocation, setAddress } from "../redux/mapSlice"; // setAddress bhi import karle
 
-// ... existing imports
 function useGetCity() {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!("geolocation" in navigator)) return;
+    if ("geolocation" in navigator) {
+      console.log("⏳ Location maang raha hu browser se...");
+      
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          
+          // 1. Lat/Lon Dispatch
+          dispatch(setLocation({ lat: latitude, lon: longitude }));
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        dispatch(setLocation({ lat: latitude, lon: longitude }));
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+              {
+                headers: {
+                  'User-Agent': 'Swigo-App' // Nominatim ko User-Agent chahiye hota hai
+                }
+              }
+            );
+            const data = await response.json();
 
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`,
-            { headers: { 'User-Agent': 'Zyngo-App' } }
-          );
-          const data = await response.json();
+            if (data && data.address) {
+              const address = data.address;
+              
+              // 🚀 FIX: Yahan currentCity ko data se assign karna zaroori hai
+              // Nominatim kabhi city deta hai, kabhi town, toh sab check karna padta hai
+              let currentCity = address.city || address.town || address.village || address.state_district || "Unknown Location";
 
-          if (data?.address) {
-            // Priority list for city detection
-            const city = data.address.city || data.address.town || data.address.village || data.address.state_district;
-            
-            // Dispatch city & full address
-            dispatch(setCity(city)); 
-            dispatch(setAddress(data.display_name));
+              console.log("🏙️ Final Fetch Ki Gayi Jagah:", currentCity);
+              
+              // 2. City set karo userSlice mein
+              dispatch(setCity(currentCity));
+              
+              // 3. Pura address set karo mapSlice mein
+              dispatch(setAddress(data.display_name)); 
+            }
+
+          } catch (error) {
+            console.error("❌ Free Map API Error:", error);
           }
-        } catch (error) {
-          console.error("Nominatim API error:", error);
-          dispatch(setCity("Unknown")); // Fallback
-        }
-      },
-      (error) => {
-        console.error("GPS Error:", error.message);
-        dispatch(setCity("Unknown"));
-      },
-      { enableHighAccuracy: true }
-    );
+        },
+        (error) => {
+          console.error("❌ Browser Location Error:", error.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
   }, [dispatch]);
 }
 

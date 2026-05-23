@@ -11,7 +11,7 @@ import { addMyOrder } from "../redux/userSlice";
 // 🚨 Icons for Online Payment
 import { SiGooglepay, SiPhonepe, SiPaytm } from "react-icons/si";
 
-export const serverurl = "https://zyngo.onrender.com";
+export const serverurl = "http://localhost:8000";
 
 // Real Distance Formula
 const calculateKm = (lat1, lon1, lat2, lon2) => {
@@ -93,7 +93,7 @@ function CheckOut() {
       key: "rzp_test_SoP0awKZdS5zFG", 
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
-      name: "Zyngo Bhagalpur",
+      name: "Swigo Bhagalpur",
       description: "Food Order",
       order_id: razorpayOrder.id,
       handler: async (response) => {

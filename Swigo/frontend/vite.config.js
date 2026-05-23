@@ -1,22 +1,13 @@
-
-
-
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-
 
 export default defineConfig({
- plugins: [react(), tailwindcss()],
+  plugins: [react()],
   build: {
-    // Vite 8/Rolldown ke errors se bachne ke liye
-    minify: 'terser', // Rolldown ki jagah Terser use karega
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 1600, // Limit badha di
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'framer-motion', 'lucide-react']
-        }
+        manualChunks: undefined // Filhal manualChunks hata do, error wahi se ho sakta hai
       }
     }
   }

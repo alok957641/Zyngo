@@ -12,7 +12,7 @@ import {
   FiCreditCard,
 } from "react-icons/fi";
 
-const serverurl = "https://zyngo.onrender.com";
+const serverurl = "http://localhost:8000";
 
 const OwnerEarnings = () => {
   const navigate = useNavigate();

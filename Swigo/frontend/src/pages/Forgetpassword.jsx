@@ -6,7 +6,7 @@ import axios from "axios";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
-export const serverurl = "https://zyngo.onrender.com";
+export const serverurl = "http://localhost:8000";
 
 function Forgetpassword() {
   const [email, setEmail] = useState("");
@@ -107,7 +107,7 @@ function Forgetpassword() {
               <FaArrowLeftLong className="text-xl font-bold " />
             </Link>
           </div>
-          <h1 className="text-3xl font-extrabold text-red-600">Zyngo</h1>
+          <h1 className="text-3xl font-extrabold text-red-600">Swigo</h1>
 
           <p className="text-gray-500 text-xs font-medium mt-1 uppercase tracking-widest">
             Forget Password

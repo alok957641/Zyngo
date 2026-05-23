@@ -8,7 +8,7 @@ import {
 } from "react-icons/fi";
 import axios from "axios";
 
-const serverurl = "https://zyngo.onrender.com";
+const serverurl = "http://localhost:8000";
 
 const RiderProfile = () => {
     const navigate = useNavigate();
@@ -19,24 +19,19 @@ const RiderProfile = () => {
         ? new Date(userData.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) 
         : "May 2026";
 
- const handleLogout = async () => {
-    try {
-        // 1. Backend call to destroy cookie
-        await axios.get(`${serverurl}/api/auth/signout`, { withCredentials: true });
-    } catch (err) {
-        console.error("Backend logout call failed, forcing client-side logout...");
-    } finally {
-        // 2. Clear Redux
-        dispatch(setUserData(null));
-        
-        // 3. Clear Local Storage
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // 4. Force browser to clear everything and redirect
-        window.location.href = "/signin";
-    }
-};
+    // 🔐 LOGOUT LOGIC
+    const handleLogout = async () => {
+       
+        try {
+            await axios.get(`${serverurl}/api/user/logout`, { withCredentials: true });
+            localStorage.clear();
+            window.location.href = "/signin";
+        } catch (err) {
+            console.error("Logout error");
+            localStorage.clear();
+            window.location.href = "/signin";
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#020617] font-sans pb-32 text-slate-200 selection:bg-orange-500/20 overflow-x-hidden">

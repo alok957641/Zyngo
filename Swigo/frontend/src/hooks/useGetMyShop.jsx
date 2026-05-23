@@ -3,49 +3,34 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";
 
-export const serverurl = "https://zyngo.onrender.com";
+export const serverurl = "http://localhost:8000";
 
-export default function useGetMyShop() {
+function useGetMyShop() {
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.user);
-  
-  useEffect(() => {
-    // 1. Agar user hi nahi hai, toh wait karo. Hook return kar jayega.
-    if (!userData) {
-      console.log("Hook waiting: No userData yet");
-      return;
-    }
+  const { myShopData } = useSelector((state) => state.owner || {});
 
-    // 2. Sirf owner ke liye call karo
-    if (userData.role !== "owner") {
-      dispatch(setMyShopData(null));
-      return;
-    }
+  useEffect(() => {
+    // 🚀 Logic: Sirf Owner ke liye call karo aur tabhi jab data na ho
+    if (!userData || userData.role !== "owner" || myShopData) return;
 
     const fetchShop = async () => {
       try {
-        console.log("Hook: Calling API...");
-        const res = await axios.get(`${serverurl}/api/shop/getMyShop`, { 
-          withCredentials: true 
+        const result = await axios.get(`${serverurl}/api/shop/getMyShop`, {
+          withCredentials: true,
         });
-
-        console.log("Hook: API Response:", res.data);
-        
-        // 3. Agar success true hai aur shop object mila
-        if (res.data && res.data.success && res.data.shop) {
-           dispatch(setMyShopData(res.data.shop));
-        } else {
-           // 4. Shop nahi mili (ya success false hai), toh explicitly null
-           dispatch(setMyShopData(null));
+        if (result.data) {
+          dispatch(setMyShopData(result.data));
         }
       } catch (error) {
-        console.error("Hook: Fetch Error:", error);
-        // Error par bhi null set karo taaki redirect kaam kare
-        dispatch(setMyShopData(null));
+        if (error.response?.status === 404) {
+          dispatch(setMyShopData(false)); // Confirm shop nahi hai
+        }
       }
     };
 
     fetchShop();
-  }, [userData, dispatch]);
+  }, [userData, dispatch]); 
 }
 
+export default useGetMyShop;

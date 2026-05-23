@@ -39,7 +39,7 @@ function OwnerNav() {
           {/* 1. LOGO */}
           <div className="flex-shrink-0 flex items-center gap-2">
             <Link to="/" className="text-3xl sm:text-4xl font-extrabold text-red-600 tracking-tighter hover:scale-105 transition-transform">
-              Zyngo
+              Swigo
             </Link>
             <span className="bg-orange-100 text-orange-600 text-[10px] sm:text-xs font-bold px-2 py-1 rounded-md tracking-wider uppercase hidden sm:block">
               Partner

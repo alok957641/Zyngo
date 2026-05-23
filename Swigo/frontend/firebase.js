@@ -7,9 +7,9 @@ import { getAuth } from "firebase/auth";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey:import.meta.env.VITE_FIREBASE_APIKEY,
-  authDomain: "Zyngo-17827.firebaseapp.com",
-  projectId: "Zyngo-17827",
-  storageBucket: "Zyngo-17827.firebasestorage.app",
+  authDomain: "swigo-17827.firebaseapp.com",
+  projectId: "swigo-17827",
+  storageBucket: "swigo-17827.firebasestorage.app",
   messagingSenderId: "619345443414",
   appId: "1:619345443414:web:61ba408395dfd13f3559f7"
 };
