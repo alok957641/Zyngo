@@ -48,3 +48,5 @@ export default function useGetMyShop() {
     fetchShop();
   }, [userData, dispatch]);
 }
+
+export default useGetMyShop;

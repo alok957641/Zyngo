@@ -27,3 +27,4 @@ function useGetMyOrders(userData) {
   }, [userData]);
 
 }
+export default useGetMyOrders;
