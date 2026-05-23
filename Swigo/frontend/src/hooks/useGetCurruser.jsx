@@ -1,59 +1,44 @@
 import { useEffect } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { setUserData, setLoading } from "../redux/userSlice";
+import {
+  setUserData,
+  setLoading
+} from "../redux/userSlice";
 
 function useGetCurruser() {
 
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-    useEffect(() => {
+  useEffect(() => {
 
-        const fetchUser = async () => {
+    const fetchUser = async () => {
 
-            // ✅ START LOADING
-            dispatch(setLoading(true));
+      dispatch(setLoading(true));
 
-            try {
+      try {
 
-                // ✅ API CALL
-                const result = await axios.get(
-                    "https://zyngo.onrender.com/api/user/getcurruser",
-                    {
-                        withCredentials: true,
-                    }
-                );
+        const res = await axios.get(
+          "/api/user/getcurruser"
+        );
 
-                // ✅ USER SAVE
-                if (result.data) {
+        dispatch(setUserData(res.data.user));
 
-                    dispatch(
-                        setUserData(result.data.user || result.data)
-                    );
+      } catch (err) {
 
-                }
+        dispatch(setUserData(null));
 
-            } catch (error) {
+      } finally {
 
-                console.log("🔒 User not logged in.");
+        dispatch(setLoading(false));
 
-                // ✅ IMPORTANT
-                // Sirf user null karo
-                // loading finally me false hoga
-                dispatch(setUserData(null));
+      }
 
-            } finally {
+    };
 
-                // ✅ ALWAYS STOP LOADING
-                dispatch(setLoading(false));
+    fetchUser();
 
-            }
-
-        };
-
-        fetchUser();
-
-    }, [dispatch]);
+  }, []);
 
 }
 

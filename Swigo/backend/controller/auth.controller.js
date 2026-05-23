@@ -5,23 +5,15 @@ const { sendOtpEmail } = require("../utils/mail.js");
 
 // ✅ FINAL COOKIE FIX
 const setAuthCookie = (res, token) => {
-
     res.cookie("token", token, {
         httpOnly: true,
-
-        secure: process.env.NODE_ENV === "production",
-
-        sameSite:
-            process.env.NODE_ENV === "production"
-                ? "None"
-                : "Lax",
-
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-
+        secure: true,
+        sameSite: "None",
         path: "/",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
 };
+
 
 // SIGNUP
 const signup = async (req, res) => {

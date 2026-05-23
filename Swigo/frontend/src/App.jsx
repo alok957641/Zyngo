@@ -24,13 +24,6 @@ import RiderEarnings from "./pages/RiderEarnings";
 import RiderHistory from "./pages/RiderHistory";
 import RiderProfile from "./pages/RiderProfile";
 import OwnerEarnings from "./pages/OwnerEarnings.jsx";
-import AdminPayouts from "./pages/AdminPayouts.jsx";
-import AdminRoute from "./components/AdminRoute.jsx";
-import AdminSidebar from "./components/AdminSidebar.jsx";
-import AdminDashboardOverview from "./pages/AdminDashboardOverview.jsx";
-import AdminRiderManagement from "./pages/AdminRiderManagement.jsx";
-import AdminShopManagement from "./pages/AdminShopManagement.jsx";
-import AdminSettings from "./pages/AdminSettings.jsx";
 import OwnerDashboard from "./components/OwnerDeshboard.jsx";
 import Footer from "./components/Footer.jsx";
 
@@ -47,7 +40,7 @@ function App() {
 
   const location = useLocation();
 
-  // ✅ AXIOS GLOBAL SETUP
+  // ✅ AXIOS GLOBAL CONFIG
   useEffect(() => {
 
     axios.defaults.baseURL = "https://zyngo.onrender.com";
@@ -56,19 +49,21 @@ function App() {
 
   }, []);
 
-  // ✅ HOOKS
-  useGetCurruser();
-  useGetCity();
-  useGetMyShop();
-  useGetShopbyCity();
-  useGetItemByCity();
-  useGetMyOrders();
-  useGetUpdateLocation();
-
   // ✅ REDUX STATE
   const { userData, loading } = useSelector((state) => state.user);
 
-  // ✅ FULL PAGE LOADER
+  // ✅ PUBLIC HOOKS
+  useGetCurruser();
+  useGetCity();
+  useGetShopbyCity();
+  useGetItemByCity();
+
+  // ✅ PROTECTED HOOKS
+  useGetMyShop(userData);
+  useGetMyOrders(userData);
+  useGetUpdateLocation(userData);
+
+  // ✅ LOADING SCREEN
   if (loading) {
 
     return (
@@ -91,7 +86,7 @@ function App() {
 
   }
 
-  // ✅ FOOTER CONDITION
+  // ✅ FOOTER
   const path = location.pathname.toLowerCase();
 
   const showFooter =
@@ -99,39 +94,21 @@ function App() {
     path.startsWith("/shop/") ||
     path.startsWith("/category/");
 
-  // ✅ FINAL FIXED PROTECTED COMPONENT
+  // ✅ PROTECTED ROUTE
   const Protected = ({ children, role }) => {
 
-    // ⏳ Wait while restoring user
-    if (loading) {
-
-      return (
-        <div className="h-screen bg-[#020617] flex items-center justify-center">
-
-          <p className="text-white font-bold text-lg">
-            Loading...
-          </p>
-
-        </div>
-      );
-
-    }
-
-    // ❌ User not logged in
     if (!userData) {
 
       return <Navigate to="/signin" replace />;
 
     }
 
-    // ❌ Wrong role
     if (role && userData.role !== role) {
 
       return <Navigate to="/" replace />;
 
     }
 
-    // ✅ All good
     return children;
 
   };
@@ -160,8 +137,6 @@ function App() {
           element={
             !userData ? (
               <Home />
-            ) : userData.role === "admin" ? (
-              <Navigate to="/admin/dashboard" replace />
             ) : userData.role === "deliveryboy" ? (
               <Navigate to="/rider/dashboard" replace />
             ) : userData.role === "owner" ? (
@@ -188,7 +163,7 @@ function App() {
           element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />}
         />
 
-        {/* OWNER ROUTES */}
+        {/* OWNER */}
         <Route
           path="/CreateAndEditShop"
           element={
@@ -216,7 +191,7 @@ function App() {
           }
         />
 
-        {/* USER ROUTES */}
+        {/* USER */}
         <Route
           path="/cart"
           element={
@@ -280,7 +255,7 @@ function App() {
           }
         />
 
-        {/* RIDER ROUTES */}
+        {/* RIDER */}
         <Route
           path="/rider/dashboard"
           element={
