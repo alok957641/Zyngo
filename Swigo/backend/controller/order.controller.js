@@ -492,18 +492,17 @@ const sendDeliveryOtp = async (req, res) => {
     try {
         const { orderId, shopOrderId } = req.body;
         
-        // 1. User email ke saath populate karo
+        // 1. Order aur User fetch karo (populate ke saath)
         const order = await Order.findById(orderId).populate("user", "email");
         
-        // 2. Check karo ki user aur email exist karte hain
         if (!order || !order.user || !order.user.email) {
-            console.error("Order or User Email missing for OrderId:", orderId);
             return res.status(404).json({ message: "Order ya User ki email nahi mili!" });
         }
 
         const shopOrder = order.shopOrders.id(shopOrderId);
         if (!shopOrder) return res.status(400).json({ message: "Bhai IDs galat hain!" });
 
+        // 2. OTP Generate karo
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         shopOrder.deliveryOtp = otp;
         shopOrder.otpExpires = Date.now() + 10 * 60 * 1000;
@@ -511,7 +510,8 @@ const sendDeliveryOtp = async (req, res) => {
         order.markModified('shopOrders'); 
         await order.save();
 
-        // 3. Email send karo
+        // 3. AB RESEND API CALL HOGA (Yahan koi change nahi karna hai)
+        // Tumhare naye 'utils/mail.js' mein jo function hai, wo yahan call ho jayega
         await sendDeliveryOtpEmail(order.user.email, otp); 
 
         res.status(200).json({ success: true, message: "OTP Sent Successfully!" });
@@ -520,6 +520,7 @@ const sendDeliveryOtp = async (req, res) => {
         res.status(500).json({ message: "Server error, check logs" }); 
     }
 };
+
 
 
 const getDeliveryBoyAssignment = async (req, res) => {

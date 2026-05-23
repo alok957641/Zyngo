@@ -1,62 +1,27 @@
-const nodemailer = require("nodemailer");
-const dotenv = require("dotenv");
-dotenv.config();
+// utils/mail.js
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-
-
-// console.log("Email from Env:", process.env.EMAIL);
-// console.log("Pass from Env:", process.env.PASS ? "Received" : "Not Received");
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true, // 465 port ke liye true
-    auth: {
-        user: process.env.EMAIL,
-        pass: process.env.PASS,
-    },
-    // 🔥 YE ADD KARO: Connection timeout badha do
-    connectionTimeout: 10000, 
-    socketTimeout: 10000,
-});
-
-const sendOtpEmail = async (to, otp) => {
+const sendDeliveryOtpEmail = async (email, otp) => {
     try {
-        await transporter.sendMail({
-            from: process.env.EMAIL, 
-            to: to,
-            subject: "RESET Your Password - Zyngo",
+        await resend.emails.send({
+            from: 'onboarding@resend.dev', // Resend ka default (tum apna domain verify kar sakte ho baad mein)
+            to: email,
+            subject: 'Delivery OTP - Zyngo',
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                    <h2 style="color: #ea580c;">Zyngo Password Reset</h2>
-                    <p>Your OTP for password reset is:</p>
+                    <h2 style="color: #ea580c;">Zyngo Delivery OTP</h2>
+                    <p>Your OTP for delivery is:</p>
                     <h1 style="color: #dc2626; letter-spacing: 5px;">${otp}</h1>
                     <p style="color: #666; font-size: 12px;">This OTP will expire in 5 minutes.</p>
                 </div>
             `
         });
-        console.log("Email sent successfully to:", to);
+        console.log("Email sent successfully via Resend to:", email);
     } catch (error) {
-        console.error("Nodemailer Error:", error);
-        throw new Error("Failed to send email");
+        console.error("Resend Error:", error);
+        throw error;
     }
-}
+};
 
-
-const sendDeliveryOtpEmail = async (email, otp) => { 
-    try {
-        if (!email) throw new Error("Email address is missing");
-
-        await transporter.sendMail({
-            from: process.env.EMAIL,
-            to: email, // Directly email string use karo
-            subject: "Delivery OTP - Zyngo",
-            html: `...`
-        });
-        console.log("Email sent successfully to:", email);
-    } catch (error) {
-        console.error("Nodemailer Error:", error);
-        throw error; // Error ko throw karo taaki controller mein catch ho
-    }
-}
-
-module.exports = {sendOtpEmail, sendDeliveryOtpEmail};
+module.exports = { sendDeliveryOtpEmail };
