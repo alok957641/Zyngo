@@ -80,34 +80,49 @@ const fetchEverything = async () => {
         console.error("Sync error:", err.response?.status); 
     }
 };
-
- useEffect(() => {
-    ro
+useEffect(() => {
     if (!userData) return;
 
     setIsOnline(userData.isOnline !== false);
-    
+
     let watchId;
-  
+
     if (userData.isOnline !== false) {
         watchId = navigator.geolocation.watchPosition(
             (pos) => {
                 const { latitude, longitude } = pos.coords;
-                setRiderPos({ lat: latitude, lng: longitude });
-                axios.post(`${serverurl}/api/user/update-location`, { latitude, longitude }, { withCredentials: true });
+
+                setRiderPos({
+                    lat: latitude,
+                    lng: longitude
+                });
+
+                axios.post(
+                    `${serverurl}/api/user/update-location`,
+                    { latitude, longitude },
+                    { withCredentials: true }
+                );
             },
             (err) => console.error("GPS Error", err),
             { enableHighAccuracy: true }
         );
+
         fetchEverything();
     }
-    
-    const poll = setInterval(() => { 
-        if (userData) fetchEverything(); 
+
+    const poll = setInterval(() => {
+        if (userData) fetchEverything();
     }, 5000);
 
-    return () => { clearInterval(poll); if (watchId) navigator.geolocation.clearWatch(watchId); };
-}, [userData]); 
+    return () => {
+        clearInterval(poll);
+
+        if (watchId) {
+            navigator.geolocation.clearWatch(watchId);
+        }
+    };
+
+}, [userData]);
 
 
 

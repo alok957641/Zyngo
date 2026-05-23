@@ -10,16 +10,20 @@ function useGetCurruser() {
     const fetchUser = async () => {
       dispatch(setLoading(true));
       try {
-        // Yahan baseURL ki zaroorat nahi, kyuki App.jsx mein setup hai
-    const result = await axios.get("https://zyngo.onrender.com/api/user/getcurruser");
+        // 🔥 YE RAHA FIX: { withCredentials: true } zaroor daal
+        const result = await axios.get("https://zyngo.onrender.com/api/user/getcurruser", { 
+            withCredentials: true 
+        });
+        
         if (result.data) {
           dispatch(setUserData(result.data.user || result.data));
         }
       } catch (error) {
         console.log("🔒 User not logged in.");
-        dispatch(setUserData(null)); 
+        // Logout mat kar, bas loading false kar de
+        dispatch(setLoading(false)); 
       } finally {
-        dispatch(setLoading(false));
+        // Finally mein sirf loading false rakh, user null mat kar
       }
     };
     fetchUser();

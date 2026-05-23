@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
-// Pages & Components
+// Pages & Components (Aapke existing imports...)
 import Signup from "./pages/Signup.jsx";
 import Signin from "./pages/Signin.jsx";
 import Home from "./pages/Home.jsx";
@@ -42,8 +42,6 @@ import useGetShopbyCity from "./hooks/useGetShopbyCity.jsx";
 import useGetItemByCity from "./hooks/useGetItemByCity.jsx";
 import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
-import { app } from "../firebase.js";
-
 
 function App() {
   const location = useLocation();
@@ -63,7 +61,7 @@ function App() {
 
   const { userData, loading } = useSelector((state) => state.user);
 
-  // 🚀 PREMIUM LOADER
+  // 🚀 LOADING STATE
   if (loading) return (
     <div className="h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
       <div className="relative w-16 h-16">
@@ -79,12 +77,11 @@ function App() {
                      path.startsWith("/shop/") || 
                      path.startsWith("/category/");
 
-  // Helper function taaki baar baar same logic na likhna pade
+  // ✅ FIXED PROTECTED COMPONENT
   const Protected = ({ children, role }) => {
-    if (loading) return null; // Wait karo
     if (!userData) return <Navigate to="/signin" replace />;
     if (role && userData.role !== role) return <Navigate to="/" replace />;
-    return children;
+    return <>{children}</>;
   };
 
   return (
@@ -104,7 +101,7 @@ function App() {
         <Route path="/signin" element={!userData ? <Signin /> : <Navigate to="/" replace />} />
         <Route path="/forgetpassword" element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />} />
 
-        {/* Protected Routes Wrapper */}
+        {/* Protected Routes */}
         <Route path="/CreateAndEditShop" element={<Protected role="owner"><CreateAndEditShop /></Protected>} />
         <Route path="/AddItem" element={<Protected role="owner"><AddItem /></Protected>} />
         <Route path="/EditItem/:itemId" element={<Protected role="owner"><EditItem /></Protected>} />
@@ -116,11 +113,13 @@ function App() {
         <Route path="/shop/:shopId" element={<Protected><ShopPage /></Protected>} />
         <Route path="/track-order/:orderId" element={<Protected><TrackOrderPage /></Protected>} />
 
+        {/* Rider Routes */}
         <Route path="/rider/dashboard" element={<Protected role="deliveryboy"><DelevryBoyDeshboard /></Protected>} />
         <Route path="/rider/earnings" element={<Protected role="deliveryboy"><RiderEarnings /></Protected>} />
         <Route path="/rider/history" element={<Protected role="deliveryboy"><RiderHistory /></Protected>} />
         <Route path="/rider/profile" element={<Protected role="deliveryboy"><RiderProfile /></Protected>} />
 
+        {/* Owner Routes */}
         <Route path="/owner/dashboard" element={<Protected role="owner"><OwnerDashboard /></Protected>} />
         <Route path="/owner/earnings" element={<Protected role="owner"><OwnerEarnings /></Protected>} />
 
