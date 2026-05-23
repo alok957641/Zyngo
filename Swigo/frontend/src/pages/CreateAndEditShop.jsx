@@ -76,27 +76,32 @@ function CreateAndEditShop() {
   };
 
   // --- 🚀 FINAL SUBMIT ---
-const handlesubmit = async (e) => {
+const handlesubmit = async (e) => { 
     e.preventDefault();
-    setIsSubmitting(true);
-    
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("city", city);
-    formData.append("state", state);
-    formData.append("address", address);
-    formData.append("latitude", lat);
-    formData.append("longitude", lon);
-    if (backendimg) formData.append("image", backendimg);
+    if (!lat || !lon) return alert("Bhai, map par location select karo!");
 
     try {
+        setIsSubmitting(true);
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("city", city);
+        formData.append("state", state);
+        formData.append("address", address);
+        formData.append("latitude", lat);
+        formData.append("longitude", lon);
+
+        if (backendimg) formData.append("image", backendimg);
+
+     
         const result = await axios.post(`${serverurl}/api/shop/CreateAndEditShop`, formData, {
             headers: { "Content-Type": "multipart/form-data" },
             withCredentials: true,
         });
+
         dispatch(setMyShopData(result.data.shop));
         navigate(-1);
     } catch (error) {
+        console.error("Error:", error);
         alert("Error saving shop: " + (error.response?.data?.message || error.message));
         setIsSubmitting(false);
     }
