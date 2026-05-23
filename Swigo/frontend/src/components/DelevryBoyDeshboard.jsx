@@ -61,42 +61,55 @@ function DelevryBoyDeshboard() {
         setTimeout(() => setStatusMessage({ text: "", isError: false }), 4000);
     };
 
-    const fetchEverything = async () => {
-        if (!isOnline || !userData) return;
-        try {
-            const [statsRes, missionRes, activeRes] = await Promise.all([
-                axios.get(`${serverurl}/api/order/rider-stats`, { withCredentials: true }),
-                axios.get(`${serverurl}/api/order/get-delivery-assignments`, { withCredentials: true }),
-                axios.get(`${serverurl}/api/order/get-current-order`, { withCredentials: true })
-            ]);
-            if (statsRes.data.success) setRealStats(statsRes.data.stats);
-            const rawMissions = missionRes.data || [];
-            const uniqueMap = {};
-            rawMissions.forEach(m => { const id = m.order?._id || m.order; if(id) uniqueMap[id] = m; });
-            setAvailableMissions(Object.values(uniqueMap));
-            setActiveOrder(activeRes.data?.success ? activeRes.data : null);
-        } catch (err) { console.error("Sync error"); }
-    };
 
-    useEffect(() => {
-        if (!userData) return;
-        setIsOnline(userData.isOnline !== false);
-        let watchId;
-        if (isOnline) {
-            watchId = navigator.geolocation.watchPosition(
-                (pos) => {
-                    const { latitude, longitude } = pos.coords;
-                    setRiderPos({ lat: latitude, lng: longitude });
-                    axios.post(`${serverurl}/api/user/update-location`, { latitude, longitude }, { withCredentials: true });
-                },
-                (err) => console.error("GPS Error", err),
-                { enableHighAccuracy: true }
-            );
-            fetchEverything();
-        }
-        const poll = setInterval(() => { if (isOnline) fetchEverything(); }, 5000);
-        return () => { clearInterval(poll); if (watchId) navigator.geolocation.clearWatch(watchId); };
-    }, [isOnline, userData]);
+const fetchEverything = async () => {
+    // userData milne par hi call karo, isOnline check mat karo yahan
+    if (!userData) return;
+    
+    try {
+        const [statsRes, missionRes, activeRes] = await Promise.all([
+            axios.get(`${serverurl}/api/order/rider-stats`, { withCredentials: true }),
+            axios.get(`${serverurl}/api/order/get-delivery-assignments`, { withCredentials: true }),
+            axios.get(`${serverurl}/api/order/get-current-order`, { withCredentials: true })
+        ]);
+        if (statsRes.data.success) setRealStats(statsRes.data.stats);
+        
+        // ... baki logic
+    } catch (err) { 
+        // 401 aane par redirect mat kar, bas console log kar
+        console.error("Sync error:", err.response?.status); 
+    }
+};
+
+ useEffect(() => {
+    ro
+    if (!userData) return;
+
+    setIsOnline(userData.isOnline !== false);
+    
+    let watchId;
+  
+    if (userData.isOnline !== false) {
+        watchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                const { latitude, longitude } = pos.coords;
+                setRiderPos({ lat: latitude, lng: longitude });
+                axios.post(`${serverurl}/api/user/update-location`, { latitude, longitude }, { withCredentials: true });
+            },
+            (err) => console.error("GPS Error", err),
+            { enableHighAccuracy: true }
+        );
+        fetchEverything();
+    }
+    
+    const poll = setInterval(() => { 
+        if (userData) fetchEverything(); 
+    }, 5000);
+
+    return () => { clearInterval(poll); if (watchId) navigator.geolocation.clearWatch(watchId); };
+}, [userData]); 
+
+
 
     const handleLogout = async () => {
         try { await axios.get(`${serverurl}/api/auth/signout`, { withCredentials: true }); } 
