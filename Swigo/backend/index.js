@@ -21,8 +21,7 @@ const port = process.env.PORT || 5000;
 
 app.set("trust proxy", 1); // 🔥 IMPORTANT
 
-// ✅ FIXED CORS SETUP
-const cors = require("cors");
+
 
 app.use(cors({
   origin: [
