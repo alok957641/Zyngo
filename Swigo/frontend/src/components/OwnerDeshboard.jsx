@@ -12,7 +12,7 @@ import useGetMyOrders from "../hooks/useGetMyOrders";
 import { IoNotificationsOutline, IoWalletOutline } from "react-icons/io5";
 import { MdArrowForward } from "react-icons/md";
 import { FiEdit3, FiPlus, FiStar, FiRadio, FiPower } from "react-icons/fi";
-import { FaMapLocationDot } from "react-icons/fa6";
+import { FaMapLocationDot, FaStore } from "react-icons/fa6"; // FaStore add kiya
 import OwnerItemCard from "./OwnerItemCard";
 
 const serverurl ="https://zyngo.onrender.com";
@@ -72,10 +72,30 @@ function OwnerDeshboard() {
     );
   }
 
-  // --- 🔥 FIX: Agar shop nahi hai, toh redirect karo (taaki spinner na ghoome) ---
+  // --- 🔥 FIX: Agar shop nahi hai, toh Welcome Card dikhao (Redirect nahi) ---
   if (myShopData === null) {
-     navigate("/CreateAndEditShop");
-     return null;
+    return (
+      <div className="w-full min-h-screen bg-[#FDFCFB] flex items-center justify-center p-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full bg-white p-10 rounded-[3rem] shadow-2xl border border-gray-100 text-center"
+        >
+          <div className="w-20 h-20 bg-orange-100 text-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <FaStore className="text-4xl" />
+          </div>
+          <h2 className="text-3xl font-black text-gray-900 italic tracking-tighter uppercase mb-2">Welcome to Zyngo!</h2>
+          <p className="text-gray-500 font-medium mb-8 text-sm">Bhai, tumhari dukaan abhi tak bani nahi hai. Chalo, jaldi se apni pehli shop set up karte hain!</p>
+          
+          <button 
+            onClick={() => navigate("/CreateAndEditShop")}
+            className="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-orange-600 transition-all active:scale-95 flex items-center justify-center gap-3"
+          >
+            <FiPlus /> CREATE YOUR SHOP
+          </button>
+        </motion.div>
+      </div>
+    );
   }
 
   return (
@@ -178,7 +198,6 @@ function OwnerDeshboard() {
                <h2 className="text-2xl font-black text-gray-800 tracking-tighter italic uppercase">Inventory Logs</h2>
                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {myShopData?.items?.map((item, index) => (
-                  // 🔥 LOGIC: Agar poora kitchen offline hai, toh inventory items cards par automatic smooth opacity logic shift chalega
                   <div key={index} className={!isShopOnline ? "opacity-50 pointer-events-none select-none transition-all duration-300" : "transition-all duration-300"}>
                       <OwnerItemCard data={item} />
                   </div>

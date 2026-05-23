@@ -14,43 +14,46 @@ const CreateAndEditShop = async (req, res) => {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
 
+        // 1. Image Processing
         let image;
         if (req.file) {
             const cloudResponse = await uploadoncloudinary(req.file.path);
             image = typeof cloudResponse === "string" ? cloudResponse : cloudResponse?.secure_url;
         }
 
-        let shopData = await Shop.findOne({ owner: ownerId });
-
-        // Coordinates ko safely parse karo
+        // 2. Coordinate Processing
         const lat = parseFloat(latitude);
         const lon = parseFloat(longitude);
-        const locationData = {
-            type: "Point",
-            coordinates: [lon, lat] // MongoDB GeoJSON: [longitude, latitude]
-        };
+        const hasCoords = !isNaN(lat) && !isNaN(lon);
+
+        let shopData = await Shop.findOne({ owner: ownerId });
 
         if (!shopData) {
-            // New Shop Creation
+            // --- NEW SHOP CREATION ---
             if (!image) return res.status(400).json({ success: false, message: "Image is required for new shop" });
-            if (isNaN(lat) || isNaN(lon)) return res.status(400).json({ success: false, message: "Valid coordinates required" });
+            if (!hasCoords) return res.status(400).json({ success: false, message: "Valid coordinates required" });
 
             shopData = await Shop.create({
                 name, city, state, address, image, owner: ownerId,
-                location: locationData 
+                location: { type: "Point", coordinates: [lon, lat] }
             });
         } else {
-            // Update Existing Shop
-            const updateData = { name, city, state, address };
-            if (image) updateData.image = image;
-            if (!isNaN(lat) && !isNaN(lon)) {
-                updateData.location = locationData;
+            // --- UPDATE EXISTING SHOP ---
+            // Yahan hum sirf wohi fields update kar rahe hain jo body mein aayi hain
+            shopData.name = name || shopData.name;
+            shopData.city = city || shopData.city;
+            shopData.state = state || shopData.state;
+            shopData.address = address || shopData.address;
+            
+            if (image) shopData.image = image;
+            if (hasCoords) {
+                shopData.location = { type: "Point", coordinates: [lon, lat] };
             }
 
-            await Shop.findByIdAndUpdate(shopData._id, { $set: updateData }, { new: true });
+            await shopData.save(); // .save() use karna behtar hai validation ke liye
         }
 
-        // Final Fetch with Populate
+        // 3. Final Fetch
         const finalShop = await Shop.findOne({ owner: ownerId }).populate([
             { path: "owner" },
             { path: "items", options: { sort: { updatedAt: -1 } } }
@@ -59,10 +62,13 @@ const CreateAndEditShop = async (req, res) => {
         return res.status(200).json({ success: true, shop: finalShop });
 
     } catch (error) {
-        console.error("🔥 CreateShop Error:", error.message);
+        console.error("🔥 CreateShop Error:", error); // Pura error log karo
         return res.status(500).json({ success: false, message: `Server Error: ${error.message}` });
     }
 }
+
+
+
 
 const getMyShop = async (req, res) => {
     try {
