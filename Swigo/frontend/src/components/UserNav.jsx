@@ -97,7 +97,7 @@ function UserNav() {
               {userData ? (
                 <div className="relative">
                   <button onClick={() => setIsProfileOpen(!isProfileOpen)} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-tr from-orange-400 to-red-500 text-white font-extrabold text-base shadow-md transition-all">
-                    {userData.fullname.charAt(0).toUpperCase()}
+                  {userData?.fullname?.charAt(0)?.toUpperCase()}
                   </button>
 
                   {isProfileOpen && (
