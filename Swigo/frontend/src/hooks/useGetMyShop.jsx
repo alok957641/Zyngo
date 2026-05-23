@@ -49,4 +49,3 @@ export default function useGetMyShop() {
   }, [userData, dispatch]);
 }
 
-export default useGetMyShop;
