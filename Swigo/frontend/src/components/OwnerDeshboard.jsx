@@ -12,7 +12,7 @@ import useGetMyOrders from "../hooks/useGetMyOrders";
 import { IoNotificationsOutline, IoWalletOutline } from "react-icons/io5";
 import { MdArrowForward } from "react-icons/md";
 import { FiEdit3, FiPlus, FiStar, FiRadio, FiPower } from "react-icons/fi";
-import { FaMapLocationDot, FaStore } from "react-icons/fa6"; // FaStore add kiya
+import { FaMapLocationDot, FaStore } from "react-icons/fa6";
 import OwnerItemCard from "./OwnerItemCard";
 
 const serverurl ="https://zyngo.onrender.com";
@@ -72,50 +72,44 @@ function OwnerDeshboard() {
     );
   }
 
-  // --- 🔥 FIX: Agar shop nahi hai, toh Welcome Card dikhao (Redirect nahi) ---
-  if (myShopData === null) {
-    return (
-      <div className="w-full min-h-screen bg-[#FDFCFB] flex items-center justify-center p-6">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full bg-white p-10 rounded-[3rem] shadow-2xl border border-gray-100 text-center"
-        >
-          <div className="w-20 h-20 bg-orange-100 text-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-6">
-            <FaStore className="text-4xl" />
-          </div>
-          <h2 className="text-3xl font-black text-gray-900 italic tracking-tighter uppercase mb-2">Welcome to Zyngo!</h2>
-          <p className="text-gray-500 font-medium mb-8 text-sm">Bhai, tumhari dukaan abhi tak bani nahi hai. Chalo, jaldi se apni pehli shop set up karte hain!</p>
-          
-          <button 
-            onClick={() => navigate("/CreateAndEditShop")}
-            className="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-orange-600 transition-all active:scale-95 flex items-center justify-center gap-3"
-          >
-            <FiPlus /> CREATE YOUR SHOP
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full min-h-screen bg-[#FDFCFB] flex flex-col font-sans relative overflow-x-hidden">
       <OwnerNav />
 
-      <div className="flex-grow flex flex-col items-center p-4 sm:p-8 relative gap-10">
-        <div className="w-full max-w-5xl z-10 flex flex-col gap-8">
-            
-            {/* TOP BAR GRID CONTROL SYSTEM */}
+      {/* --- 🔥 NEW: WELCOME CARD (Shop nahi hone par navbar ke niche) --- */}
+      {myShopData === null ? (
+        <div className="flex-grow flex items-center justify-center p-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-lg w-full bg-gradient-to-br from-white to-orange-50 p-12 rounded-[3rem] shadow-xl border border-orange-100 text-center"
+          >
+            <div className="w-24 h-24 bg-white text-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-orange-100">
+              <FaStore className="text-5xl" />
+            </div>
+            <h2 className="text-4xl font-black text-gray-900 italic tracking-tighter uppercase mb-4">Welcome to Zyngo</h2>
+            <p className="text-gray-500 font-bold mb-10 text-base leading-relaxed">
+              Your digital storefront is ready to launch. <br/> 
+              Set up your shop details to start receiving orders.
+            </p>
+            <button 
+              onClick={() => navigate("/CreateAndEditShop")}
+              className="w-full bg-slate-900 text-white font-black py-6 rounded-3xl shadow-2xl hover:bg-orange-600 transition-all active:scale-95 flex items-center justify-center gap-3 text-lg"
+            >
+              <FiPlus size={20} /> CREATE YOUR SHOP
+            </button>
+          </motion.div>
+        </div>
+      ) : (
+        /* --- Baki ka original Dashboard Content --- */
+        <div className="flex-grow flex flex-col items-center p-4 sm:p-8 relative gap-10">
+          <div className="w-full max-w-5xl z-10 flex flex-col gap-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div>
                 <p className="text-orange-500 font-black uppercase tracking-[0.2em] text-[10px] mb-1 italic">Shop Operations</p>
                 <h1 className="text-4xl font-black text-gray-900 tracking-tighter italic uppercase leading-none">{myShopData.name}</h1>
               </div>
-
-              {/* ACTION TOOLS BOX CONTAINER */}
               <div className="flex flex-wrap items-center gap-3">
-                
-                {/* 🔥 THE CHIEF TOGGLE SWITCH: Live status manager */}
                 <button
                   onClick={handleStatusToggle}
                   disabled={toggleLoading}
@@ -128,7 +122,6 @@ function OwnerDeshboard() {
                   <FiPower className={toggleLoading ? "animate-spin" : ""} size={14} />
                   {isShopOnline ? "● KITCHEN LIVE" : "○ KITCHEN CLOSED"}
                 </button>
-
                 <button onClick={() => navigate('/owner/earnings')} className="bg-white border border-gray-200 px-5 py-4 rounded-3xl shadow-sm flex items-center gap-2 hover:bg-slate-50 transition-all font-black text-[10px]">
                   <IoWalletOutline size={16} className="text-orange-500" /> WALLET
                 </button>
@@ -138,23 +131,19 @@ function OwnerDeshboard() {
               </div>
             </div>
 
-            {/* 📊 STATS MATRIX GRID */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Orders</p>
                   <h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">{orders.length}</h3>
                </div>
-
                <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Net Sales</p>
                   <h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">₹{totalRevenue}</h3>
                </div>
-
                <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Live Items</p>
                   <h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">{myShopData?.items?.length || 0}</h3>
                </div>
-
                <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
                   <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Rating</p>
                   <div className="flex items-center gap-2">
@@ -164,24 +153,19 @@ function OwnerDeshboard() {
                </div>
             </div>
 
-            {/* SHOP DETAILS HEADER CARD (With Offline Interceptor Mask) */}
             <div className={`w-full bg-white rounded-[3rem] shadow-sm overflow-hidden border flex flex-col md:flex-row transition-all duration-300 ${!isShopOnline ? 'border-red-500/20 ring-4 ring-red-500/5' : 'border-gray-100'}`}>
               <div className="md:w-1/2 relative h-[250px] md:h-auto overflow-hidden">
                 <img src={myShopData.image} className={`w-full h-full object-cover transition-all duration-300 ${!isShopOnline ? 'grayscale blur-[1px]' : ''}`} alt="shop" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                
-                {/* 🛑 DYNAMIC CLOSED MASK LOG OVERLAY */}
                 {!isShopOnline && (
                   <div className="absolute top-6 right-6 bg-red-600 text-white font-mono font-black text-[8px] tracking-[3px] uppercase px-3 py-1.5 rounded-xl shadow-xl border border-red-500/20">
                       STORE OFFLINE
                   </div>
                 )}
-
                 <div className="absolute bottom-6 left-8 text-white">
                   <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none">{myShopData.name}</h2>
                 </div>
               </div>
-              
               <div className="md:w-1/2 p-10 flex flex-col justify-center relative">
                 <div className="flex items-start gap-4 mb-8 text-left">
                   <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 shrink-0"><FaMapLocationDot /></div>
@@ -193,7 +177,6 @@ function OwnerDeshboard() {
               </div>
             </div>
 
-            {/* INVENTORY LOGS */}
             <div className="flex flex-col gap-6 mb-20">
                <h2 className="text-2xl font-black text-gray-800 tracking-tighter italic uppercase">Inventory Logs</h2>
                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -204,9 +187,9 @@ function OwnerDeshboard() {
                 ))}
                </div>
             </div>
-
           </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

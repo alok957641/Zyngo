@@ -64,10 +64,10 @@ function CreateAndEditShop() {
 
   const handleimg = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setBackendimg(file);
-      setFrontendimg(URL.createObjectURL(file));
-    }
+   let image;
+        if (req.file) {
+           
+            image = await uploadoncloudinary(req.file.buffer);}
   };
 
   const handleBackClick = () => {
