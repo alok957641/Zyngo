@@ -37,230 +37,74 @@ import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
 function App() {
-  const location = useLocation();
-
-  // ✅ AXIOS CONFIG
-  useEffect(() => {
-    axios.defaults.baseURL = "https://zyngo.onrender.com";
-    axios.defaults.withCredentials = true;
-  }, []);
-
-  // ✅ REDUX STATE
   const { userData, loading } = useSelector((state) => state.user);
 
-  // ✅ HOOKS (Sare hooks yahan call ho rahe hain)
-  useGetCurruser();
-  useGetCity();
-  useGetShopbyCity();
-  useGetItemByCity();
-  useGetMyShop(userData);
-  useGetMyOrders(userData);
-  useGetUpdateLocation(userData);
-
-  // ✅ PROTECTED ROUTE LOGIC
+  // ✅ FIXED PROTECTED ROUTE LOGIC
   const Protected = ({ children, role }) => {
-    if (loading)
-      return (
-        <div className="h-screen flex items-center justify-center text-orange-500">
-          Syncing Zyngo...
-        </div>
-      );
-
+    if (loading) return <div className="h-screen flex items-center justify-center text-orange-500">Syncing Zyngo...</div>;
+    
     if (!userData) return <Navigate to="/signin" replace />;
 
-    if (role && userData.role !== role) return <Navigate to="/" replace />;
+    // 1. ADMIN BYPASS: Admin ko sab jagah access milega
+    if (userData.role === "admin") return children;
+
+    // 2. ROLE CHECK: Agar specific role define hai aur match nahi karta
+    if (role && userData.role !== role) {
+      if (userData.role === "owner") return <Navigate to="/owner/dashboard" replace />;
+      if (userData.role === "deliveryboy") return <Navigate to="/rider/dashboard" replace />;
+      return <Navigate to="/" replace />;
+    }
+
+    // 3. GENERIC USER ROUTES PROTECTION: 
+    // Agar route par role define nahi hai (generic), lekin user 'owner'/'deliveryboy' hai,
+    // toh unhe wapas unke dashboard bhejo.
+    if (!role && userData.role !== "user") {
+      if (userData.role === "owner") return <Navigate to="/owner/dashboard" replace />;
+      if (userData.role === "deliveryboy") return <Navigate to="/rider/dashboard" replace />;
+    }
 
     return children;
   };
 
-  const path = location.pathname.toLowerCase();
-  const showFooter =
-    ["/", "/cart", "/my-orders", "/checkout", "/order-success"].includes(
-      path,
-    ) ||
-    path.startsWith("/shop/") ||
-    path.startsWith("/category/");
-
   return (
     <>
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          style: {
-            fontSize: "12px",
-            borderRadius: "15px",
-            background: "#1e293b",
-            color: "#fff",
-          },
-        }}
-      />
-
+      <Toaster />
       <Routes>
-        <Route
-          path="/"
-          element={
-            !userData ? (
-              <Home />
-            ) : userData.role === "deliveryboy" ? (
-              <Navigate to="/rider/dashboard" replace />
-            ) : userData.role === "owner" ? (
-              <Navigate to="/owner/dashboard" replace />
-            ) : (
-              <Home />
-            )
-          }
-        />
+        {/* HOME REDIRECT */}
+        <Route path="/" element={
+            !userData ? <Home /> : 
+            userData.role === "admin" ? <Navigate to="/admin/dashboard" replace /> :
+            userData.role === "deliveryboy" ? <Navigate to="/rider/dashboard" replace /> : 
+            userData.role === "owner" ? <Navigate to="/owner/dashboard" replace /> : <Home />
+        } />
 
-        <Route
-          path="/signup"
-          element={!userData ? <Signup /> : <Navigate to="/" replace />}
-        />
-        <Route
-          path="/signin"
-          element={!userData ? <Signin /> : <Navigate to="/" replace />}
-        />
-        <Route
-          path="/forgetpassword"
-          element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />}
-        />
+        {/* AUTH */}
+        <Route path="/signup" element={!userData ? <Signup /> : <Navigate to="/" replace />} />
+        <Route path="/signin" element={!userData ? <Signin /> : <Navigate to="/" replace />} />
 
-        {/* OWNER */}
-        <Route
-          path="/CreateAndEditShop"
-          element={
-            <Protected role="owner">
-              <CreateAndEditShop />
-            </Protected>
-          }
-        />
-        <Route
-          path="/AddItem"
-          element={
-            <Protected role="owner">
-              <AddItem />
-            </Protected>
-          }
-        />
-        <Route
-          path="/EditItem/:itemId"
-          element={
-            <Protected role="owner">
-              <EditItem />
-            </Protected>
-          }
-        />
-        <Route
-          path="/owner/dashboard"
-          element={
-            <Protected role="owner">
-              <OwnerDashboard />
-            </Protected>
-          }
-        />
-        <Route
-          path="/owner/earnings"
-          element={
-            <Protected role="owner">
-              <OwnerEarnings />
-            </Protected>
-          }
-        />
+        {/* OWNER ROUTES */}
+        <Route path="/owner/dashboard" element={<Protected role="owner"><OwnerDashboard /></Protected>} />
+        <Route path="/CreateAndEditShop" element={<Protected role="owner"><CreateAndEditShop /></Protected>} />
+        <Route path="/AddItem" element={<Protected role="owner"><AddItem /></Protected>} />
+        <Route path="/EditItem/:itemId" element={<Protected role="owner"><EditItem /></Protected>} />
+        <Route path="/owner/earnings" element={<Protected role="owner"><OwnerEarnings /></Protected>} />
 
-        {/* USER */}
-        <Route
-          path="/cart"
-          element={
-            <Protected>
-              <Cartpage />
-            </Protected>
-          }
-        />
-        <Route
-          path="/CheckOut"
-          element={
-            <Protected>
-              <CheckOut />
-            </Protected>
-          }
-        />
-        <Route
-          path="/order-success"
-          element={
-            <Protected>
-              <OrderSuccess />
-            </Protected>
-          }
-        />
-        <Route
-          path="/my-orders"
-          element={
-            <Protected>
-              <MyOrders />
-            </Protected>
-          }
-        />
-        <Route
-          path="/category/:catName"
-          element={
-            <Protected>
-              <CategoryPage />
-            </Protected>
-          }
-        />
-        <Route
-          path="/shop/:shopId"
-          element={
-            <Protected>
-              <ShopPage />
-            </Protected>
-          }
-        />
-        <Route
-          path="/track-order/:orderId"
-          element={
-            <Protected>
-              <TrackOrderPage />
-            </Protected>
-          }
-        />
+        {/* USER ROUTES (role="user" add karna zaroori hai!) */}
+        <Route path="/cart" element={<Protected role="user"><Cartpage /></Protected>} />
+        <Route path="/CheckOut" element={<Protected role="user"><CheckOut /></Protected>} />
+        <Route path="/my-orders" element={<Protected role="user"><MyOrders /></Protected>} />
+        <Route path="/shop/:shopId" element={<Protected role="user"><ShopPage /></Protected>} />
 
-        {/* RIDER */}
-        <Route
-          path="/rider/dashboard"
-          element={
-            <Protected role="deliveryboy">
-              <DelevryBoyDeshboard />
-            </Protected>
-          }
-        />
-        <Route
-          path="/rider/earnings"
-          element={
-            <Protected role="deliveryboy">
-              <RiderEarnings />
-            </Protected>
-          }
-        />
-        <Route
-          path="/rider/history"
-          element={
-            <Protected role="deliveryboy">
-              <RiderHistory />
-            </Protected>
-          }
-        />
-        <Route
-          path="/rider/profile"
-          element={
-            <Protected role="deliveryboy">
-              <RiderProfile />
-            </Protected>
-          }
-        />
+        {/* RIDER ROUTES */}
+        <Route path="/rider/dashboard" element={<Protected role="deliveryboy"><DelevryBoyDeshboard /></Protected>} />
+        <Route path="/rider/earnings" element={<Protected role="deliveryboy"><RiderEarnings /></Protected>} />
+        <Route path="/rider/history" element={<Protected role="deliveryboy"><RiderHistory /></Protected>} />
+        
+        {/* ADMIN ROUTES (Agar admin dashboard banaya hai toh) */}
+        {/* <Route path="/admin/dashboard" element={<Protected role="admin"><AdminDashboard /></Protected>} /> */}
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-      {showFooter && <Footer />}
     </>
   );
 }

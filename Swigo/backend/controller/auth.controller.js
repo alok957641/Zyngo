@@ -69,34 +69,24 @@ const signin = async (req, res) => {
 
 // SIGNOUT
 const signout = async (req, res) => {
-
     try {
-
+        // Backend se cookie hatana
         res.clearCookie("token", {
             httpOnly: true,
-
-            secure: process.env.NODE_ENV === "production",
-
-            sameSite:
-                process.env.NODE_ENV === "production"
-                    ? "None"
-                    : "Lax",
-
+            secure: true, // Render par production ke liye true hi rakh
+            sameSite: "none",
             path: "/"
         });
 
         return res.status(200).json({
+            success: true,
             message: "Logout Successfully"
         });
-
     } catch (error) {
-
         return res.status(500).json({
             message: `Signout error: ${error.message}`
         });
-
     }
-
 };
 
 // GOOGLE AUTH
