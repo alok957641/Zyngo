@@ -9,7 +9,7 @@ import { FiArrowLeft, FiArrowRight, FiClock, FiLock } from "react-icons/fi";
 import { setSelectedCategory } from "../redux/userSlice";
 import axios from "axios";
 
-const serverurl = "http://localhost:8000";
+const serverurl = "https://zyngo.onrender.com";
 
 function UserDeshboard() {
   const dispatch = useDispatch();

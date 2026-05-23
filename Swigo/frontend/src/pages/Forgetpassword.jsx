@@ -6,7 +6,7 @@ import axios from "axios";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 
-export const serverurl = "http://localhost:8000";
+export const serverurl = "https://zyngo.onrender.com";
 
 function Forgetpassword() {
   const [email, setEmail] = useState("");

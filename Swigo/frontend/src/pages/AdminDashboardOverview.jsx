@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios"; 
 import { FiUsers, FiShoppingBag, FiTruck, FiActivity, FiLoader } from "react-icons/fi";
 
-const serverurl = "http://localhost:8000";
+const serverurl = "https://zyngo.onrender.com";
 
 const AdminDashboardOverview = () => {
   const [stats, setStats] = useState({ totalUsers: 0, totalShops: 0, totalRiders: 0, activeOrders: 0 });

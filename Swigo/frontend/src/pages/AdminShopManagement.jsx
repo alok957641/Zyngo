@@ -3,7 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux"; 
 import { FiLoader, FiHome, FiSearch, FiShoppingBag, FiMapPin, FiPhoneCall } from "react-icons/fi";
 
-const serverurl = "http://localhost:8000";
+const serverurl = "https://zyngo.onrender.com";
 
 const AdminShopManagement = () => {
   const [shops, setShops] = useState([]);

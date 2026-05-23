@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux"; 
 import { setUserData, setLoading } from "../redux/userSlice"; 
 
-export const serverurl = "http://localhost:8000";
+export const serverurl = "https://zyngo.onrender.com";
 
 function useGetCurruser() {
   const dispatch = useDispatch();

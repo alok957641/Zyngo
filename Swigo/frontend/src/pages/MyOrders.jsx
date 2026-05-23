@@ -7,7 +7,7 @@ import OwnerOrderCard from "../components/OwnerOrderCard";
 import useGetMyShop from "../hooks/useGetMyShop"; 
 import axios from "axios";
 
-const serverurl = "http://localhost:8000";
+const serverurl = "https://zyngo.onrender.com";
 
 function MyOrders() {
   useGetMyShop(); 

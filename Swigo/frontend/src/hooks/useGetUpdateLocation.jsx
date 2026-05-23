@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
-export const serverurl = "http://localhost:8000";
+export const serverurl = "https://zyngo.onrender.com";
 
 function useGetUpdateLocation() {
   const { userData } = useSelector((state) => state.user);

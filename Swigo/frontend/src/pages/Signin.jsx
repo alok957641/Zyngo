@@ -9,7 +9,7 @@ import { use } from "react";
 
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice.js";
-export const serverurl = "http://localhost:8000";
+export const serverurl = "https://zyngo.onrender.com";
 
 function Signin() {
   const [showpassword, setShowpassword] = useState(false);

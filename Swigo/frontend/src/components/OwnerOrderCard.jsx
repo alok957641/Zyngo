@@ -3,7 +3,7 @@ import { FiUser, FiPhone, FiMapPin, FiChevronDown, FiLoader, FiNavigation, FiLoc
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import axios from "axios";
 
-const serverurl = "http://localhost:8000";
+const serverurl = "https://zyngo.onrender.com";
 
 function OwnerOrderCard({ data }) {
   if (!data || !data.shopOrders || data.shopOrders.length === 0) return null;

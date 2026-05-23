@@ -6,7 +6,7 @@ import { MdOutlineDescription, MdCategory } from "react-icons/md";
 import { useDispatch } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";
 import axios from "axios";
-export const serverurl = "http://localhost:8000";
+export const serverurl = "https://zyngo.onrender.com";
 
 function AddItem() {
   const navigate = useNavigate();

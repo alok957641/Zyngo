@@ -8,7 +8,7 @@ import {
 } from "react-icons/fi";
 import axios from "axios";
 
-const serverurl = "http://localhost:8000";
+const serverurl = "https://zyngo.onrender.com";
 
 const RiderProfile = () => {
     const navigate = useNavigate();

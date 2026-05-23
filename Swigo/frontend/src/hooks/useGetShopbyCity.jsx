@@ -3,7 +3,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setCity, setShopsOfMyCity } from "../redux/userSlice";
 
-export const serverurl = "http://localhost:8000";
+export const serverurl = "https://zyngo.onrender.com";
 
 function useGetShopbyCity() {
   // ⚠️ DHYAN RAKHNA: Redux me tune 'City' (Capital C) rakha hai ya 'city' (Small c). 

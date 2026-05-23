@@ -11,7 +11,7 @@ import { addMyOrder } from "../redux/userSlice";
 // 🚨 Icons for Online Payment
 import { SiGooglepay, SiPhonepe, SiPaytm } from "react-icons/si";
 
-export const serverurl = "http://localhost:8000";
+export const serverurl = "https://zyngo.onrender.com";
 
 // Real Distance Formula
 const calculateKm = (lat1, lon1, lat2, lon2) => {
