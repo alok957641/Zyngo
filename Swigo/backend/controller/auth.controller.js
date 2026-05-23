@@ -1,196 +1,158 @@
-const User = require("../models/user/usermodel.js")
-const generatetocken = require("../utils/tocken.js")
-const bscrypt = require("bcryptjs");
-const { sendOtpEmail} = require("../utils/mail.js");
+const User = require("../models/user/usermodel.js");
+const generateToken = require("../utils/token.js"); // Fix spelling
+const bcrypt = require("bcryptjs"); // Fix spelling
+const { sendOtpEmail } = require("../utils/mail.js");
 
+// Helper function to remove password from response
+const sanitizeUser = (user) => {
+    const userObj = user.toObject();
+    delete userObj.password;
+    return userObj;
+};
 
-
+// Signup
 const signup = async (req, res) => {
     try {
         const { fullname, email, password, mobile, role } = req.body;
+        
         let user = await User.findOne({ email });
-        if (user) {
-            return res.status(400).json({ message: "User already exists" });
-        }
-        if (password.length < 6) {
-            return res.status(400).json({ message: "Password must be at least 6 characters long" });
-        }
-        if (mobile.length !== 10) {
-            return res.status(400).json({ message: "mobile number must be exactly 10 digit long " });
-        }
+        if (user) return res.status(400).json({ message: "User already exists" });
 
-        const hashedpassword = await bscrypt.hash(password, 10);
-        user = await User.create({
-            fullname,
-            email,
-            mobile,
-            role,
-            password: hashedpassword,
-        })
+        if (password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
+        if (mobile.length !== 10) return res.status(400).json({ message: "Mobile number must be 10 digits" });
 
-        const token = generatetocken(user._id);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        user = await User.create({ fullname, email, mobile, role, password: hashedPassword });
+
+        const token = generateToken(user._id);
         res.cookie("token", token, {
-            secure: false,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
             httpOnly: true,
-        })
-        return res.status(201).json(user)
+        });
 
-    } catch (error)
-    {
-        return res.status(500).json({ message: `sign up  error ${error}` });
+        return res.status(201).json(sanitizeUser(user));
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error", error: error.message });
     }
-}
+};
 
-
-// signin
+// Signin
 const signin = async (req, res) => {
-
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user) {
+        if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
-        const ismatch = await bscrypt.compare(password, user.password)
-        if (!ismatch) {
-            return res.status(400).json({ message: "password incorrect " });
-        }
-
-        const token = generatetocken(user._id);
+        const token = generateToken(user._id);
         res.cookie("token", token, {
-            secure: false,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
             httpOnly: true,
-        })
-        console.log(user);
-        return res.status(201).json(user)
-    } catch (err) {
-        return res.status(500).json({ message: ` sign in  error ${err}` });
+        });
+
+        return res.status(200).json(sanitizeUser(user));
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error", error: error.message });
     }
-}
+};
 
-
-
-// signout
+// Signout
 const signout = async (req, res) => {
     try {
         res.clearCookie("token");
-        return res.status(200).json({ message: "Logut Sucessfully" });
+        return res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
-        return res.status(500).json({ message: ` sign out  error ${error}` });
+        return res.status(500).json({ message: "Logout failed", error: error.message });
     }
-}
+};
 
-
-// send otp
+// Send OTP
 const sendOtp = async (req, res) => {
     try {
         const { email } = req.body;
-        console.log("Request for Email:", email); // Step 1
-
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "Bhai, user nahi mila!" });
-        }
+        if (!user) return res.status(404).json({ message: "User not found" });
 
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.resetOtp = otp;
         user.otpExpiry = Date.now() + 5 * 60 * 1000;
-        
-        console.log("Saving OTP to DB..."); // Step 2
         await user.save();
 
-        console.log("Attempting to send Email..."); // Step 3
-        await sendOtpEmail(email, otp); 
-
+        await sendOtpEmail(email, otp);
         return res.status(200).json({ success: true, message: "OTP sent to email" });
-
     } catch (error) {
-        // 🔥 Ye tere VS Code terminal mein laal rang ka error dikhayega
-        console.error("CRITICAL ERROR IN SEND-OTP:", error); 
-        return res.status(500).json({ 
-            success: false, 
-            message: "Email bhejte waqt server fat gaya!",
-            debug_error: error.message 
-        });
+        return res.status(500).json({ success: false, message: "Error sending email", error: error.message });
     }
-}
+};
 
-// varify otp
-const varifyOtp = async (req, res) => {
+// Verify OTP
+const verifyOtp = async (req, res) => {
     try {
         const { email, otp } = req.body;
         const user = await User.findOne({ email });
 
         if (!user || user.resetOtp !== otp || user.otpExpiry < Date.now()) {
-            return res.status(400).json({ message: "Invalid or Expired OTP" });
+            return res.status(400).json({ message: "Invalid or expired OTP" });
         }
+        
         user.isOtpVerified = true;
         user.resetOtp = undefined;
         user.otpExpiry = undefined;
         await user.save();
 
-        return res.status(200).json({ message: "OTP Varified Successfully" })
-
+        return res.status(200).json({ message: "OTP verified successfully" });
     } catch (error) {
-        return res.status(500).json({ message: "Error verifying OTP" })
+        return res.status(500).json({ message: "Error verifying OTP", error: error.message });
     }
-}
+};
 
-// reset password
-const resetpassword = async (req, res) => {
-
+// Reset Password
+const resetPassword = async (req, res) => {
     try {
-        const { email, newpassword } = req.body;
-        const user = await User.findOne({ email })
+        const { email, newPassword } = req.body;
+        const user = await User.findOne({ email });
+        
         if (!user || !user.isOtpVerified) {
-            return res.status(400).json({ message: "User Does not Exist or OTP not verified" })
+            return res.status(400).json({ message: "Invalid request or OTP not verified" });
         }
 
-        const hashedpassword = await bscrypt.hash(newpassword, 10);
-        user.password = hashedpassword;
+        user.password = await bcrypt.hash(newPassword, 10);
         user.isOtpVerified = false;
         await user.save();
-        return res.status(200).json({ message: "Password Reset Successfully" });
+
+        return res.status(200).json({ message: "Password reset successfully" });
     } catch (error) {
-        return res.status(500).json({ message: "Error resetting password" });
+        return res.status(500).json({ message: "Error resetting password", error: error.message });
     }
-}
+};
 
-
-// googlerauth
-
-const googleauth = async (req, res) => {
-
+// Google Auth
+const googleAuth = async (req, res) => {
     try {
-
-
-        const { fullname, email, mobile ,role} = req.body
-        let user = await User.findOne({ email })
+        const { fullname, email, mobile, role } = req.body;
+        let user = await User.findOne({ email });
 
         if (!user) {
-            user = await User.create({
-                fullname, email, mobile ,role
-            })
+            user = await User.create({ fullname, email, mobile, role });
         }
-        const token = generatetocken(user._id);
+
+        const token = generateToken(user._id);
         res.cookie("token", token, {
-            secure: false,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
             httpOnly: true,
-        })
+        });
 
-        return res.status(200).json(user)
-
+        return res.status(200).json(sanitizeUser(user));
     } catch (error) {
-          return res.status(500).json({ message: ` Googleauth   error ${err}` });
+        return res.status(500).json({ message: "Google auth error", error: error.message });
     }
+};
 
-}
-
-module.exports = { signup, signin, signout, sendOtp, varifyOtp, resetpassword , googleauth};
+module.exports = { signup, signin, signout, sendOtp, verifyOtp, resetPassword, googleAuth };

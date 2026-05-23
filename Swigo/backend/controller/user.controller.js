@@ -1,101 +1,83 @@
+const User = require("../models/user/usermodel.js");
 
-const User = require("../models/user/usermodel.js")
-
-
-// controller/user.controller.js
-const getcurruser = async (req ,res) => {
+// Get Current User
+const getcurruser = async (req, res) => {
     try {
-        const userId = req.userId;
-        if(!userId) return res.status(401).json({message : "UserId not found"});
+        const userId = req.userId || req.user?._id;
+        if (!userId) return res.status(401).json({ message: "Unauthorized: UserId not found" });
 
-        const user = await User.findById(userId).select("-password");
-        if(!user) return res.status(401).json({message : "User not found"});
+        const user = await User.findById(userId).select("-password").lean();
+        if (!user) return res.status(404).json({ message: "User not found" });
 
-        // 🚨 CULPRIT: {user} ki jagah sirf user bhejo!
-        return res.status(200).json(user); 
+        return res.status(200).json(user);
     } catch (error) {
-        return res.status(500).json({message : "Get current user error"});
+        console.error("Get Current User Error:", error);
+        return res.status(500).json({ message: "Internal server error" });
     }
-}
+};
 
+// Update User Location
 const updateUserLocation = async (req, res) => {
     try {
-        // 1. Dono format support karega (lat/latitude aur lon/longitude)
-        const lat = req.body.lat || req.body.latitude;
-        const lon = req.body.lon || req.body.longitude;
+        const userId = req.userId || req.user?._id;
+        if (!userId) return res.status(401).json({ success: false, message: "Unauthorized access" });
 
-        // 2. ID Check (Jo bhi tere auth middleware mein set ho)
-        const userId = req.user?._id || req.userId;
+        const lat = parseFloat(req.body.lat || req.body.latitude);
+        const lon = parseFloat(req.body.lon || req.body.longitude);
 
-        if (!userId) {
-            return res.status(401).json({ success: false, message: "Bhai, login session nahi mila!" });
+        // Validation
+        if (isNaN(lat) || isNaN(lon)) {
+            return res.status(400).json({ success: false, message: "Invalid coordinates provided" });
         }
 
-        // 3. Validation: Coordinates zero ya missing nahi honi chahiye
-        if (lat === undefined || lon === undefined) {
-            return res.status(400).json({ success: false, message: "Latitude aur Longitude dono zaroori hain!" });
-        }
-
-        // 4. Update Database
         const user = await User.findByIdAndUpdate(
             userId,
             {
                 $set: {
                     location: {
                         type: "Point",
-                        // 🚨 MongoDB Rules: Hamesha [Longitude, Latitude] ka order hona chahiye
-                        coordinates: [parseFloat(lon), parseFloat(lat)]
+                        // GeoJSON format: [longitude, latitude]
+                        coordinates: [lon, lat]
                     }
                 }
             },
-            { new: true } // Taaki update ke baad naya data return kare
+            { new: true, select: "location" }
         );
 
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User nahi mila!" });
-        }
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        // console.log(`📍 Location Synced for: ${user.fullname}`); // Debugging ke liye sahi hai
-
-        return res.status(200).json({ 
-            success: true, 
+        return res.status(200).json({
+            success: true,
             message: "Location updated successfully",
-            location: user.location 
+            location: user.location
         });
-
     } catch (error) {
-        console.error("🔥 Update Location Error:", error.message);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Server internal error", 
-            error: error.message 
-        });
+        console.error("Update Location Error:", error);
+        return res.status(500).json({ success: false, message: "Failed to update location" });
     }
 };
 
-// 🚀 GLOBAL AVAILABILITY TOGGLE CONTROLLER
+// Toggle Availability Status
 const toggleAvailabilityStatus = async (req, res) => {
     try {
-        const userId = req.user?._id || req.userId || req.id;
-        if (!userId) return res.status(401).json({ success: false, message: "Session expired!" });
+        const userId = req.userId || req.user?._id;
+        if (!userId) return res.status(401).json({ success: false, message: "Session expired" });
 
         const user = await User.findById(userId);
-        if (!user) return res.status(404).json({ success: false, message: "User profile mismatch!" });
+        if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-        // 🔥 Matrix invert state operation
         user.isOnline = !user.isOnline;
         await user.save();
 
-        return res.status(200).json({ 
-            success: true, 
-            message: `Status switched to ${user.isOnline ? 'ONLINE' : 'OFFLINE'}`, 
-            isOnline: user.isOnline 
+        return res.status(200).json({
+            success: true,
+            message: `Status switched to ${user.isOnline ? 'ONLINE' : 'OFFLINE'}`,
+            isOnline: user.isOnline
         });
     } catch (error) {
-        return res.status(500).json({ success: false, message: error.message });
+        console.error("Toggle Status Error:", error);
+        return res.status(500).json({ success: false, message: "Server error occurred" });
     }
 };
 
-
-
-module.exports = { getcurruser, updateUserLocation, toggleAvailabilityStatus }
+module.exports = { getcurruser, updateUserLocation, toggleAvailabilityStatus };
