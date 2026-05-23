@@ -7,12 +7,16 @@ dotenv.config();
 // console.log("Email from Env:", process.env.EMAIL);
 // console.log("Pass from Env:", process.env.PASS ? "Received" : "Not Received");
 const transporter = nodemailer.createTransport({
-    service: "Gmail",
-    port: 465 , 
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, // 465 port ke liye true
     auth: {
         user: process.env.EMAIL,
-        pass: process.env.PASS, 
+        pass: process.env.PASS,
     },
+    // 🔥 YE ADD KARO: Connection timeout badha do
+    connectionTimeout: 10000, 
+    socketTimeout: 10000,
 });
 
 const sendOtpEmail = async (to, otp) => {
