@@ -491,17 +491,34 @@ const getCurrentOrder = async (req, res) => {
 const sendDeliveryOtp = async (req, res) => {
     try {
         const { orderId, shopOrderId } = req.body;
+        
+        // 1. Order aur User ko fetch karo
         const order = await Order.findById(orderId).populate("user");
-        const shopOrder = order?.shopOrders.id(shopOrderId);
+        if (!order || !order.user) {
+            return res.status(404).json({ message: "Order ya User nahi mila!" });
+        }
+
+        // 2. ShopOrder find karo
+        const shopOrder = order.shopOrders.id(shopOrderId);
         if (!shopOrder) return res.status(400).json({ message: "Bhai IDs galat hain!" });
+
+        // 3. OTP Generate karo
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         shopOrder.deliveryOtp = otp;
         shopOrder.otpExpires = Date.now() + 10 * 60 * 1000;
+        
         order.markModified('shopOrders'); 
         await order.save();
-        await sendDeliveryOtpEmail(order.user, otp);
+
+        // ✅ FIX: order.user ke bajaye order.user.email bhejo
+        // Kyunki 'populate' kiya hai, toh email object ke andar mil jayega
+        await sendDeliveryOtpEmail(order.user.email, otp); 
+
         res.status(200).json({ success: true, message: "OTP Sent Successfully!" });
-    } catch (error) { res.status(500).json({ message: error.message }); }
+    } catch (error) { 
+        console.error("OTP Error:", error); // Log zaroor check karo
+        res.status(500).json({ message: error.message }); 
+    }
 };
 
 const getDeliveryBoyAssignment = async (req, res) => {
