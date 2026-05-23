@@ -19,22 +19,26 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// ✅ FIXED CORS SETUP (Multi-origin support)
+app.set("trust proxy", 1); // 🔥 IMPORTANT
+
+// ✅ FIXED CORS SETUP
 const allowedOrigins = [
-  "http://localhost:5173", 
+  "http://localhost:5173",
   "https://zyngo-omega.vercel.app"
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // !origin allowed hai kyunki server-to-server request mein origin nahi hota
+
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
+
   },
-  credentials: true, // Yeh TRUE hona hi chahiye!
+
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -42,7 +46,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// 🛣️ API Routes 
+// Routes
 app.use("/api/auth", router);
 app.use("/api/user", userroute);
 app.use("/api/shop", shoprouter);
@@ -56,15 +60,19 @@ app.get("/", (req, res) => {
   res.send("API Working 🔥");
 });
 
-// 🚀 Server Start
 const startServer = async () => {
   try {
+
     await database();
+
     app.listen(port, () => {
       console.log(`Server running on port ${port} 🚀`);
     });
+
   } catch (err) {
+
     console.log("Server start error:", err);
+
   }
 };
 
