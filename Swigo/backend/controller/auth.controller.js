@@ -15,22 +15,37 @@ const setAuthCookie = (res, token) => {
 };
 
 // SIGNUP
+// SIGNUP
 const signup = async (req, res) => {
     try {
         const { fullname, email, password, mobile, role } = req.body;
-        // ... (validation code waisa hi rakho)
         
         const hashedpassword = await bscrypt.hash(password, 10);
-        const user = await User.create({ fullname, email, mobile, role, password: hashedpassword });
+        
+        // 🔥 FIX: Yahan location object add karo
+        const user = await User.create({ 
+            fullname, 
+            email, 
+            mobile, 
+            role, 
+            password: hashedpassword,
+            location: {
+                type: "Point",
+                coordinates: [0, 0] // Default values
+            }
+        });
 
         const token = generatetocken(user._id);
-        setAuthCookie(res, token); // FIX: Helper function use karo
+        setAuthCookie(res, token);
         
         return res.status(201).json({ message: "User registered", user });
     } catch (error) {
+        // Error print karo taaki pata chale agar validation fail hua hai
+        console.error("Signup error:", error);
         return res.status(500).json({ message: `signup error: ${error.message}` });
     }
-}
+};
+
 
 // SIGNIN
 const signin = async (req, res) => {
