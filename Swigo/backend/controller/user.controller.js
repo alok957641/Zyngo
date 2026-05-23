@@ -3,90 +3,73 @@ const User = require("../models/user/usermodel.js")
 
 
 // controller/user.controller.js
-const getcurruser = async (req, res) => {
+const getcurruser = async (req ,res) => {
     try {
-        // Middleware se req.userId aa raha hai
-        const userId = req.userId; 
-
-        if (!userId) {
-            return res.status(401).json({
-                success: false,
-                message: "UserId not found - Login required"
-            });
-        }
+        const userId = req.userId;
+        if(!userId) return res.status(401).json({message : "UserId not found"});
 
         const user = await User.findById(userId).select("-password");
+        if(!user) return res.status(401).json({message : "User not found"});
 
-        if (!user) {
-            return res.status(404).json({ // 404 better hai kyunki user nahi mila
-                success: false,
-                message: "User not found in database"
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            user
-        });
-
+        // 🚨 CULPRIT: {user} ki jagah sirf user bhejo!
+        return res.status(200).json(user); 
     } catch (error) {
-        console.error("Get Current User Error:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Server error in getcurruser"
-        });
+        return res.status(500).json({message : "Get current user error"});
     }
 }
 
 const updateUserLocation = async (req, res) => {
     try {
-        const { address, lat, latitude, lon, longitude } = req.body;
-        const latitudeVal = lat || latitude;
-        const longitudeVal = lon || longitude;
+        // 1. Dono format support karega (lat/latitude aur lon/longitude)
+        const lat = req.body.lat || req.body.latitude;
+        const lon = req.body.lon || req.body.longitude;
 
+        // 2. ID Check (Jo bhi tere auth middleware mein set ho)
         const userId = req.user?._id || req.userId;
+
         if (!userId) {
-            return res.status(401).json({ success: false, message: "Unauthorized." });
+            return res.status(401).json({ success: false, message: "Bhai, login session nahi mila!" });
         }
 
-        // 1. Validation: Agar address bhi nahi aur coords bhi nahi, toh reject karo
-        if (!address && (latitudeVal === undefined || longitudeVal === undefined)) {
-            return res.status(400).json({ success: false, message: "Address ya Coordinates mein se kuch toh bhejo!" });
+        // 3. Validation: Coordinates zero ya missing nahi honi chahiye
+        if (lat === undefined || lon === undefined) {
+            return res.status(400).json({ success: false, message: "Latitude aur Longitude dono zaroori hain!" });
         }
 
-        // 2. Prepare Update Data
-        let updateFields = {};
-        
-        // Agar address aaya hai toh update karo
-        if (address) {
-            updateFields.deliveryAddress = address; 
-        }
-
-        // Agar coordinates aaye hain toh GeoJSON update karo
-        if (latitudeVal !== undefined && longitudeVal !== undefined) {
-            updateFields.location = {
-                type: "Point",
-                coordinates: [parseFloat(longitudeVal), parseFloat(latitudeVal)]
-            };
-        }
-
+        // 4. Update Database
         const user = await User.findByIdAndUpdate(
             userId,
-            { $set: updateFields },
-            { new: true }
+            {
+                $set: {
+                    location: {
+                        type: "Point",
+                        // 🚨 MongoDB Rules: Hamesha [Longitude, Latitude] ka order hona chahiye
+                        coordinates: [parseFloat(lon), parseFloat(lat)]
+                    }
+                }
+            },
+            { new: true } // Taaki update ke baad naya data return kare
         );
 
-        if (!user) return res.status(404).json({ success: false, message: "User not found." });
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User nahi mila!" });
+        }
+
+        // console.log(`📍 Location Synced for: ${user.fullname}`); // Debugging ke liye sahi hai
 
         return res.status(200).json({ 
             success: true, 
-            message: "Location/Address synced successfully.",
-            user 
+            message: "Location updated successfully",
+            location: user.location 
         });
 
     } catch (error) {
-        console.error("Error:", error.message);
-        return res.status(500).json({ success: false, message: error.message });
+        console.error("🔥 Update Location Error:", error.message);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Server internal error", 
+            error: error.message 
+        });
     }
 };
 
@@ -103,10 +86,10 @@ const toggleAvailabilityStatus = async (req, res) => {
         user.isOnline = !user.isOnline;
         await user.save();
 
-        return res.status(200).json({
-            success: true,
-            message: `Status switched to ${user.isOnline ? 'ONLINE' : 'OFFLINE'}`,
-            isOnline: user.isOnline
+        return res.status(200).json({ 
+            success: true, 
+            message: `Status switched to ${user.isOnline ? 'ONLINE' : 'OFFLINE'}`, 
+            isOnline: user.isOnline 
         });
     } catch (error) {
         return res.status(500).json({ success: false, message: error.message });

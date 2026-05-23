@@ -1,11 +1,7 @@
 const uploadoncloudinary = require("../utils/cloudinary.js");
 const Shop = require("../models/shop/shopmodel.js");
-
-
-
+// 🚨 LINE 1: Apne dynamic Order model ko sahi path se yahan import karo bhai!
 const Order = require("../models/order/ordermodel.js"); 
-
-
 
 const CreateAndEditShop = async (req, res) => {
     try {
@@ -13,61 +9,60 @@ const CreateAndEditShop = async (req, res) => {
         const ownerId = req.user?._id || req.userId || req.id;
 
         if (!ownerId) {
-            return res.status(401).json({ success: false, message: "User not authenticated" });
+            return res.status(401).json({ message: "User not authenticated" });
         }
 
         let image;
-        // --- FIX: Buffer ka use karo, path ka nahi ---
         if (req.file) {
-            // Tumhare cloudinary utility ko buffer chahiye
-            image = await uploadoncloudinary(req.file.buffer); 
+            const cloudResponse = await uploadoncloudinary(req.file.path);
+            image = typeof cloudResponse === "string" ? cloudResponse : cloudResponse?.secure_url;
         }
-
-        const lat = parseFloat(latitude);
-        const lon = parseFloat(longitude);
-        const hasCoords = !isNaN(lat) && !isNaN(lon);
 
         let shopData = await Shop.findOne({ owner: ownerId });
 
+        const locationData = {
+            type: "Point",
+            coordinates: [parseFloat(longitude), parseFloat(latitude)]
+        };
+
         if (!shopData) {
-            if (!image) return res.status(400).json({ success: false, message: "Image is required" });
-            if (!hasCoords) return res.status(400).json({ success: false, message: "Valid coordinates required" });
+            if (!image) return res.status(400).json({ message: "Image is required" });
+            if (!latitude || !longitude) return res.status(400).json({ message: "Bhai, map ke liye location coordinates zaruri hain!" });
 
             shopData = await Shop.create({
                 name, city, state, address, image, owner: ownerId,
-                location: { type: "Point", coordinates: [lon, lat] }
+                location: locationData 
             });
         } else {
-            shopData.name = name || shopData.name;
-            shopData.city = city || shopData.city;
-            shopData.state = state || shopData.state;
-            shopData.address = address || shopData.address;
+            const updateData = { name, city, state, address };
+            if (image) updateData.image = image;
             
-            if (image) shopData.image = image;
-            if (hasCoords) {
-                shopData.location = { type: "Point", coordinates: [lon, lat] };
+            if (latitude && longitude) {
+                updateData.location = locationData;
             }
-            await shopData.save();
+
+            shopData = await Shop.findByIdAndUpdate(shopData._id, updateData, { new: true });
         }
 
-        const finalShop = await Shop.findOne({ owner: ownerId }).populate("owner items");
-        return res.status(200).json({ success: true, shop: finalShop });
+        const finalShop = await Shop.findOne({ owner: ownerId }).populate([
+            { path: "owner" },
+            { path: "items", options: { sort: { updatedAt: -1 } } }
+        ]);
+
+        return res.status(201).json(finalShop);
 
     } catch (error) {
-        console.error("🔥 CreateShop Error:", error);
-        return res.status(500).json({ success: false, message: error.message });
+        console.error("🔥 CreateShop Error:", error.message);
+        return res.status(500).json({ message: `Server Error: ${error.message}` });
     }
 }
-
-
-
 
 const getMyShop = async (req, res) => {
     try {
         const ownerId = req.user?._id || req.userId || req.id;
 
         if (!ownerId) {
-            return res.status(401).json({ message: "ID missing in request", success: false });
+            return res.status(401).json({ message: "ID missing in request" });
         }
 
         const shop = await Shop.findOne({ owner: ownerId }).populate([
@@ -75,18 +70,17 @@ const getMyShop = async (req, res) => {
             { path: "items", options: { sort: { updatedAt: -1 } } }
         ]);
 
-        // Yahan 404 mat bhejo agar shop nahi mili, 200 bhejo aur shop: null
         if (!shop) {
-            return res.status(200).json({ success: true, shop: null, message: "Shop not created yet" });
+            return res.status(404).json({ message: "Shop not found", success: false });
         }
 
-        return res.status(200).json({ success: true, shop });
+        return res.status(200).json(shop);
     } catch (error) {
-        return res.status(500).json({ message: `getMyshop Error: ${error.message}`, success: false });
+        return res.status(500).json({ message: `getMyshop Error: ${error.message}` });
     }
 }
 
-
+// 🔥 CONTROLLER FIXED: Ab koi default fallback logic nahi chalega, direct collection counting hogi
 const getShopByCity = async (req, res) => {
     try {
         const { city } = req.params;
@@ -96,16 +90,20 @@ const getShopByCity = async (req, res) => {
             .populate('owner')
             .populate('items');
 
-        // 🔥 FIX: 404 error ke bajaye 200 OK aur khali array bhejo
         if (!shops || shops.length === 0) {
-            return res.status(200).json([]); 
+            return res.status(404).json({ message: "No shops found in this city" });
         }
 
+        // 🚀 LIVE ABSOLUTE REAL AGGREGATION:
+        // Yeh database ke Order table mein jaakar ginega ki Alok Bakery ke sach mein kitne orders hain
         const shopsWithRealOrders = await Promise.all(
             shops.map(async (shop) => {
+                // Check karo tumhare Order model mein dukan ki key 'shop' hai ya 'shopId'
                 const actualCount = await Order.countDocuments({ shop: shop._id });
+                
                 const shopObj = shop.toObject();
-                shopObj.totalOrders = actualCount;
+                shopObj.totalOrders = actualCount; // Direct real absolute tracking feed jodi
+                
                 return shopObj;
             })
         );

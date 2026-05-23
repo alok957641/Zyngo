@@ -3,8 +3,6 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const database = require("./config/db.js");
-
-// Routes
 const router = require("./routes/authroute.js");
 const userroute = require("./routes/userroute.js");
 const shoprouter = require("./routes/shoproute.js");
@@ -12,39 +10,24 @@ const itemrouter = require("./routes/itemroute.js");
 const orderrouter = require("./routes/orderroute.js");
 const ratingrouter = require("./routes/rating.js");
 const payoutRouter = require("./routes/payoutRoute.js");
-const adminRoutes = require("./routes/adminRoute.js");
+const adminRoutes = require ("./routes/adminRoute.js");
+
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-app.set("trust proxy", 1); 
-
-// --- CORS FIX START ---
-const allowedOrigins = [
-  "http://localhost:5173", 
-  "https://zyngo-omega.vercel.app"
-];
-
+// ✅ Standard CORS Setup
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: "http://localhost:5173",
   credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
 }));
-// --- CORS FIX END ---
 
 app.use(express.json());
 app.use(cookieParser());
 
-// Routes
+// 🛣️ API Routes 
 app.use("/api/auth", router);
 app.use("/api/user", userroute);
 app.use("/api/shop", shoprouter);
@@ -55,17 +38,18 @@ app.use("/api/payout", payoutRouter);
 app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
-  res.send("API Working 🔥");
+  res.send("API Working 🔥 (Polling Mode Active)");
 });
 
+// 🚀 Server Start Logic
 const startServer = async () => {
   try {
     await database();
     app.listen(port, () => {
-      console.log(`Server running on port ${port} 🚀`);
+      console.log(`Server running on port ${port} 🚀 (Clean Mode)`);
     });
   } catch (err) {
-    console.error("Server start error:", err);
+    console.log("Server start error:", err);
   }
 };
 

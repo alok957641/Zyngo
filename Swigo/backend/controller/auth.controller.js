@@ -1,266 +1,196 @@
-const User = require("../models/user/usermodel.js");
-const generatetocken = require("../utils/tocken.js");
+const User = require("../models/user/usermodel.js")
+const generatetocken = require("../utils/tocken.js")
 const bscrypt = require("bcryptjs");
-const { sendOtpEmail } = require("../utils/mail.js");
+const { sendOtpEmail} = require("../utils/mail.js");
 
-// ✅ FINAL COOKIE FIX
-const setAuthCookie = (res, token) => {
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: true,         
-        sameSite: "none",      
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        path: "/"             
-    });
-};
 
-// SIGNUP
-// SIGNUP
+
 const signup = async (req, res) => {
     try {
         const { fullname, email, password, mobile, role } = req.body;
-        
+        let user = await User.findOne({ email });
+        if (user) {
+            return res.status(400).json({ message: "User already exists" });
+        }
+        if (password.length < 6) {
+            return res.status(400).json({ message: "Password must be at least 6 characters long" });
+        }
+        if (mobile.length !== 10) {
+            return res.status(400).json({ message: "mobile number must be exactly 10 digit long " });
+        }
+
         const hashedpassword = await bscrypt.hash(password, 10);
-        
-        // 🔥 FIX: Yahan location object add karo
-        const user = await User.create({ 
-            fullname, 
-            email, 
-            mobile, 
-            role, 
+        user = await User.create({
+            fullname,
+            email,
+            mobile,
+            role,
             password: hashedpassword,
-            location: {
-                type: "Point",
-                coordinates: [0, 0] // Default values
-            }
-        });
+        })
 
         const token = generatetocken(user._id);
-        setAuthCookie(res, token);
-        
-        return res.status(201).json({ message: "User registered", user });
-    } catch (error) {
-        // Error print karo taaki pata chale agar validation fail hua hai
-        console.error("Signup error:", error);
-        return res.status(500).json({ message: `signup error: ${error.message}` });
-    }
-};
+        res.cookie("token", token, {
+            secure: false,
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+        })
+        return res.status(201).json(user)
 
-
-// SIGNIN
-const signin = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ message: "Invalid credentials" });
-
-        const isMatch = await bscrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
-
-        const token = generatetocken(user._id);
-        setAuthCookie(res, token); // FIX: Helper function use karo
-        
-        return res.status(200).json({ message: "Login successful", user });
-    } catch (err) {
-        return res.status(500).json({ message: `Signin error: ${err.message}` });
+    } catch (error)
+    {
+        return res.status(500).json({ message: `sign up  error ${error}` });
     }
 }
 
 
-// SIGNOUT
+// signin
+const signin = async (req, res) => {
+
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
+
+        const ismatch = await bscrypt.compare(password, user.password)
+        if (!ismatch) {
+            return res.status(400).json({ message: "password incorrect " });
+        }
+
+        const token = generatetocken(user._id);
+        res.cookie("token", token, {
+            secure: false,
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+        })
+        console.log(user);
+        return res.status(201).json(user)
+    } catch (err) {
+        return res.status(500).json({ message: ` sign in  error ${err}` });
+    }
+}
+
+
+
+// signout
 const signout = async (req, res) => {
     try {
-        // Backend se cookie hatana
-        res.clearCookie("token", {
-            httpOnly: true,
-            secure: true, // Render par production ke liye true hi rakh
-            sameSite: "none",
-            path: "/"
-        });
-
-        return res.status(200).json({
-            success: true,
-            message: "Logout Successfully"
-        });
+        res.clearCookie("token");
+        return res.status(200).json({ message: "Logut Sucessfully" });
     } catch (error) {
-        return res.status(500).json({
-            message: `Signout error: ${error.message}`
+        return res.status(500).json({ message: ` sign out  error ${error}` });
+    }
+}
+
+
+// send otp
+const sendOtp = async (req, res) => {
+    try {
+        const { email } = req.body;
+        console.log("Request for Email:", email); // Step 1
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: "Bhai, user nahi mila!" });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        user.resetOtp = otp;
+        user.otpExpiry = Date.now() + 5 * 60 * 1000;
+        
+        console.log("Saving OTP to DB..."); // Step 2
+        await user.save();
+
+        console.log("Attempting to send Email..."); // Step 3
+        await sendOtpEmail(email, otp); 
+
+        return res.status(200).json({ success: true, message: "OTP sent to email" });
+
+    } catch (error) {
+        // 🔥 Ye tere VS Code terminal mein laal rang ka error dikhayega
+        console.error("CRITICAL ERROR IN SEND-OTP:", error); 
+        return res.status(500).json({ 
+            success: false, 
+            message: "Email bhejte waqt server fat gaya!",
+            debug_error: error.message 
         });
     }
-};
+}
 
-// GOOGLE AUTH
+// varify otp
+const varifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        const user = await User.findOne({ email });
+
+        if (!user || user.resetOtp !== otp || user.otpExpiry < Date.now()) {
+            return res.status(400).json({ message: "Invalid or Expired OTP" });
+        }
+        user.isOtpVerified = true;
+        user.resetOtp = undefined;
+        user.otpExpiry = undefined;
+        await user.save();
+
+        return res.status(200).json({ message: "OTP Varified Successfully" })
+
+    } catch (error) {
+        return res.status(500).json({ message: "Error verifying OTP" })
+    }
+}
+
+// reset password
+const resetpassword = async (req, res) => {
+
+    try {
+        const { email, newpassword } = req.body;
+        const user = await User.findOne({ email })
+        if (!user || !user.isOtpVerified) {
+            return res.status(400).json({ message: "User Does not Exist or OTP not verified" })
+        }
+
+        const hashedpassword = await bscrypt.hash(newpassword, 10);
+        user.password = hashedpassword;
+        user.isOtpVerified = false;
+        await user.save();
+        return res.status(200).json({ message: "Password Reset Successfully" });
+    } catch (error) {
+        return res.status(500).json({ message: "Error resetting password" });
+    }
+}
+
+
+// googlerauth
+
 const googleauth = async (req, res) => {
 
     try {
 
-        const { fullname, email, mobile, role } = req.body;
 
-        let user = await User.findOne({ email });
+        const { fullname, email, mobile ,role} = req.body
+        let user = await User.findOne({ email })
 
         if (!user) {
-
             user = await User.create({
-                fullname,
-                email,
-                mobile,
-                role,
-                password: "google-user-dummy-pass",
-
-                location: {
-                    type: "Point",
-                    coordinates: [0, 0]
-                }
-            });
-
+                fullname, email, mobile ,role
+            })
         }
-
         const token = generatetocken(user._id);
+        res.cookie("token", token, {
+            secure: false,
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+        })
 
-        setAuthCookie(res, token);
-
-        return res.status(200).json(user);
-
-    } catch (error) {
-
-        return res.status(500).json({
-            message: `Googleauth error: ${error.message}`
-        });
-
-    }
-
-};
-
-// OTP SEND
-const sendOtp = async (req, res) => {
-
-    try {
-
-        const { email } = req.body;
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(400).json({
-                message: "User not found"
-            });
-        }
-
-        const otp = Math.floor(
-            100000 + Math.random() * 900000
-        ).toString();
-
-        user.resetOtp = otp;
-
-        user.otpExpiry = Date.now() + 5 * 60 * 1000;
-
-        await user.save();
-
-        await sendOtpEmail(email, otp);
-
-        return res.status(200).json({
-            success: true,
-            message: "OTP sent"
-        });
+        return res.status(200).json(user)
 
     } catch (error) {
-
-        return res.status(500).json({
-            message: `OTP error: ${error.message}`
-        });
-
+          return res.status(500).json({ message: ` Googleauth   error ${err}` });
     }
 
-};
+}
 
-// VERIFY OTP
-const varifyOtp = async (req, res) => {
-
-    try {
-
-        const { email, otp } = req.body;
-
-        const user = await User.findOne({ email });
-
-        if (
-            !user ||
-            user.resetOtp !== otp ||
-            user.otpExpiry < Date.now()
-        ) {
-
-            return res.status(400).json({
-                message: "Invalid or Expired OTP"
-            });
-
-        }
-
-        user.isOtpVerified = true;
-
-        user.resetOtp = undefined;
-
-        user.otpExpiry = undefined;
-
-        await user.save();
-
-        return res.status(200).json({
-            message: "OTP Verified"
-        });
-
-    } catch (error) {
-
-        return res.status(500).json({
-            message: `OTP verify error: ${error.message}`
-        });
-
-    }
-
-};
-
-// RESET PASSWORD
-const resetpassword = async (req, res) => {
-
-    try {
-
-        const { email, newpassword } = req.body;
-
-        const user = await User.findOne({ email });
-
-        if (!user || !user.isOtpVerified) {
-
-            return res.status(400).json({
-                message: "OTP not verified"
-            });
-
-        }
-
-        const hashedpassword = await bscrypt.hash(newpassword, 10);
-
-        user.password = hashedpassword;
-
-        user.isOtpVerified = false;
-
-        await user.save();
-
-        return res.status(200).json({
-            message: "Password Reset Successfully"
-        });
-
-    } catch (error) {
-
-        return res.status(500).json({
-            message: `Reset error: ${error.message}`
-        });
-
-    }
-
-};
-
-module.exports = {
-    signup,
-    signin,
-    signout,
-    sendOtp,
-    varifyOtp,
-    resetpassword,
-    googleauth
-};
+module.exports = { signup, signin, signout, sendOtp, varifyOtp, resetpassword , googleauth};

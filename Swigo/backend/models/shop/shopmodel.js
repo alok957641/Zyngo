@@ -26,15 +26,14 @@ const shopSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-  
     location: {
         type: {
             type: String,
-            enum: ["Point"],
-            default: "Point"
+            enum: ["Point"], 
+            default: "Point",
         },
         coordinates: {
-            type: [Number], // [longitude, latitude]
+            type: [Number], 
             required: true
         }
     },
@@ -42,24 +41,24 @@ const shopSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Item",
     }],
+
     averageRating: {
         type: Number,
-        default: 0,
+        default: 0, 
     },
     totalRatings: {
         type: Number,
-        default: 0,
+        default: 0, 
     },
+
+    // 🔥 NEW REAL FIELD: Total Orders Track Karne Ke Liye Add Kiya
     totalOrders: {
         type: Number,
-        default: 0,
+        default: 0, 
     }
+
 }, { timestamps: true });
 
-// Indexing
 shopSchema.index({ location: "2dsphere" });
 
-
-const Shop = mongoose.models.Shop || mongoose.model("Shop", shopSchema);
-
-module.exports = Shop;
+module.exports = mongoose.models.Shop || mongoose.model("Shop", shopSchema);

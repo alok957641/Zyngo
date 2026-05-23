@@ -1,34 +1,63 @@
 const nodemailer = require("nodemailer");
+const dotenv = require("dotenv");
+dotenv.config();
 
+
+
+// console.log("Email from Env:", process.env.EMAIL);
+// console.log("Pass from Env:", process.env.PASS ? "Received" : "Not Received");
 const transporter = nodemailer.createTransport({
-    host: "smtp-relay.brevo.com",
-    port: 587,
-    secure: false, // 587 ke liye false rakho
+    service: "Gmail",
+    port: 465 , 
     auth: {
-        user: "tumhari-brevo-email@example.com", // Brevo login email
-        pass: "yahan-apni-smtp-key-daalo",       // Brevo ki SMTP Key
+        user: process.env.EMAIL,
+        pass: process.env.PASS, 
     },
 });
 
-const sendDeliveryOtpEmail = async (email, otp) => {
+const sendOtpEmail = async (to, otp) => {
     try {
         await transporter.sendMail({
-            from: "tumhari-brevo-email@example.com", // Sender email
-            to: email,
-            subject: "Delivery OTP - Zyngo",
+            from: process.env.EMAIL, 
+            to: to,
+            subject: "RESET Your Password - Swigo",
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                    <h2 style="color: #ea580c;">Zyngo Delivery OTP</h2>
-                    <p>Your OTP for delivery is:</p>
+                    <h2 style="color: #ea580c;">Swigo Password Reset</h2>
+                    <p>Your OTP for password reset is:</p>
                     <h1 style="color: #dc2626; letter-spacing: 5px;">${otp}</h1>
+                    <p style="color: #666; font-size: 12px;">This OTP will expire in 5 minutes.</p>
                 </div>
             `
         });
-        console.log("Email sent successfully via Brevo to:", email);
+        console.log("Email sent successfully to:", to);
     } catch (error) {
-        console.error("Brevo Error:", error);
-        throw error;
+        console.error("Nodemailer Error:", error);
+        throw new Error("Failed to send email");
     }
-};
+}
 
-module.exports = { sendDeliveryOtpEmail };
+
+const sendDeliveryOtpEmail = async (user, otp) => {
+    try {
+        await transporter.sendMail({
+            from: process.env.EMAIL, 
+            to: user.email,
+            subject: "Delivery OTP - Swigo",
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                    <h2 style="color: #ea580c;">Swigo Delivery OTP</h2>
+                    <p>Your OTP for delivery is:</p>
+                    <h1 style="color: #dc2626; letter-spacing: 5px;">${otp}</h1>
+                    <p style="color: #666; font-size: 12px;">This OTP will expire in 5 minutes.</p>
+                </div>
+            `
+        });
+        console.log("Email sent successfully to:", user.email);
+    } catch (error) {
+        console.error("Nodemailer Error:", error);
+        throw new Error("Failed to send email");
+    }
+}
+
+module.exports = {sendOtpEmail, sendDeliveryOtpEmail};
