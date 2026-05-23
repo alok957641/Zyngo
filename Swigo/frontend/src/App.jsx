@@ -42,6 +42,7 @@ import useGetShopbyCity from "./hooks/useGetShopbyCity.jsx";
 import useGetItemByCity from "./hooks/useGetItemByCity.jsx";
 import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
+import { app } from "../firebase.js";
 
 
 function App() {
@@ -130,3 +131,5 @@ function App() {
     </>
   );
 }
+
+export default app ;
