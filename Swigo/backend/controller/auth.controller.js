@@ -1,7 +1,7 @@
-const User = require("../models/user/usermodel.js");
-const generateToken = require("../utils/token.js"); // Fix spelling
-const bcrypt = require("bcryptjs"); // Fix spelling
-const { sendOtpEmail } = require("../utils/mail.js");
+const User = require("../models/user/usermodel.js")
+const generatetocken = require("../utils/tocken.js")
+const bscrypt = require("bcryptjs");
+const { sendOtpEmail} = require("../utils/mail.js");
 
 // Helper function to remove password from response
 const sanitizeUser = (user) => {
