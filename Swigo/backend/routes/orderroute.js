@@ -1,5 +1,7 @@
 const express = require("express");
-const {isAuth} = require("../middelwear/isAuth"); // 🚨 Check kar lena spelling 'middelwear' sahi hai ya 'middleware'
+// Ab hum 'isDeliveryBoy' middleware bhi import karenge
+const { isAuth, isDeliveryBoy } = require("../middelwear/isAuth"); 
+
 const {
     placeOrder, 
     getMyOrders, 
@@ -13,8 +15,8 @@ const {
     verifyPayment,
     getRiderStats,
     getRiderHistory,
-     riderPayDebtOrder, 
-     verifyRiderDebtPayment
+    riderPayDebtOrder, 
+    verifyRiderDebtPayment
 } = require("../controller/order.controller");
 
 const orderrouter = express.Router();
@@ -24,24 +26,24 @@ orderrouter.post("/place-order", isAuth, placeOrder);
 orderrouter.get("/my-orders", isAuth, getMyOrders);
 orderrouter.get("/get-order-by-id/:orderId", isAuth, getOrderById);
 
-// 🏪 Owner Routes
+// 🏪 Owner Routes (Yahan check kar lena ki sirf owner hi update kare)
 orderrouter.post("/update-status/:orderId/:shopId", isAuth, updateOrderStatus);
 
-// 🏍️ Delivery Boy Routes
-// 🚨 Frontend isi URL ko call kar raha hai, iska upar hona zaroori hai
-orderrouter.get("/get-delivery-assignments", isAuth, getDeliveryBoyAssignment); 
-orderrouter.get("/get-assignment", isAuth, getDeliveryBoyAssignment); // Legacy support
-orderrouter.get("/get-current-order", isAuth, getCurrentOrder);
-orderrouter.post("/accept-order/:assignmentId", isAuth, acceptOrder);
+// 🏍️ Delivery Boy Routes (Ab yahan isDeliveryBoy middleware zaroori hai!)
+orderrouter.get("/get-delivery-assignments", isAuth, isDeliveryBoy, getDeliveryBoyAssignment); 
+orderrouter.get("/get-assignment", isAuth, isDeliveryBoy, getDeliveryBoyAssignment);
+orderrouter.get("/get-current-order", isAuth, isDeliveryBoy, getCurrentOrder);
+orderrouter.post("/accept-order/:assignmentId", isAuth, isDeliveryBoy, acceptOrder);
 
-// 🔐 OTP Flow
-orderrouter.post("/send-delivery-otp", isAuth, sendDeliveryOtp);
-orderrouter.post("/verify-otp", isAuth, verifyDeliveryOtp);
+// 🔐 OTP Flow (Delivery boy se related hai)
+orderrouter.post("/send-delivery-otp", isAuth, isDeliveryBoy, sendDeliveryOtp);
+orderrouter.post("/verify-otp", isAuth, isDeliveryBoy, verifyDeliveryOtp);
 
-orderrouter.post("/verify-payment", isAuth, verifyPayment);
-orderrouter.get("/rider-pay-debt", isAuth, riderPayDebtOrder);
-orderrouter.post("/verify-rider-debt", isAuth, verifyRiderDebtPayment);
+// Rider Stats & Debt
+orderrouter.post("/verify-payment", isAuth, isDeliveryBoy, verifyPayment);
+orderrouter.get("/rider-pay-debt", isAuth, isDeliveryBoy, riderPayDebtOrder);
+orderrouter.post("/verify-rider-debt", isAuth, isDeliveryBoy, verifyRiderDebtPayment);
+orderrouter.get("/rider-stats", isAuth, isDeliveryBoy, getRiderStats);
+orderrouter.get("/rider-history", isAuth, isDeliveryBoy, getRiderHistory);
 
-orderrouter.get("/rider-stats", isAuth, getRiderStats);
-orderrouter.get("/rider-history", isAuth, getRiderHistory);
 module.exports = orderrouter;

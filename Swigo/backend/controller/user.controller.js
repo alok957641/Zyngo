@@ -5,37 +5,36 @@ const User = require("../models/user/usermodel.js")
 // controller/user.controller.js
 const getcurruser = async (req, res) => {
     try {
-
-        const userId = req.userId;
+        // Middleware se req.userId aa raha hai
+        const userId = req.userId; 
 
         if (!userId) {
             return res.status(401).json({
-                success:false,
-                message:"UserId not found"
+                success: false,
+                message: "UserId not found - Login required"
             });
         }
 
         const user = await User.findById(userId).select("-password");
 
         if (!user) {
-            return res.status(401).json({
-                success:false,
-                message:"User not found"
+            return res.status(404).json({ // 404 better hai kyunki user nahi mila
+                success: false,
+                message: "User not found in database"
             });
         }
 
         return res.status(200).json({
-            success:true,
+            success: true,
             user
         });
 
     } catch (error) {
-
+        console.error("Get Current User Error:", error);
         return res.status(500).json({
-            success:false,
-            message:"Get current user error"
+            success: false,
+            message: "Server error in getcurruser"
         });
-
     }
 }
 

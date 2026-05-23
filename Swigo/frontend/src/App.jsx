@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
-// Pages & Components
+// Pages & Components (Aapke imports wahi hain)
 import Signup from "./pages/Signup.jsx";
 import Signin from "./pages/Signin.jsx";
 import Home from "./pages/Home.jsx";
@@ -37,86 +37,52 @@ import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
 function App() {
-
   const location = useLocation();
 
-  // ✅ AXIOS GLOBAL CONFIG
+  // ✅ AXIOS CONFIG
   useEffect(() => {
-
     axios.defaults.baseURL = "https://zyngo.onrender.com";
-
     axios.defaults.withCredentials = true;
-
   }, []);
 
   // ✅ REDUX STATE
   const { userData, loading } = useSelector((state) => state.user);
 
-  // ✅ PUBLIC HOOKS
+  // ✅ HOOKS (Sare hooks yahan call ho rahe hain)
   useGetCurruser();
   useGetCity();
   useGetShopbyCity();
   useGetItemByCity();
-
-  // ✅ PROTECTED HOOKS
   useGetMyShop(userData);
   useGetMyOrders(userData);
   useGetUpdateLocation(userData);
 
-  // ✅ LOADING SCREEN
-  if (loading) {
-
-    return (
-      <div className="h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
-
-        <div className="relative w-16 h-16">
-
-          <div className="absolute inset-0 border-4 border-slate-800 rounded-full"></div>
-
-          <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
-
+  // ✅ PROTECTED ROUTE LOGIC
+  const Protected = ({ children, role }) => {
+    if (loading)
+      return (
+        <div className="h-screen flex items-center justify-center text-orange-500">
+          Syncing Zyngo...
         </div>
+      );
 
-        <p className="text-[10px] font-black uppercase tracking-[4px] text-orange-500 animate-pulse font-mono">
-          Syncing Zyngo Node...
-        </p>
+    if (!userData) return <Navigate to="/signin" replace />;
 
-      </div>
-    );
+    if (role && userData.role !== role) return <Navigate to="/" replace />;
 
-  }
+    return children;
+  };
 
-  // ✅ FOOTER
   const path = location.pathname.toLowerCase();
-
   const showFooter =
-    ["/", "/cart", "/my-orders", "/checkout", "/order-success"].includes(path) ||
+    ["/", "/cart", "/my-orders", "/checkout", "/order-success"].includes(
+      path,
+    ) ||
     path.startsWith("/shop/") ||
     path.startsWith("/category/");
 
-  // ✅ PROTECTED ROUTE
-  const Protected = ({ children, role }) => {
-
-    if (!userData) {
-
-      return <Navigate to="/signin" replace />;
-
-    }
-
-    if (role && userData.role !== role) {
-
-      return <Navigate to="/" replace />;
-
-    }
-
-    return children;
-
-  };
-
   return (
-
     <>
-
       <Toaster
         position="top-center"
         toastOptions={{
@@ -124,14 +90,12 @@ function App() {
             fontSize: "12px",
             borderRadius: "15px",
             background: "#1e293b",
-            color: "#fff"
-          }
+            color: "#fff",
+          },
         }}
       />
 
       <Routes>
-
-        {/* HOME */}
         <Route
           path="/"
           element={
@@ -147,17 +111,14 @@ function App() {
           }
         />
 
-        {/* AUTH */}
         <Route
           path="/signup"
           element={!userData ? <Signup /> : <Navigate to="/" replace />}
         />
-
         <Route
           path="/signin"
           element={!userData ? <Signin /> : <Navigate to="/" replace />}
         />
-
         <Route
           path="/forgetpassword"
           element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />}
@@ -172,7 +133,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/AddItem"
           element={
@@ -181,12 +141,27 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/EditItem/:itemId"
           element={
             <Protected role="owner">
               <EditItem />
+            </Protected>
+          }
+        />
+        <Route
+          path="/owner/dashboard"
+          element={
+            <Protected role="owner">
+              <OwnerDashboard />
+            </Protected>
+          }
+        />
+        <Route
+          path="/owner/earnings"
+          element={
+            <Protected role="owner">
+              <OwnerEarnings />
             </Protected>
           }
         />
@@ -200,7 +175,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/CheckOut"
           element={
@@ -209,7 +183,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/order-success"
           element={
@@ -218,7 +191,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/my-orders"
           element={
@@ -227,7 +199,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/category/:catName"
           element={
@@ -236,7 +207,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/shop/:shopId"
           element={
@@ -245,7 +215,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/track-order/:orderId"
           element={
@@ -264,7 +233,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/rider/earnings"
           element={
@@ -273,7 +241,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/rider/history"
           element={
@@ -282,7 +249,6 @@ function App() {
             </Protected>
           }
         />
-
         <Route
           path="/rider/profile"
           element={
@@ -292,39 +258,11 @@ function App() {
           }
         />
 
-        {/* OWNER DASHBOARD */}
-        <Route
-          path="/owner/dashboard"
-          element={
-            <Protected role="owner">
-              <OwnerDashboard />
-            </Protected>
-          }
-        />
-
-        <Route
-          path="/owner/earnings"
-          element={
-            <Protected role="owner">
-              <OwnerEarnings />
-            </Protected>
-          }
-        />
-
-        {/* 404 */}
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
-
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
       {showFooter && <Footer />}
-
     </>
-
   );
-
 }
 
 export default App;

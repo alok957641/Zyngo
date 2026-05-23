@@ -5,128 +5,48 @@ const { sendOtpEmail } = require("../utils/mail.js");
 
 // ✅ FINAL COOKIE FIX
 const setAuthCookie = (res, token) => {
-
     res.cookie("token", token, {
-
         httpOnly: true,
-
-        secure: true,
-
-        sameSite: "none",
-
+        secure: true,         
+        sameSite: "none",      
         maxAge: 7 * 24 * 60 * 60 * 1000,
-
+        path: "/"             
     });
-
 };
 
-// signup
+// SIGNUP
 const signup = async (req, res) => {
     try {
-        console.log("--- SIGNUP START ---");
         const { fullname, email, password, mobile, role } = req.body;
-        console.log("Data received:", { fullname, email, mobile, role });
-
-        // Check if user exists
-        console.log("Checking if user exists...");
-        let user = await User.findOne({ email });
-        if (user) {
-            console.log("User already exists!");
-            return res.status(400).json({ message: "User already exists" });
-        }
-
-        // Validate password length
-        if (!password || password.length < 6) {
-            console.log("Password validation failed");
-            return res.status(400).json({ message: "Password must be at least 6 characters long" });
-        }
-
-        // Validate mobile string length
-        console.log("Validating mobile:", mobile);
-        if (!mobile || mobile.toString().length !== 10) {
-            console.log("Mobile validation failed");
-            return res.status(400).json({ message: "mobile number must be exactly 10 digit long" });
-        }
-
-        console.log("Hashing password...");
+        // ... (validation code waisa hi rakho)
+        
         const hashedpassword = await bscrypt.hash(password, 10);
-
-        console.log("Creating user in DB...");
-        user = await User.create({
-            fullname,
-            email,
-            mobile,
-            role,
-            password: hashedpassword,
-        });
-        console.log("User created successfully:", user._id);
+        const user = await User.create({ fullname, email, mobile, role, password: hashedpassword });
 
         const token = generatetocken(user._id);
-        res.cookie("token", token, {
-            secure: false,
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true,
-        });
+        setAuthCookie(res, token); // FIX: Helper function use karo
         
-        return res.status(201).json(user);
-
+        return res.status(201).json({ message: "User registered", user });
     } catch (error) {
-        // 🔥 Ye line sabse important hai. 
-        // Render ke Logs mein yahi error dikhega.
-        console.error("CRITICAL ERROR IN SIGNUP:", error); 
         return res.status(500).json({ message: `signup error: ${error.message}` });
     }
 }
 
-
 // SIGNIN
 const signin = async (req, res) => {
     try {
-        console.log("--- SIGNIN START ---");
         const { email, password } = req.body;
-        console.log("Signin attempt for email:", email);
-
-        // 1. Check if user exists
         const user = await User.findOne({ email });
-        if (!user) {
-            console.log("User not found with email:", email);
-            return res.status(400).json({ message: "Invalid email or password" });
-        }
-        console.log("User found in DB, verifying password...");
+        if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
-        // 2. Check if user has a password (kabhi kabhi DB mein password field empty ho sakti hai)
-        if (!user.password) {
-            console.log("CRITICAL: User found but no password in DB!");
-            return res.status(400).json({ message: "Password not set for this account" });
-        }
-
-        // 3. Compare password
         const isMatch = await bscrypt.compare(password, user.password);
-        if (!isMatch) {
-            console.log("Password mismatch for email:", email);
-            return res.status(400).json({ message: "Password incorrect" });
-        }
-        console.log("Password matched!");
+        if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-        // 4. Generate Token
         const token = generatetocken(user._id);
-        res.cookie("token", token, {
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true,
-        });
-
-        const userObj = user.toObject();
-        delete userObj.password; // Security: password mat bhejo
-        console.log("Signin successful for:", userObj._id);
-
-        return res.status(200).json(userObj);
-
+        setAuthCookie(res, token); // FIX: Helper function use karo
+        
+        return res.status(200).json({ message: "Login successful", user });
     } catch (err) {
-        // 🔥 Asli error yahan pakda jayega
-        console.error("CRITICAL ERROR IN SIGNIN:", err);
         return res.status(500).json({ message: `Signin error: ${err.message}` });
     }
 }
