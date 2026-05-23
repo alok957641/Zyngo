@@ -3,12 +3,7 @@ const generatetocken = require("../utils/tocken.js")
 const bscrypt = require("bcryptjs");
 const { sendOtpEmail} = require("../utils/mail.js");
 
-// Helper function to remove password from response
-const sanitizeUser = (user) => {
-    const userObj = user.toObject();
-    delete userObj.password;
-    return userObj;
-};
+
 
 // Signup
 const signup = async (req, res) => {
