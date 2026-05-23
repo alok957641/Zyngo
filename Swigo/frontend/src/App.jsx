@@ -44,7 +44,6 @@ import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
 
-
 function App() {
   const location = useLocation();
 
@@ -53,7 +52,6 @@ function App() {
     axios.defaults.withCredentials = true;
   }, []);
 
-  // Hooks (Sahi jagah par)
   useGetCurruser();
   useGetCity();
   useGetMyShop();
@@ -75,18 +73,24 @@ function App() {
     </div>
   );
 
-  // Footer Logic: Lowercase karke check kar rahe hain taaki path mismatch na ho
   const path = location.pathname.toLowerCase();
   const showFooter = ["/", "/cart", "/my-orders", "/checkout", "/order-success"].includes(path) || 
                      path.startsWith("/shop/") || 
                      path.startsWith("/category/");
+
+  // Helper function taaki baar baar same logic na likhna pade
+  const Protected = ({ children, role }) => {
+    if (loading) return null; // Wait karo
+    if (!userData) return <Navigate to="/signin" replace />;
+    if (role && userData.role !== role) return <Navigate to="/" replace />;
+    return children;
+  };
 
   return (
     <>
       <Toaster position="top-center" toastOptions={{ style: { fontSize: "12px", borderRadius: "15px", background: "#1e293b", color: "#fff" } }} />
       
       <Routes>
-        {/* Protected Root Gateway */}
         <Route path="/" element={
           !userData ? <Home /> : 
           userData.role === "admin" ? <Navigate to="/admin/dashboard" replace /> :
@@ -99,36 +103,25 @@ function App() {
         <Route path="/signin" element={!userData ? <Signin /> : <Navigate to="/" replace />} />
         <Route path="/forgetpassword" element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />} />
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminRoute><AdminSidebar /></AdminRoute>}>
-          <Route path="dashboard" element={<AdminDashboardOverview />} />
-          <Route path="payouts" element={<AdminPayouts />} />
-          <Route path="riders" element={<AdminRiderManagement />} />
-          <Route path="restaurants" element={<AdminShopManagement />} />
-          <Route path="settings" element={<AdminSettings />} />
-        </Route>
+        {/* Protected Routes Wrapper */}
+        <Route path="/CreateAndEditShop" element={<Protected role="owner"><CreateAndEditShop /></Protected>} />
+        <Route path="/AddItem" element={<Protected role="owner"><AddItem /></Protected>} />
+        <Route path="/EditItem/:itemId" element={<Protected role="owner"><EditItem /></Protected>} />
+        <Route path="/cart" element={<Protected><Cartpage /></Protected>} />
+        <Route path="/CheckOut" element={<Protected><CheckOut /></Protected>} />
+        <Route path="/order-success" element={<Protected><OrderSuccess /></Protected>} />
+        <Route path="/my-orders" element={<Protected><MyOrders /></Protected>} />
+        <Route path="/category/:catName" element={<Protected><CategoryPage /></Protected>} />
+        <Route path="/shop/:shopId" element={<Protected><ShopPage /></Protected>} />
+        <Route path="/track-order/:orderId" element={<Protected><TrackOrderPage /></Protected>} />
 
-        {/* Customer & Protected Routes */}
-        <Route path="/CreateAndEditShop" element={userData ? <CreateAndEditShop /> : <Navigate to="/signin" replace />} />
-        <Route path="/AddItem" element={userData ? <AddItem /> : <Navigate to="/signin" replace />} />
-        <Route path="/EditItem/:itemId" element={userData ? <EditItem /> : <Navigate to="/signin" replace />} />
-        <Route path="/cart" element={userData ? <Cartpage /> : <Navigate to="/signin" replace />} />
-        <Route path="/CheckOut" element={userData ? <CheckOut /> : <Navigate to="/signin" replace />} />
-        <Route path="/order-success" element={userData ? <OrderSuccess /> : <Navigate to="/signin" replace />} />
-        <Route path="/my-orders" element={userData ? <MyOrders /> : <Navigate to="/signin" replace />} />
-        <Route path="/category/:catName" element={userData ? <CategoryPage /> : <Navigate to="/signin" replace />} />
-        <Route path="/shop/:shopId" element={userData ? <ShopPage /> : <Navigate to="/signin" replace />} />
-        <Route path="/track-order/:orderId" element={userData ? <TrackOrderPage /> : <Navigate to="/signin" replace />} />
+        <Route path="/rider/dashboard" element={<Protected role="deliveryboy"><DelevryBoyDeshboard /></Protected>} />
+        <Route path="/rider/earnings" element={<Protected role="deliveryboy"><RiderEarnings /></Protected>} />
+        <Route path="/rider/history" element={<Protected role="deliveryboy"><RiderHistory /></Protected>} />
+        <Route path="/rider/profile" element={<Protected role="deliveryboy"><RiderProfile /></Protected>} />
 
-        {/* Rider Routes */}
-        <Route path="/rider/dashboard" element={userData?.role === "deliveryboy" ? <DelevryBoyDeshboard /> : <Navigate to="/signin" replace />} />
-        <Route path="/rider/earnings" element={userData?.role === "deliveryboy" ? <RiderEarnings /> : <Navigate to="/signin" replace />} />
-        <Route path="/rider/history" element={userData?.role === "deliveryboy" ? <RiderHistory /> : <Navigate to="/signin" replace />} />
-        <Route path="/rider/profile" element={userData?.role === "deliveryboy" ? <RiderProfile /> : <Navigate to="/signin" replace />} />
-
-        {/* Owner Routes */}
-        <Route path="/owner/dashboard" element={userData?.role === "owner" ? <OwnerDashboard /> : <Navigate to="/signin" replace />} />
-        <Route path="/owner/earnings" element={userData?.role === "owner" ? <OwnerEarnings /> : <Navigate to="/signin" replace />} />
+        <Route path="/owner/dashboard" element={<Protected role="owner"><OwnerDashboard /></Protected>} />
+        <Route path="/owner/earnings" element={<Protected role="owner"><OwnerEarnings /></Protected>} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
@@ -137,5 +130,3 @@ function App() {
     </>
   );
 }
-
-export default App;
