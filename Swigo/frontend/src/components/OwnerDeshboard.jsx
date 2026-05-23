@@ -47,7 +47,10 @@ function OwnerDeshboard() {
   const handleStatusToggle = async () => {
     try {
       setToggleLoading(true);
+      
+      // Backend global endpoint pipeline ko hit kiya state invert karne ke liye
       const res = await axios.post(`${serverurl}/api/user/toggle-availability`, {}, { withCredentials: true });
+      
       if (res.data.success) {
         setIsShopOnline(res.data.isOnline);
         alert(`🎉 Store status updated to: ${res.data.isOnline ? "ONLINE" : "OFFLINE"}`);
@@ -60,6 +63,7 @@ function OwnerDeshboard() {
     }
   };
 
+  // --- 🔥 FIX: Spinner tabhi dikhao jab data bilkul nahi aaya (undefined) ---
   if (myShopData === undefined) {
     return (
       <div className="w-full min-h-screen bg-[#FDFCFB] flex items-center justify-center">
@@ -72,7 +76,7 @@ function OwnerDeshboard() {
     <div className="w-full min-h-screen bg-[#FDFCFB] flex flex-col font-sans relative overflow-x-hidden">
       <OwnerNav />
 
-      {/* --- WELCOME CARD (Shop nahi hone par) --- */}
+      {/* --- 🔥 NEW: WELCOME CARD (Shop nahi hone par navbar ke niche) --- */}
       {myShopData === null ? (
         <div className="flex-grow flex items-center justify-center p-6">
           <motion.div 
@@ -83,15 +87,16 @@ function OwnerDeshboard() {
             <div className="w-24 h-24 bg-white text-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg shadow-orange-100">
               <FaStore className="text-5xl" />
             </div>
-            <h2 className="text-3xl font-black text-gray-900 italic tracking-tighter uppercase mb-4">Welcome to Zyngo</h2>
-            <p className="text-gray-500 font-bold mb-10 text-sm leading-relaxed">
-              Your digital storefront is ready to launch. Set up your shop details to start receiving orders.
+            <h2 className="text-4xl font-black text-gray-900 italic tracking-tighter uppercase mb-4">Welcome to Zyngo</h2>
+            <p className="text-gray-500 font-bold mb-10 text-base leading-relaxed">
+              Your digital storefront is ready to launch. <br/> 
+              Set up your shop details to start receiving orders.
             </p>
             <button 
               onClick={() => navigate("/CreateAndEditShop")}
-              className="w-full bg-slate-900 text-white font-black py-5 rounded-2xl shadow-lg hover:bg-orange-600 transition-all active:scale-95 flex items-center justify-center gap-3"
+              className="w-full bg-slate-900 text-white font-black py-6 rounded-3xl shadow-2xl hover:bg-orange-600 transition-all active:scale-95 flex items-center justify-center gap-3 text-lg"
             >
-              <FiPlus /> CREATE YOUR SHOP
+              <FiPlus size={20} /> CREATE YOUR SHOP
             </button>
           </motion.div>
         </div>
@@ -108,7 +113,11 @@ function OwnerDeshboard() {
                 <button
                   onClick={handleStatusToggle}
                   disabled={toggleLoading}
-                  className={`px-5 py-4 rounded-3xl font-black text-[10px] tracking-wider transition-all duration-300 flex items-center gap-2 border shadow-sm ${isShopOnline ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/20" : "bg-red-500/10 border-red-500/20 text-red-600 hover:bg-red-500/20 animate-pulse"}`}
+                  className={`px-5 py-4 rounded-3xl font-black text-[10px] tracking-wider transition-all duration-300 flex items-center gap-2 border shadow-sm ${
+                    isShopOnline 
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/20" 
+                      : "bg-red-500/10 border-red-500/20 text-red-600 hover:bg-red-500/20 animate-pulse"
+                  }`}
                 >
                   <FiPower className={toggleLoading ? "animate-spin" : ""} size={14} />
                   {isShopOnline ? "● KITCHEN LIVE" : "○ KITCHEN CLOSED"}
@@ -123,10 +132,50 @@ function OwnerDeshboard() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-               <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm"><p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Orders</p><h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">{orders.length}</h3></div>
-               <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm"><p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Net Sales</p><h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">₹{totalRevenue}</h3></div>
-               <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm"><p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Live Items</p><h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">{myShopData?.items?.length || 0}</h3></div>
-               <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm"><p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Rating</p><div className="flex items-center gap-2"><h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">{myShopData?.ratings || myShopData?.rating || "4.8"}</h3><FiStar className="text-orange-500 fill-orange-500" /></div></div>
+               <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Total Orders</p>
+                  <h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">{orders.length}</h3>
+               </div>
+               <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Net Sales</p>
+                  <h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">₹{totalRevenue}</h3>
+               </div>
+               <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Live Items</p>
+                  <h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">{myShopData?.items?.length || 0}</h3>
+               </div>
+               <div className="bg-white p-6 rounded-[2.5rem] border border-gray-100 shadow-sm">
+                  <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-2">Rating</p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-4xl font-black text-gray-900 italic tracking-tighter">{myShopData?.ratings || myShopData?.rating || "4.8"}</h3>
+                    <FiStar className="text-orange-500 fill-orange-500" />
+                  </div>
+               </div>
+            </div>
+
+            {/* Shop Details Card */}
+            <div className={`w-full bg-white rounded-[3rem] shadow-sm overflow-hidden border flex flex-col md:flex-row transition-all duration-300 ${!isShopOnline ? 'border-red-500/20 ring-4 ring-red-500/5' : 'border-gray-100'}`}>
+              <div className="md:w-1/2 relative h-[250px] md:h-auto overflow-hidden">
+                <img src={myShopData.image} className={`w-full h-full object-cover transition-all duration-300 ${!isShopOnline ? 'grayscale blur-[1px]' : ''}`} alt="shop" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
+                {!isShopOnline && (
+                  <div className="absolute top-6 right-6 bg-red-600 text-white font-mono font-black text-[8px] tracking-[3px] uppercase px-3 py-1.5 rounded-xl shadow-xl border border-red-500/20">
+                      STORE OFFLINE
+                  </div>
+                )}
+                <div className="absolute bottom-6 left-8 text-white">
+                  <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-none">{myShopData.name}</h2>
+                </div>
+              </div>
+              <div className="md:w-1/2 p-10 flex flex-col justify-center relative">
+                <div className="flex items-start gap-4 mb-8 text-left">
+                  <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 shrink-0"><FaMapLocationDot /></div>
+                  <p className="text-gray-500 font-bold text-sm leading-relaxed">{myShopData.address}</p>
+                </div>
+                <Link to="/CreateAndEditShop" className="flex items-center gap-2 text-[10px] font-black text-slate-400 hover:text-orange-500 transition-all uppercase tracking-[0.2em]">
+                  <FiEdit3 /> Manage Store <MdArrowForward />
+                </Link>
+              </div>
             </div>
 
             {/* Inventory Logs Section */}
@@ -134,6 +183,7 @@ function OwnerDeshboard() {
                <h2 className="text-2xl font-black text-gray-800 tracking-tighter italic uppercase">Inventory Logs</h2>
                
                {(!myShopData.items || myShopData.items.length === 0) ? (
+                 // --- 🔥 PROFESIONAL EMPTY STATE CARD ---
                  <div className="w-full bg-white p-8 rounded-[2.5rem] border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-center gap-4">
                     <div className="w-16 h-16 bg-orange-50 text-orange-500 rounded-3xl flex items-center justify-center text-2xl shadow-inner">
                         <FaBowlFood />
@@ -148,7 +198,7 @@ function OwnerDeshboard() {
                  </div>
                ) : (
                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {myShopData?.items?.map((item, index) => (
+                  {myShopData.items.map((item, index) => (
                     <div key={index} className={!isShopOnline ? "opacity-50 pointer-events-none select-none transition-all duration-300" : "transition-all duration-300"}>
                         <OwnerItemCard data={item} />
                     </div>
