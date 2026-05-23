@@ -5,47 +5,32 @@ const uploadoncloudinary = require("../utils/cloudinary");
 const AddItem = async (req, res) => {
     try {
         const { name, category, price, foodType } = req.body;
-        
-        
         const ownerId = req.user?._id || req.userId || req.id;
 
-        if (!ownerId) {
-            return res.status(401).json({ message: "User not authenticated" });
-        }
+        if (!ownerId) return res.status(401).json({ message: "User not authenticated" });
 
         let image;
+        // --- FIX: req.file.path ki jagah req.file.buffer ---
         if (req.file) {
-            const cloudResponse = await uploadoncloudinary(req.file.path);
-            image = typeof cloudResponse === "string" ? cloudResponse : cloudResponse?.secure_url;
+            image = await uploadoncloudinary(req.file.buffer); 
         }
 
-       
         const shop = await Shop.findOne({ owner: ownerId });
-
-        if (!shop) {
-            return res.status(404).json({ message: "Bhai, pehle restaurant register karo!" });
-        }
+        if (!shop) return res.status(404).json({ message: "Bhai, pehle restaurant register karo!" });
 
         const item = await Item.create({
-            name, 
-            category, 
-            price, 
-            foodType, 
-            image, 
-            shop: shop._id 
+            name, category, price, foodType, image, shop: shop._id 
         });
 
         shop.items.push(item._id);
         await shop.save();
 
-        // Data ko fresh populate karke bhejo
         const updatedShop = await Shop.findById(shop._id).populate([
             { path: "owner" },
             { path: "items", options: { sort: { updatedAt: -1 } } }
         ]);
 
         return res.status(201).json(updatedShop);
-
     } catch (error) {
         console.log("❌ Add Item Error:", error);
         return res.status(500).json({ message: `Add Item Error: ${error.message}` });
@@ -60,16 +45,13 @@ const EditItem = async (req, res) => {
 
         const updateData = { name, category, price, foodType };
 
+        // --- FIX: req.file.path ki jagah req.file.buffer ---
         if (req.file) {
-            const cloudResponse = await uploadoncloudinary(req.file.path);
-            updateData.image = typeof cloudResponse === "string" ? cloudResponse : cloudResponse?.secure_url;
+            updateData.image = await uploadoncloudinary(req.file.buffer);
         }
 
         const item = await Item.findByIdAndUpdate(itemId, updateData, { new: true });
-
-        if (!item) {
-            return res.status(404).json({ message: "Item Not Found" });
-        }
+        if (!item) return res.status(404).json({ message: "Item Not Found" });
 
         const shop = await Shop.findOne({ owner: ownerId }).populate([
             { path: "owner" },
@@ -81,6 +63,7 @@ const EditItem = async (req, res) => {
         return res.status(500).json({ message: `Edit Item Error: ${error.message}` });
     }
 };
+
 
 const getitembyid = async (req, res) => {
     try {
