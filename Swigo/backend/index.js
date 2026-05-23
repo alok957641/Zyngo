@@ -22,10 +22,16 @@ const port = process.env.PORT || 5000;
 app.set("trust proxy", 1); // 🔥 IMPORTANT
 
 // ✅ FIXED CORS SETUP
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://zyngo-omega.vercel.app"
-];
+const cors = require("cors");
+
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://zyngo-omega.vercel.app"
+  ],
+  credentials: true
+}));
+
 
 app.use(cors({
   origin: function (origin, callback) {
