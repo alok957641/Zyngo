@@ -38,25 +38,20 @@ const sendOtpEmail = async (to, otp) => {
 }
 
 
-const sendDeliveryOtpEmail = async (user, otp) => {
+const sendDeliveryOtpEmail = async (email, otp) => { 
     try {
+        if (!email) throw new Error("Email address is missing");
+
         await transporter.sendMail({
-            from: process.env.EMAIL, 
-            to: user.email,
+            from: process.env.EMAIL,
+            to: email, // Directly email string use karo
             subject: "Delivery OTP - Zyngo",
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                    <h2 style="color: #ea580c;">Zyngo Delivery OTP</h2>
-                    <p>Your OTP for delivery is:</p>
-                    <h1 style="color: #dc2626; letter-spacing: 5px;">${otp}</h1>
-                    <p style="color: #666; font-size: 12px;">This OTP will expire in 5 minutes.</p>
-                </div>
-            `
+            html: `...`
         });
-        console.log("Email sent successfully to:", user.email);
+        console.log("Email sent successfully to:", email);
     } catch (error) {
         console.error("Nodemailer Error:", error);
-        throw new Error("Failed to send email");
+        throw error; // Error ko throw karo taaki controller mein catch ho
     }
 }
 
