@@ -4,7 +4,7 @@ import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import axios from "axios";
 
-// Pages & Components (Aapke existing imports...)
+// Pages & Components
 import Signup from "./pages/Signup.jsx";
 import Signin from "./pages/Signin.jsx";
 import Home from "./pages/Home.jsx";
@@ -44,13 +44,19 @@ import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
 function App() {
+
   const location = useLocation();
 
+  // ✅ AXIOS GLOBAL SETUP
   useEffect(() => {
+
     axios.defaults.baseURL = "https://zyngo.onrender.com";
+
     axios.defaults.withCredentials = true;
+
   }, []);
 
+  // ✅ HOOKS
   useGetCurruser();
   useGetCity();
   useGetMyShop();
@@ -59,76 +65,291 @@ function App() {
   useGetMyOrders();
   useGetUpdateLocation();
 
+  // ✅ REDUX STATE
   const { userData, loading } = useSelector((state) => state.user);
 
-  // 🚀 LOADING STATE
-  if (loading) return (
-    <div className="h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
-      <div className="relative w-16 h-16">
-        <div className="absolute inset-0 border-4 border-slate-800 rounded-full"></div>
-        <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
+  // ✅ FULL PAGE LOADER
+  if (loading) {
+
+    return (
+      <div className="h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
+
+        <div className="relative w-16 h-16">
+
+          <div className="absolute inset-0 border-4 border-slate-800 rounded-full"></div>
+
+          <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
+
+        </div>
+
+        <p className="text-[10px] font-black uppercase tracking-[4px] text-orange-500 animate-pulse font-mono">
+          Syncing Zyngo Node...
+        </p>
+
       </div>
-      <p className="text-[10px] font-black uppercase tracking-[4px] text-orange-500 animate-pulse font-mono">Syncing Zyngo Node...</p>
-    </div>
-  );
+    );
 
+  }
+
+  // ✅ FOOTER CONDITION
   const path = location.pathname.toLowerCase();
-  const showFooter = ["/", "/cart", "/my-orders", "/checkout", "/order-success"].includes(path) || 
-                     path.startsWith("/shop/") || 
-                     path.startsWith("/category/");
 
-  // ✅ FIXED PROTECTED COMPONENT
+  const showFooter =
+    ["/", "/cart", "/my-orders", "/checkout", "/order-success"].includes(path) ||
+    path.startsWith("/shop/") ||
+    path.startsWith("/category/");
+
+  // ✅ FINAL FIXED PROTECTED COMPONENT
   const Protected = ({ children, role }) => {
-    if (!userData) return <Navigate to="/signin" replace />;
-    if (role && userData.role !== role) return <Navigate to="/" replace />;
-    return <>{children}</>;
+
+    // ⏳ Wait while restoring user
+    if (loading) {
+
+      return (
+        <div className="h-screen bg-[#020617] flex items-center justify-center">
+
+          <p className="text-white font-bold text-lg">
+            Loading...
+          </p>
+
+        </div>
+      );
+
+    }
+
+    // ❌ User not logged in
+    if (!userData) {
+
+      return <Navigate to="/signin" replace />;
+
+    }
+
+    // ❌ Wrong role
+    if (role && userData.role !== role) {
+
+      return <Navigate to="/" replace />;
+
+    }
+
+    // ✅ All good
+    return children;
+
   };
 
   return (
+
     <>
-      <Toaster position="top-center" toastOptions={{ style: { fontSize: "12px", borderRadius: "15px", background: "#1e293b", color: "#fff" } }} />
-      
+
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            fontSize: "12px",
+            borderRadius: "15px",
+            background: "#1e293b",
+            color: "#fff"
+          }
+        }}
+      />
+
       <Routes>
-        <Route path="/" element={
-          !userData ? <Home /> : 
-          userData.role === "admin" ? <Navigate to="/admin/dashboard" replace /> :
-          userData.role === "deliveryboy" ? <Navigate to="/rider/dashboard" replace /> :
-          userData.role === "owner" ? <Navigate to="/owner/dashboard" replace /> :
-          <Home />
-        } />
 
-        <Route path="/signup" element={!userData ? <Signup /> : <Navigate to="/" replace />} />
-        <Route path="/signin" element={!userData ? <Signin /> : <Navigate to="/" replace />} />
-        <Route path="/forgetpassword" element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />} />
+        {/* HOME */}
+        <Route
+          path="/"
+          element={
+            !userData ? (
+              <Home />
+            ) : userData.role === "admin" ? (
+              <Navigate to="/admin/dashboard" replace />
+            ) : userData.role === "deliveryboy" ? (
+              <Navigate to="/rider/dashboard" replace />
+            ) : userData.role === "owner" ? (
+              <Navigate to="/owner/dashboard" replace />
+            ) : (
+              <Home />
+            )
+          }
+        />
 
-        {/* Protected Routes */}
-        <Route path="/CreateAndEditShop" element={<Protected role="owner"><CreateAndEditShop /></Protected>} />
-        <Route path="/AddItem" element={<Protected role="owner"><AddItem /></Protected>} />
-        <Route path="/EditItem/:itemId" element={<Protected role="owner"><EditItem /></Protected>} />
-        <Route path="/cart" element={<Protected><Cartpage /></Protected>} />
-        <Route path="/CheckOut" element={<Protected><CheckOut /></Protected>} />
-        <Route path="/order-success" element={<Protected><OrderSuccess /></Protected>} />
-        <Route path="/my-orders" element={<Protected><MyOrders /></Protected>} />
-        <Route path="/category/:catName" element={<Protected><CategoryPage /></Protected>} />
-        <Route path="/shop/:shopId" element={<Protected><ShopPage /></Protected>} />
-        <Route path="/track-order/:orderId" element={<Protected><TrackOrderPage /></Protected>} />
+        {/* AUTH */}
+        <Route
+          path="/signup"
+          element={!userData ? <Signup /> : <Navigate to="/" replace />}
+        />
 
-        {/* Rider Routes */}
-        <Route path="/rider/dashboard" element={<Protected role="deliveryboy"><DelevryBoyDeshboard /></Protected>} />
-        <Route path="/rider/earnings" element={<Protected role="deliveryboy"><RiderEarnings /></Protected>} />
-        <Route path="/rider/history" element={<Protected role="deliveryboy"><RiderHistory /></Protected>} />
-        <Route path="/rider/profile" element={<Protected role="deliveryboy"><RiderProfile /></Protected>} />
+        <Route
+          path="/signin"
+          element={!userData ? <Signin /> : <Navigate to="/" replace />}
+        />
 
-        {/* Owner Routes */}
-        <Route path="/owner/dashboard" element={<Protected role="owner"><OwnerDashboard /></Protected>} />
-        <Route path="/owner/earnings" element={<Protected role="owner"><OwnerEarnings /></Protected>} />
+        <Route
+          path="/forgetpassword"
+          element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />}
+        />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* OWNER ROUTES */}
+        <Route
+          path="/CreateAndEditShop"
+          element={
+            <Protected role="owner">
+              <CreateAndEditShop />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/AddItem"
+          element={
+            <Protected role="owner">
+              <AddItem />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/EditItem/:itemId"
+          element={
+            <Protected role="owner">
+              <EditItem />
+            </Protected>
+          }
+        />
+
+        {/* USER ROUTES */}
+        <Route
+          path="/cart"
+          element={
+            <Protected>
+              <Cartpage />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/CheckOut"
+          element={
+            <Protected>
+              <CheckOut />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/order-success"
+          element={
+            <Protected>
+              <OrderSuccess />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/my-orders"
+          element={
+            <Protected>
+              <MyOrders />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/category/:catName"
+          element={
+            <Protected>
+              <CategoryPage />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/shop/:shopId"
+          element={
+            <Protected>
+              <ShopPage />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/track-order/:orderId"
+          element={
+            <Protected>
+              <TrackOrderPage />
+            </Protected>
+          }
+        />
+
+        {/* RIDER ROUTES */}
+        <Route
+          path="/rider/dashboard"
+          element={
+            <Protected role="deliveryboy">
+              <DelevryBoyDeshboard />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/rider/earnings"
+          element={
+            <Protected role="deliveryboy">
+              <RiderEarnings />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/rider/history"
+          element={
+            <Protected role="deliveryboy">
+              <RiderHistory />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/rider/profile"
+          element={
+            <Protected role="deliveryboy">
+              <RiderProfile />
+            </Protected>
+          }
+        />
+
+        {/* OWNER DASHBOARD */}
+        <Route
+          path="/owner/dashboard"
+          element={
+            <Protected role="owner">
+              <OwnerDashboard />
+            </Protected>
+          }
+        />
+
+        <Route
+          path="/owner/earnings"
+          element={
+            <Protected role="owner">
+              <OwnerEarnings />
+            </Protected>
+          }
+        />
+
+        {/* 404 */}
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
+        />
+
       </Routes>
 
       {showFooter && <Footer />}
+
     </>
+
   );
+
 }
 
 export default App;
