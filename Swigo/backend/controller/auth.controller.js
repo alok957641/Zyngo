@@ -20,60 +20,62 @@ const setAuthCookie = (res, token) => {
 
 };
 
-// SIGNUP
+// signup
 const signup = async (req, res) => {
     try {
+        console.log("--- SIGNUP START ---");
         const { fullname, email, password, mobile, role } = req.body;
+        console.log("Data received:", { fullname, email, mobile, role });
 
-        // 1. Basic validation
-        if (!fullname || !email || !password || !mobile || !role) {
-            return res.status(400).json({ message: "Sabhi fields bharna zaroori hai!" });
-        }
-
-        // 2. Already exists check
+        // Check if user exists
+        console.log("Checking if user exists...");
         let user = await User.findOne({ email });
         if (user) {
+            console.log("User already exists!");
             return res.status(400).json({ message: "User already exists" });
         }
 
-        // 3. Length validation
-        if (password.length < 6) {
-            return res.status(400).json({ message: "Password kam se kam 6 characters ka ho" });
-        }
-        if (mobile.length !== 10) {
-            return res.status(400).json({ message: "Mobile number exactly 10 digit ka hona chahiye" });
+        // Validate password length
+        if (!password || password.length < 6) {
+            console.log("Password validation failed");
+            return res.status(400).json({ message: "Password must be at least 6 characters long" });
         }
 
-        // 4. Password hashing
-        const hashedPassword = await bscrypt.hash(password, 10);
-        
-        // 5. Create user
+        // Validate mobile string length
+        console.log("Validating mobile:", mobile);
+        if (!mobile || mobile.toString().length !== 10) {
+            console.log("Mobile validation failed");
+            return res.status(400).json({ message: "mobile number must be exactly 10 digit long" });
+        }
+
+        console.log("Hashing password...");
+        const hashedpassword = await bscrypt.hash(password, 10);
+
+        console.log("Creating user in DB...");
         user = await User.create({
             fullname,
             email,
             mobile,
             role,
-            password: hashedPassword,
+            password: hashedpassword,
         });
+        console.log("User created successfully:", user._id);
 
-        // 6. Token aur Cookie
-        const token = generatetoken(user._id); // Spelling check: 'generatetoken'
+        const token = generatetocken(user._id);
         res.cookie("token", token, {
-            secure: process.env.NODE_ENV === "production",
+            secure: false,
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
             httpOnly: true,
         });
-
-        // 7. Success response (password hatakar)
-        const userResponse = user.toObject();
-        delete userResponse.password;
         
-        return res.status(201).json(userResponse);
+        return res.status(201).json(user);
 
     } catch (error) {
-        console.error("Signup Error:", error);
-        return res.status(500).json({ message: "Signup ke dauran server error aaya" });
+        // 🔥 Ye line sabse important hai. 
+        // Render ke Logs mein yahi error dikhega.
+        console.error("CRITICAL ERROR IN SIGNUP:", error); 
+        return res.status(500).json({ message: `signup error: ${error.message}` });
     }
 }
 
@@ -81,19 +83,34 @@ const signup = async (req, res) => {
 // SIGNIN
 const signin = async (req, res) => {
     try {
+        console.log("--- SIGNIN START ---");
         const { email, password } = req.body;
+        console.log("Signin attempt for email:", email);
+
+        // 1. Check if user exists
         const user = await User.findOne({ email });
-        
         if (!user) {
-            return res.status(400).json({ message: "Invalid email ya password" });
+            console.log("User not found with email:", email);
+            return res.status(400).json({ message: "Invalid email or password" });
+        }
+        console.log("User found in DB, verifying password...");
+
+        // 2. Check if user has a password (kabhi kabhi DB mein password field empty ho sakti hai)
+        if (!user.password) {
+            console.log("CRITICAL: User found but no password in DB!");
+            return res.status(400).json({ message: "Password not set for this account" });
         }
 
+        // 3. Compare password
         const isMatch = await bscrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ message: "Password galat hai" });
+            console.log("Password mismatch for email:", email);
+            return res.status(400).json({ message: "Password incorrect" });
         }
+        console.log("Password matched!");
 
-        const token = generatetoken(user._id);
+        // 4. Generate Token
+        const token = generatetocken(user._id);
         res.cookie("token", token, {
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
@@ -101,13 +118,16 @@ const signin = async (req, res) => {
             httpOnly: true,
         });
 
-        const userResponse = user.toObject();
-        delete userResponse.password;
-        
-        return res.status(200).json(userResponse);
+        const userObj = user.toObject();
+        delete userObj.password; // Security: password mat bhejo
+        console.log("Signin successful for:", userObj._id);
+
+        return res.status(200).json(userObj);
+
     } catch (err) {
-        console.error("Signin Error:", err);
-        return res.status(500).json({ message: "Signin ke dauran server error" });
+        // 🔥 Asli error yahan pakda jayega
+        console.error("CRITICAL ERROR IN SIGNIN:", err);
+        return res.status(500).json({ message: `Signin error: ${err.message}` });
     }
 }
 
