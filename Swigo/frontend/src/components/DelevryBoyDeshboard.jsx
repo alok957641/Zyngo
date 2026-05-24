@@ -181,17 +181,20 @@ useEffect(() => {
         }
     };
 
-    const handleLogout = async () => {
-        try {
-            localStorage.clear(); 
-            dispatch(setUserData(null));
-            await axios.get(`${serverurl}/api/user/logout`, { withCredentials: true });
-            window.location.href = "/signin"; 
-        } catch (err) {
-            window.location.href = "/signin"; 
-        }
-    };
-
+    
+const handleLogout = async () => {
+    try {
+        // Backend se cookie delete karwao
+        await apiClient.get(`/api/auth/signout`); 
+    } catch (err) {
+        console.error("Logout API failed, but forcing local cleanup");
+    } finally {
+        // Hamesha local data saaf karo, chahe API fail ho
+        localStorage.clear();
+        dispatch(setUserData(null)); 
+        window.location.href = "/signin"; // Force redirect
+    }
+};
     const handleStartFinish = async () => {
         try {
             if (!activeOrder?.orderId || !activeOrder?.shopOrder?._id) return;

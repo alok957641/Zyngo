@@ -25,12 +25,19 @@ function OwnerNav() {
     return currentStatus === "pending" || currentStatus === "preparing";
   }).length;
 
-  const handleLogout = () => {
-    dispatch(setUserData(null));
-    setIsProfileOpen(false);
-    navigate("/signin");
-  };
-
+const handleLogout = async () => {
+    try {
+        // Backend se cookie delete karwao
+        await apiClient.get(`/api/auth/signout`); 
+    } catch (err) {
+        console.error("Logout API failed, but forcing local cleanup");
+    } finally {
+        // Hamesha local data saaf karo, chahe API fail ho
+        localStorage.clear();
+        dispatch(setUserData(null)); 
+        window.location.href = "/signin"; // Force redirect
+    }
+};
   return (
     <nav className="bg-white shadow-md border-b-2 border-orange-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

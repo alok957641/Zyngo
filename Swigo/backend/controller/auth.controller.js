@@ -80,22 +80,19 @@ const googleAuth = async (req, res) => {
 // Signout
 const signout = async (req, res) => {
     try {
-        // Cookie ko clear karne ke liye 'clearCookie' use karo 
-        // options wahi hone chahiye jo set karte waqt the
+        // Options wohi hona chahiye jo login karte waqt use kiye the
         res.clearCookie("token", {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            partitioned: true, // Ye zaroori hai agar tumne set karte waqt use kiya tha
+            partitioned: true, // Ye bahut zaroori hai
             path: "/"
         });
-        
         return res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (error) {
-        return res.status(500).json({ message: "Logout failed", error: error.message });
+        return res.status(500).json({ message: "Logout failed" });
     }
 };
-
 const getMe = async (req, res) => {
     try {
         // middleware ne already req.user set kar diya hoga
