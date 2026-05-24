@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 
 // Pages & Components Imports
