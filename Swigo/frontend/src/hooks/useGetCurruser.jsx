@@ -1,29 +1,37 @@
 import { useEffect } from "react";
 import axios from "axios";
-import { useDispatch } from "react-redux"; 
+import { useDispatch, useSelector } from "react-redux"; // ✅ Add useSelector
 import { setUserData, setLoading } from "../redux/userSlice"; 
 
-export const serverurl = "https://zyngo.onrender.com";
+export const serverurl = "https://zyngo.onrender.com"; // ✅ Your Render URL
 
 function useGetCurruser() {
   const dispatch = useDispatch();
+  const { userData } = useSelector((state) => state.user); // ✅ Get current user
 
   useEffect(() => {
     const fetchUser = async () => {
-      // Refresh par pehle loading true karo taaki redirect na ho
+      // ✅ Agar already user hai toh API call mat karo (performance improve)
+      if (userData) {
+        dispatch(setLoading(false));
+        return;
+      }
+
       dispatch(setLoading(true));
       
       try {
-        const result = await axios.get(`${serverurl}/api/user/getcurruser`, {
+        // ⚠️ Route match karo - tera backend route "/api/auth/me" hai
+        const result = await axios.get(`${serverurl}/api/auth/me`, {
           withCredentials: true,
         });
 
         if (result.data) {
-          const finalUserData = result.data.user || result.data;
-          dispatch(setUserData(finalUserData));
+          dispatch(setUserData(result.data));
+        } else {
+          dispatch(setUserData(null));
         }
       } catch (error) {
-        console.log("🔒 User not logged in.");
+        console.log("🔒 User not logged in:", error.response?.status);
         dispatch(setUserData(null)); 
       } finally {
         dispatch(setLoading(false));
@@ -31,8 +39,7 @@ function useGetCurruser() {
     };
     
     fetchUser();
-    // Dependency array sirf dispatch rakho, userData nahi!
-  }, [dispatch]); 
+  }, [dispatch, userData]); // ✅ userData dependency add kiya
 }
 
 export default useGetCurruser;
