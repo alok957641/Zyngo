@@ -11,11 +11,10 @@ const AddItem = async (req, res) => {
 
         let image;
         if (req.file) {
-            // ✅ FIX: Buffer ko handle karne ke liye uploadoncloudinary 
-            // agar path leta hai, toh yahan logic change karna hoga.
-            // Agar cloudinary upload function buffer leta hai toh:
+            console.log("Uploading file to Cloudinary...");
+            // ✅ FIX: cloudResponse mein URL aa raha hai
             const cloudResponse = await uploadoncloudinary(req.file.buffer); 
-            image = secureUrl;
+            image = cloudResponse; // Yahan 'cloudResponse' use kar
         }
 
         const shop = await Shop.findOne({ owner: ownerId });
@@ -40,7 +39,6 @@ const AddItem = async (req, res) => {
     }
 };
 
-
 const EditItem = async (req, res) => {
     try {
         const itemId = req.params.id;
@@ -49,13 +47,11 @@ const EditItem = async (req, res) => {
 
         const updateData = { name, category, price, foodType };
 
-        // ✅ FIX: Agar file hai, toh 'buffer' bhejo, 'path' nahi
         if (req.file) {
             console.log("Uploading file to Cloudinary...");
+            // ✅ FIX: cloudResponse mein URL aa raha hai
             const cloudResponse = await uploadoncloudinary(req.file.buffer); 
-            
-            // ✅ Kyunki tumhari utility abhi seedha secure_url resolve kar rahi hai
-            updateData.image = secureUrl; 
+            updateData.image = cloudResponse; // Yahan bhi 'cloudResponse' use kar
         }
 
         const item = await Item.findByIdAndUpdate(itemId, updateData, { new: true });
@@ -75,7 +71,6 @@ const EditItem = async (req, res) => {
         return res.status(500).json({ message: `Edit Item Error: ${error.message}` });
     }
 };
-
 
 
 const getitembyid = async (req, res) => {
