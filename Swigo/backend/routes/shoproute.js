@@ -1,14 +1,19 @@
 const express = require("express");
 const shoprouter = express.Router();
-const { CreateAndEditShop, getMyShop, getShopByCity } = require("../controller/shop.controller.js");
 const { isAuth } = require("../middelwear/isAuth.js"); 
-const Upload = require("../middelwear/multer.js");      
+const Upload = require("../middelwear/multer.js"); 
 
-// Protected Routes (Login required)
+const { 
+    CreateAndEditShop, 
+    getMyShop, 
+    getShopByCity 
+} = require("../controller/shop.controller.js");
+
+// ✅ Protected Routes
 shoprouter.post("/CreateAndEditShop", isAuth, Upload.single("image"), CreateAndEditShop);
 shoprouter.get("/getMyShop", isAuth, getMyShop);
 
-// Public Route (No login required)
+// ✅ Public Routes
 shoprouter.get("/getShopByCity/:city", getShopByCity);
 
 module.exports = shoprouter;

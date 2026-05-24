@@ -3,61 +3,60 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const database = require("./config/db.js");
-const router = require("./routes/authroute.js");
-const userroute = require("./routes/userroute.js");
-const shoprouter = require("./routes/shoproute.js");
-const itemrouter = require("./routes/itemroute.js");
-const orderrouter = require("./routes/orderroute.js");
-const ratingrouter = require("./routes/rating.js");
-const payoutRouter = require("./routes/payoutRoute.js");
-const adminRoutes = require("./routes/adminRoute.js");
+
+// Import Routes
+const authRoute = require("./routes/authroute.js");
+const userRoute = require("./routes/userroute.js");
+const shopRoute = require("./routes/shoproute.js");
+const itemRoute = require("./routes/itemroute.js");
+const orderRoute = require("./routes/orderroute.js");
+const ratingRoute = require("./routes/rating.js");
+const payoutRoute = require("./routes/payoutRoute.js");
+const adminRoute = require("./routes/adminRoute.js");
 
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-// ✅ Dynamic CORS Setup (Best for Production)
-const allowedOrigins = [
-  "http://localhost:5173", 
-  "https://zyngo-omega.vercel.app"
-];
-
+// 1. CORS Configuration (Fixes Vercel <-> Render CORS)
 app.use(cors({
-  origin: ["https://zyngo-omega.vercel.app", "http://localhost:5173"],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    origin: ["https://zyngo-omega.vercel.app", "http://localhost:5173"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 }));
 
+// 2. Middlewares
 app.use(express.json());
 app.use(cookieParser());
 
-// 🛣️ API Routes 
-app.use("/api/auth", router);
-app.use("/api/user", userroute);
-app.use("/api/shop", shoprouter);
-app.use("/api/item", itemrouter);
-app.use("/api/order", orderrouter);
-app.use("/api/rating", ratingrouter);
-app.use("/api/payout", payoutRouter);
-app.use("/api/admin", adminRoutes);
+// 3. API Routes (Mounting)
+app.use("/api/auth", authRoute);
+app.use("/api/user", userRoute);
+app.use("/api/shop", shopRoute);
+app.use("/api/item", itemRoute);
+app.use("/api/order", orderRoute);
+app.use("/api/rating", ratingRoute);
+app.use("/api/payout", payoutRoute);
+app.use("/api/admin", adminRoute);
 
+// 4. Health Check
 app.get("/", (req, res) => {
-  res.send("API Working 🔥");
+    res.status(200).json({ message: "Server is healthy and running! 🔥" });
 });
 
-// 🚀 Server Start
-// Server Start Logic - Update this block
+// 5. Database & Server Start
 const startServer = async () => {
-  try {
-    await database();
-    app.listen(port, '0.0.0.0', () => { // '0.0.0.0' add kiya hai taaki external connections allow ho
-      console.log(`Server is running on port ${port} 🚀`);
-    });
-  } catch (err) {
-    console.error("Server start error:", err);
-  }
+    try {
+        await database();
+        app.listen(port, '0.0.0.0', () => {
+            console.log(`Server is running on port ${port} 🚀`);
+        });
+    } catch (err) {
+        console.error("Server start error:", err);
+        process.exit(1); // Exit on failure
+    }
 };
+
 startServer();
 
-module.exports = app;
