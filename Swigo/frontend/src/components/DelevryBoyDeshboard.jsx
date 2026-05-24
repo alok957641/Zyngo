@@ -14,14 +14,16 @@ import { RiMotorbikeFill, RiWallet3Fill } from "react-icons/ri";
 import { setUserData } from "../redux/userSlice"; // Check if imported correctly
 
 
-const apiClient = axios.create({
-    baseURL: serverurl,
-    withCredentials: true
-});
+
 
 
 const serverurl = "https://zyngo.onrender.com";
 
+
+const apiClient = axios.create({
+    baseURL: serverurl,
+    withCredentials: true
+});
 // --- Custom Icons (Sharp Style) ---
 const riderIcon = new L.Icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/2972/2972185.png', iconSize: [36, 36], iconAnchor: [18, 36] });
 const shopIcon = new L.Icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/610/610365.png', iconSize: [30, 30], iconAnchor: [15, 30] });
@@ -79,13 +81,14 @@ function DelevryBoyDeshboard() {
     };
 
     // 📡 ASLI DATA SYNC (Polling)
-    const fetchEverything = async () => {
+ const fetchEverything = async () => {
         if (!isOnline || !userData) return;
         try {
+            // ✅ Yahan bhi apiClient use karo
             const [statsRes, missionRes, activeRes] = await Promise.all([
-                axios.get(`${serverurl}/api/order/rider-stats`, { withCredentials: true }),
-                axios.get(`${serverurl}/api/order/get-delivery-assignments`, { withCredentials: true }),
-                axios.get(`${serverurl}/api/order/get-current-order`, { withCredentials: true })
+                apiClient.get(`/api/order/rider-stats`),
+                apiClient.get(`/api/order/get-delivery-assignments`),
+                apiClient.get(`/api/order/get-current-order`)
             ]);
 
             if (statsRes.data.success) setRealStats(statsRes.data.stats);
