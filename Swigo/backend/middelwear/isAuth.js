@@ -1,42 +1,52 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/user/usermodel.js"); // ✅ Fixed path
+const User = require("../models/user/usermodel.js");
 
 const isAuth = async (req, res, next) => {
     try {
-        const token = req.cookies.token;
+        // 1. Cookie check
+        const token = req.cookies?.token;
         if (!token) {
-            return res.status(401).json({ message: "Token not found! Bhai login toh kar lo." });
+            return res.status(401).json({ success: false, message: "Token missing! Login required." });
         }
 
+        // 2. Token Verify
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const id = decoded.id || decoded.userId || decoded.userid || decoded._id; // ✅ userId bhi add kar diya
-
-        const user = await User.findById(id).select("-password"); 
-
-        if (!user) {
-            return res.status(404).json({ message: "Bhai user database mein nahi mila!" });
+        
+        // 3. ID extraction (Logs check karne ke liye)
+        const userId = decoded.id || decoded.userId || decoded._id || decoded.userid;
+        
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Invalid Token Structure!" });
         }
 
-        req.user = user; 
-        req.userId = user._id;
-        next();
+        // 4. Database User Check
+        const user = await User.findById(userId).select("-password");
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User account not found!" });
+        }
 
+        // 5. Attach to req
+        req.user = user;
+        req.userId = user._id;
+        
+        next();
     } catch (error) {
-        console.error("Auth Error:", error.message); // ✅ Logging for debugging
-        return res.status(401).json({ message: 'Authentication fail ho gayi bhai!' });
+        // ERROR LOGGING: Render logs mein yahan se pata chalega ki expired hai ya signature mismatch
+        console.error("JWT Verification Error:", error.message);
+        
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({ success: false, message: "Session expired! Phir se login karo." });
+        }
+        return res.status(401).json({ success: false, message: "Authentication failed!" });
     }
 };
 
-// 👑 ADMIN CHECK MIDDLEWARE
-const isAdmin = async (req, res, next) => {
-    try {
-        if (req.user && req.user.role === "admin") {
-            next();
-        } else {
-            return res.status(403).json({ message: "Access Denied! Bhai tum admin nahi ho." });
-        }
-    } catch (error) {
-        return res.status(500).json({ message: "Admin check mein error!" });
+const isAdmin = (req, res, next) => {
+    // req.user check karna zaroori hai kyunki isAuth pehle call hona chahiye
+    if (req.user && req.user.role === "admin") {
+        next();
+    } else {
+        return res.status(403).json({ success: false, message: "Access Denied: Admins only!" });
     }
 };
 

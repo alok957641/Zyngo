@@ -42,6 +42,16 @@ const signup = async (req, res) => {
     }
 };
 
+const getMe = async (req, res) => {
+    try {
+        // middleware ne already req.user set kar diya hoga
+        if (!req.user) return res.status(404).json({ message: "User not found" });
+        return res.status(200).json(req.user);
+    } catch (error) {
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
 // Rest of your code remains same... (signin, signout, etc.)
 // Signin
 const signin = async (req, res) => {
@@ -160,4 +170,4 @@ const googleAuth = async (req, res) => {
     }
 };
 
-module.exports = { signup, signin, signout, sendOtp, verifyOtp, resetPassword, googleAuth };
+module.exports = { signup, signin, signout, sendOtp, verifyOtp, resetPassword, googleAuth, getMe };
