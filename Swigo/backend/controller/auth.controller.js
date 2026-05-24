@@ -76,23 +76,25 @@ const googleAuth = async (req, res) => {
     }
 };
 
-// Signout
+
 // Signout
 const signout = async (req, res) => {
     try {
-        // Options wohi hona chahiye jo login karte waqt use kiye the
         res.clearCookie("token", {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            partitioned: true, // Ye bahut zaroori hai
-            path: "/"
+            partitioned: true,
+            path: "/",
+            // Domain wahi rakho jo login ke time tha
+            // Agar Render pe hai, toh domain undefined chhodne se default sahi leta hai
         });
         return res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (error) {
         return res.status(500).json({ message: "Logout failed" });
     }
 };
+
 const getMe = async (req, res) => {
     try {
         // middleware ne already req.user set kar diya hoga

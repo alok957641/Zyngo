@@ -56,6 +56,22 @@ function App() {
   useGetMyOrders();
   useGetUpdateLocation();
 
+  useEffect(() => {
+    // 🛡️ GLOBAL INTERCEPTOR: Agar kabhi bhi server se 401 aaye, toh user ko logout karke login page pe bhejo
+    const interceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          console.warn("🛡️ Unauthorized! Forcing Logout...");
+          localStorage.clear(); // Saara data saaf
+          window.location.href = "/signin"; // Force redirect
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => axios.interceptors.response.eject(interceptor);
+  }, []);
   // ✅ Add loading state from Redux
   const { userData, loading } = useSelector((state) => state.user);
 
