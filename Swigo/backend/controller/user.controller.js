@@ -33,47 +33,25 @@ const getcurruser = async (req, res) => {
     }
 };
 
-// Update User Location
-const updateUserLocation = async (req, res) => {
+// backend/controller/user.controller.js
+export const updateUserLocation = async (req, res) => {
     try {
-        const userId = getUserIdFromToken(req); // ✅ Use helper function
+        const { latitude, longitude } = req.body; // Yahan match karo
+        const userId = req.userId; // Middleware se aana chahiye
         
-        if (!userId) {
-            return res.status(401).json({ success: false, message: "Unauthorized access" });
-        }
+        if (!latitude || !longitude) return res.status(400).json({ message: "Invalid data" });
 
-        const lat = parseFloat(req.body.lat || req.body.latitude);
-        const lon = parseFloat(req.body.lon || req.body.longitude);
-
-        if (isNaN(lat) || isNaN(lon)) {
-            return res.status(400).json({ success: false, message: "Invalid coordinates provided" });
-        }
-
-        const user = await User.findByIdAndUpdate(
-            userId,
-            {
-                $set: {
-                    location: {
-                        type: "Point",
-                        coordinates: [lon, lat]
-                    }
-                }
-            },
-            { new: true, select: "location" }
-        );
-
-        if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-        return res.status(200).json({
-            success: true,
-            message: "Location updated successfully",
-            location: user.location
+        const user = await User.findByIdAndUpdate(userId, {
+            location: { type: "Point", coordinates: [longitude, latitude] }
         });
-    } catch (error) {
-        console.error("Update Location Error:", error);
-        return res.status(500).json({ success: false, message: "Failed to update location" });
+        
+        return res.status(200).json({ success: true });
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
     }
 };
+
+
 
 // Toggle Availability Status
 const toggleAvailabilityStatus = async (req, res) => {
