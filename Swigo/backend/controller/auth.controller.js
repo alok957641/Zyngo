@@ -6,9 +6,10 @@ const { sendOtpEmail } = require("../utils/mail.js");
 // ✅ Centralized Cookie Options: Cross-domain ke liye best practice
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production", // Production (Render) par HTTPS hota hai
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Cross-site ke liye 'none' zaruri hai
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 Days
+    secure: true,        // Production (Render) par true hona chahiye
+    sameSite: "none",    // Cross-site ke liye 'none' zaruri hai
+    partitioned: true,   // 🔥 Ye add karo, modern browser iske bina block kar dete hain
+    maxAge: 7 * 24 * 60 * 60 * 1000, 
     path: "/"
 };
 
@@ -76,11 +77,20 @@ const googleAuth = async (req, res) => {
 };
 
 // Signout
+// Signout
 const signout = async (req, res) => {
     try {
-        // Clear cookie using the same options
-        res.clearCookie("token", cookieOptions);
-        return res.status(200).json({ message: "Logged out successfully" });
+        // Cookie ko clear karne ke liye 'clearCookie' use karo 
+        // options wahi hone chahiye jo set karte waqt the
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+            partitioned: true, // Ye zaroori hai agar tumne set karte waqt use kiya tha
+            path: "/"
+        });
+        
+        return res.status(200).json({ success: true, message: "Logged out successfully" });
     } catch (error) {
         return res.status(500).json({ message: "Logout failed", error: error.message });
     }

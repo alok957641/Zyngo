@@ -175,17 +175,21 @@ useEffect(() => {
             setStatusToggleLoading(false);
         }
     };
-
-    const handleLogout = async () => {
-        try {
-            localStorage.clear(); 
-            dispatch(setUserData(null));
-            await axios.get(`${serverurl}/api/user/logout`, { withCredentials: true });
-            window.location.href = "/signin"; 
-        } catch (err) {
-            window.location.href = "/signin"; 
-        }
-    };
+const handleLogout = async () => {
+    try {
+        // Server se cookie clear karwao
+        await apiClient.get(`/api/auth/logout`); 
+        
+        // Redux aur LocalStorage saaf karo
+        localStorage.clear();
+        dispatch(setUserData(null)); 
+        
+        // Page redirect karo
+        window.location.href = "/signin";
+    } catch (err) {
+        console.error("Logout error:", err);
+    }
+};
 
     const handleStartFinish = async () => {
         try {

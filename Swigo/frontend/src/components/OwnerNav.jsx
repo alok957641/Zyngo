@@ -25,11 +25,21 @@ function OwnerNav() {
     return currentStatus === "pending" || currentStatus === "preparing";
   }).length;
 
-  const handleLogout = () => {
-    dispatch(setUserData(null));
-    setIsProfileOpen(false);
-    navigate("/signin");
-  };
+const handleLogout = async () => {
+    try {
+        // Server se cookie clear karwao
+        await apiClient.get(`/api/auth/logout`); 
+        
+        // Redux aur LocalStorage saaf karo
+        localStorage.clear();
+        dispatch(setUserData(null)); 
+        
+        // Page redirect karo
+        window.location.href = "/signin";
+    } catch (err) {
+        console.error("Logout error:", err);
+    }
+};
 
   return (
     <nav className="bg-white shadow-md border-b-2 border-orange-100 sticky top-0 z-50">
