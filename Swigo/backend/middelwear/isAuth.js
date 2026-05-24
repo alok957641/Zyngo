@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/user/usermodel");
+const User = require("../models/user/usermodel.js"); // ✅ Fixed path
 
 const isAuth = async (req, res, next) => {
     try {
@@ -9,7 +9,7 @@ const isAuth = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const id = decoded.id || decoded.userid || decoded._id;
+        const id = decoded.id || decoded.userId || decoded.userid || decoded._id; // ✅ userId bhi add kar diya
 
         const user = await User.findById(id).select("-password"); 
 
@@ -22,14 +22,14 @@ const isAuth = async (req, res, next) => {
         next();
 
     } catch (error) {
+        console.error("Auth Error:", error.message); // ✅ Logging for debugging
         return res.status(401).json({ message: 'Authentication fail ho gayi bhai!' });
     }
 };
 
-// 👑 ADMIN CHECK MIDDLEWARE (Ye miss ho raha tha)
+// 👑 ADMIN CHECK MIDDLEWARE
 const isAdmin = async (req, res, next) => {
     try {
-        // isAuth ke baad hi ye chalega, isliye req.user mil jayega
         if (req.user && req.user.role === "admin") {
             next();
         } else {
@@ -40,5 +40,4 @@ const isAdmin = async (req, res, next) => {
     }
 };
 
-// 🔥 DONO KO EK SAATH EXPORT KARO
 module.exports = { isAuth, isAdmin };

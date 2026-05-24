@@ -1,10 +1,27 @@
 const User = require("../models/user/usermodel.js");
+const jwt = require("jsonwebtoken"); // ✅ Add this
+
+// Helper function to extract userId from token
+const getUserIdFromToken = (req) => {
+    try {
+        const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+        if (!token) return null;
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        return decoded.userId || decoded._id || decoded.id;
+    } catch (error) {
+        return null;
+    }
+};
 
 // Get Current User
 const getcurruser = async (req, res) => {
     try {
-        const userId = req.userId || req.user?._id;
-        if (!userId) return res.status(401).json({ message: "Unauthorized: UserId not found" });
+        const userId = getUserIdFromToken(req); // ✅ Use helper function
+        
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized: No valid token" });
+        }
 
         const user = await User.findById(userId).select("-password").lean();
         if (!user) return res.status(404).json({ message: "User not found" });
@@ -19,13 +36,15 @@ const getcurruser = async (req, res) => {
 // Update User Location
 const updateUserLocation = async (req, res) => {
     try {
-        const userId = req.userId || req.user?._id;
-        if (!userId) return res.status(401).json({ success: false, message: "Unauthorized access" });
+        const userId = getUserIdFromToken(req); // ✅ Use helper function
+        
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Unauthorized access" });
+        }
 
         const lat = parseFloat(req.body.lat || req.body.latitude);
         const lon = parseFloat(req.body.lon || req.body.longitude);
 
-        // Validation
         if (isNaN(lat) || isNaN(lon)) {
             return res.status(400).json({ success: false, message: "Invalid coordinates provided" });
         }
@@ -36,7 +55,6 @@ const updateUserLocation = async (req, res) => {
                 $set: {
                     location: {
                         type: "Point",
-                        // GeoJSON format: [longitude, latitude]
                         coordinates: [lon, lat]
                     }
                 }
@@ -60,8 +78,11 @@ const updateUserLocation = async (req, res) => {
 // Toggle Availability Status
 const toggleAvailabilityStatus = async (req, res) => {
     try {
-        const userId = req.userId || req.user?._id;
-        if (!userId) return res.status(401).json({ success: false, message: "Session expired" });
+        const userId = getUserIdFromToken(req); // ✅ Use helper function
+        
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "Session expired" });
+        }
 
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ success: false, message: "User not found" });

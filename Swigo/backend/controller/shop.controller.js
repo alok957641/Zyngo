@@ -1,6 +1,5 @@
 const uploadoncloudinary = require("../utils/cloudinary.js");
 const Shop = require("../models/shop/shopmodel.js");
-// 🚨 LINE 1: Apne dynamic Order model ko sahi path se yahan import karo bhai!
 const Order = require("../models/order/ordermodel.js"); 
 
 const CreateAndEditShop = async (req, res) => {
@@ -27,7 +26,7 @@ const CreateAndEditShop = async (req, res) => {
 
         if (!shopData) {
             if (!image) return res.status(400).json({ message: "Image is required" });
-            if (!latitude || !longitude) return res.status(400).json({ message: "Bhai, map ke liye location coordinates zaruri hain!" });
+            if (!latitude || !longitude) return res.status(400).json({ message: "Location coordinates required!" });
 
             shopData = await Shop.create({
                 name, city, state, address, image, owner: ownerId,
@@ -36,11 +35,7 @@ const CreateAndEditShop = async (req, res) => {
         } else {
             const updateData = { name, city, state, address };
             if (image) updateData.image = image;
-            
-            if (latitude && longitude) {
-                updateData.location = locationData;
-            }
-
+            if (latitude && longitude) updateData.location = locationData;
             shopData = await Shop.findByIdAndUpdate(shopData._id, updateData, { new: true });
         }
 
@@ -80,37 +75,43 @@ const getMyShop = async (req, res) => {
     }
 }
 
-// 🔥 CONTROLLER FIXED: Ab koi default fallback logic nahi chalega, direct collection counting hogi
 const getShopByCity = async (req, res) => {
     try {
         const { city } = req.params;
         const cleanCity = city ? city.trim() : "";
 
-        const shops = await Shop.find({ city: { $regex: cleanCity, $options: 'i' } })
-            .populate('owner')
-            .populate('items');
-
-        if (!shops || shops.length === 0) {
-            return res.status(404).json({ message: "No shops found in this city" });
+        if (!cleanCity) {
+            return res.status(400).json({ message: "City name is required" });
         }
 
-        // 🚀 LIVE ABSOLUTE REAL AGGREGATION:
-        // Yeh database ke Order table mein jaakar ginega ki Alok Bakery ke sach mein kitne orders hain
+        const shops = await Shop.find({ 
+            city: { $regex: cleanCity, $options: 'i' } 
+        }).populate('owner').populate('items');
+
+        if (!shops || shops.length === 0) {
+            return res.status(200).json([]);  // ✅ Empty array return karo, 404 nahi
+        }
+
+        // ✅ Sahi field name "shop" hai (from your order model)
         const shopsWithRealOrders = await Promise.all(
             shops.map(async (shop) => {
-                // Check karo tumhare Order model mein dukan ki key 'shop' hai ya 'shopId'
-                const actualCount = await Order.countDocuments({ shop: shop._id });
-                
-                const shopObj = shop.toObject();
-                shopObj.totalOrders = actualCount; // Direct real absolute tracking feed jodi
-                
-                return shopObj;
+                try {
+                    const actualCount = await Order.countDocuments({ shop: shop._id });
+                    const shopObj = shop.toObject();
+                    shopObj.totalOrders = actualCount || 0;
+                    return shopObj;
+                } catch (err) {
+                    const shopObj = shop.toObject();
+                    shopObj.totalOrders = 0;
+                    return shopObj;
+                }
             })
         );
 
         return res.status(200).json(shopsWithRealOrders);
     } catch (error) {
-        return res.status(500).json({ message: `getShopByCity Error: ${error.message}` });
+        console.error("getShopByCity Error:", error);
+        return res.status(500).json({ message: `Server Error: ${error.message}` });
     }
 }
 

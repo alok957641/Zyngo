@@ -8,5 +8,5 @@ const Upload = require("../middelwear/multer.js");
 
 shoprouter.post("/CreateAndEditShop", isAuth ,Upload.single("image") ,CreateAndEditShop );
 shoprouter.get("/getMyShop", isAuth , getMyShop);
-shoprouter.get("/getShopByCity/:city", isAuth , getShopByCity);
+shoprouter.get("/getShopByCity/:city", getShopByCity);
 module.exports = shoprouter;
