@@ -1,16 +1,9 @@
 const User = require("../models/user/usermodel.js");
-const generateToken = require("../utils/tocken.js");  
-const bcrypt = require("bcryptjs");                   
+const generateToken = require("../utils/tocken.js");
+const bcrypt = require("bcryptjs");
 const { sendOtpEmail } = require("../utils/mail.js");
 
-const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production", // True in production
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Must be 'none' for cross-domain
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: "/"
-};
-
+// ✅ Add this helper function
 const sanitizeUser = (user) => {
     return {
         _id: user._id,
@@ -20,21 +13,28 @@ const sanitizeUser = (user) => {
         role: user.role
     };
 };
+// ✅ Correct cookie options for Cross-Site (Vercel <-> Render)
+const cookieOptions = {
+    httpOnly: true,
+    secure: true,         // Render par HTTPS hota hai, so true zaruri hai
+    sameSite: "none",     // Cross-site ke liye 'none' hi chahiye
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/"
+};
 
 const signup = async (req, res) => {
     try {
         const { fullname, email, password, mobile, role } = req.body;
-        
+
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ message: "User already exists" });
-
-        if (password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
-        if (mobile.length !== 10) return res.status(400).json({ message: "Mobile number must be 10 digits" });
 
         const hashedPassword = await bcrypt.hash(password, 10);
         user = await User.create({ fullname, email, mobile, role, password: hashedPassword });
 
         const token = generateToken(user._id);
+
+        // ✅ Use cookieOptions here
         res.cookie("token", token, cookieOptions);
 
         return res.status(201).json(sanitizeUser(user));
@@ -47,13 +47,15 @@ const signin = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        
+
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
         const token = generateToken(user._id);
         console.log("Cookie set kar raha hoon:", token);
+        res.cookie("token", token, cookieOptions);
+        // ✅ Use cookieOptions here
         res.cookie("token", token, cookieOptions);
 
         return res.status(200).json(sanitizeUser(user));
@@ -62,40 +64,27 @@ const signin = async (req, res) => {
     }
 };
 
-const googleAuth = async (req, res) => {
-    try {
-        const { fullname, email, mobile, role } = req.body;
-        let user = await User.findOne({ email });
-
-        if (!user) {
-            user = await User.create({ fullname, email, mobile, role });
-        }
-
-        const token = generateToken(user._id);
-        res.cookie("token", token, cookieOptions);
-
-        return res.status(200).json(sanitizeUser(user));
-    } catch (error) {
-        return res.status(500).json({ message: "Google auth error", error: error.message });
-    }
-};
-
-// getMe, signout, sendOtp, verifyOtp, resetPassword remain the same
-// Make sure getMe middleware is correctly passing req.user
 const getMe = async (req, res) => {
     try {
+        // middleware ne already req.user set kar diya hoga
         if (!req.user) return res.status(404).json({ message: "User not found" });
-        return res.status(200).json(sanitizeUser(req.user));
+        return res.status(200).json(req.user);
     } catch (error) {
         return res.status(500).json({ message: "Server error" });
     }
 };
 
-const signout = async (req, res) => {
-    res.clearCookie("token", { ...cookieOptions, maxAge: 0 });
-    return res.status(200).json({ message: "Logged out successfully" });
-};
 
+
+// Signout
+const signout = async (req, res) => {
+    try {
+        res.clearCookie("token");
+        return res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        return res.status(500).json({ message: "Logout failed", error: error.message });
+    }
+};
 
 // Send OTP
 const sendOtp = async (req, res) => {
@@ -125,7 +114,7 @@ const verifyOtp = async (req, res) => {
         if (!user || user.resetOtp !== otp || user.otpExpiry < Date.now()) {
             return res.status(400).json({ message: "Invalid or expired OTP" });
         }
-        
+
         user.isOtpVerified = true;
         user.resetOtp = undefined;
         user.otpExpiry = undefined;
@@ -142,7 +131,7 @@ const resetPassword = async (req, res) => {
     try {
         const { email, newPassword } = req.body;
         const user = await User.findOne({ email });
-        
+
         if (!user || !user.isOtpVerified) {
             return res.status(400).json({ message: "Invalid request or OTP not verified" });
         }
@@ -157,6 +146,28 @@ const resetPassword = async (req, res) => {
     }
 };
 
+// Google Auth
+const googleAuth = async (req, res) => {
+    try {
+        const { fullname, email, mobile, role } = req.body;
+        let user = await User.findOne({ email });
 
+        if (!user) {
+            user = await User.create({ fullname, email, mobile, role });
+        }
+
+        const token = generateToken(user._id);
+        res.cookie("token", token, {
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+        });
+
+        return res.status(200).json(sanitizeUser(user));
+    } catch (error) {
+        return res.status(500).json({ message: "Google auth error", error: error.message });
+    }
+};
 
 module.exports = { signup, signin, signout, sendOtp, verifyOtp, resetPassword, googleAuth, getMe };
