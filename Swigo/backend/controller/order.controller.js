@@ -198,6 +198,9 @@ const updateOrderStatus = async (req, res) => {
                         brodcastedTo: nearByBoys.map(b => b._id),
                         status: "brodcasted",
                     });
+
+                    console.log("Searching for riders near:", longitude, latitude);
+console.log("Total riders found:", nearByBoys.length);
                     
                     shopOrder.assignment = newAssignment._id;
                     
@@ -507,9 +510,19 @@ const sendDeliveryOtp = async (req, res) => {
 const getDeliveryBoyAssignment = async (req, res) => {
     try {
         const userId = req.user?._id; 
-        const assignments = await DeliveryAssignment.find({ brodcastedTo: userId, status: "brodcasted" }).populate("order").populate("shop");
+        // 🔥 FIX: Query ko cross-check karo.
+        // Hum un assignments ko dhoond rahe hain jahan 'brodcastedTo' array mein ye rider ID hai.
+        const assignments = await DeliveryAssignment.find({ 
+            brodcastedTo: { $in: [userId] }, 
+            status: "brodcasted" 
+        })
+        .populate("order")
+        .populate("shop");
+
         res.status(200).json(assignments);
-    } catch (error) { res.status(500).json({ message: error.message }); }
+    } catch (error) { 
+        res.status(500).json({ message: error.message }); 
+    }
 };
 
 const getOrderById = async (req, res) => {
