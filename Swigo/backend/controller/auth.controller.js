@@ -3,7 +3,14 @@ const generateToken = require("../utils/tocken.js");
 const bcrypt = require("bcryptjs");                   
 const { sendOtpEmail } = require("../utils/mail.js");
 
-// ✅ Add this helper function
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production", // True in production
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Must be 'none' for cross-domain
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: "/"
+};
+
 const sanitizeUser = (user) => {
     return {
         _id: user._id,
@@ -14,7 +21,6 @@ const sanitizeUser = (user) => {
     };
 };
 
-// Signup
 const signup = async (req, res) => {
     try {
         const { fullname, email, password, mobile, role } = req.body;
@@ -29,12 +35,7 @@ const signup = async (req, res) => {
         user = await User.create({ fullname, email, mobile, role, password: hashedPassword });
 
         const token = generateToken(user._id);
-        res.cookie("token", token, {
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true,
-        });
+        res.cookie("token", token, cookieOptions);
 
         return res.status(201).json(sanitizeUser(user));
     } catch (error) {
@@ -42,33 +43,18 @@ const signup = async (req, res) => {
     }
 };
 
-const getMe = async (req, res) => {
-    try {
-        // middleware ne already req.user set kar diya hoga
-        if (!req.user) return res.status(404).json({ message: "User not found" });
-        return res.status(200).json(req.user);
-    } catch (error) {
-        return res.status(500).json({ message: "Server error" });
-    }
-};
-
-// Rest of your code remains same... (signin, signout, etc.)
-// Signin
 const signin = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
+        
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
         const token = generateToken(user._id);
-     res.cookie("token", token, {
-    httpOnly: true,
-    secure: true,        // Production ke liye zaroori
-    sameSite: "none",    // Cross-site ke liye MUST hai
-    maxAge: 7 * 24 * 60 * 60 * 1000, 
-});
+        console.log("Cookie set kar raha hoon:", token);
+        res.cookie("token", token, cookieOptions);
 
         return res.status(200).json(sanitizeUser(user));
     } catch (error) {
@@ -76,16 +62,39 @@ const signin = async (req, res) => {
     }
 };
 
-// Signout
-const signout = async (req, res) => {
+const googleAuth = async (req, res) => {
     try {
-        res.clearCookie("token");
-        return res.status(200).json({ message: "Logged out successfully" });
+        const { fullname, email, mobile, role } = req.body;
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            user = await User.create({ fullname, email, mobile, role });
+        }
+
+        const token = generateToken(user._id);
+        res.cookie("token", token, cookieOptions);
+
+        return res.status(200).json(sanitizeUser(user));
     } catch (error) {
-        return res.status(500).json({ message: "Logout failed", error: error.message });
+        return res.status(500).json({ message: "Google auth error", error: error.message });
     }
 };
 
+// getMe, signout, sendOtp, verifyOtp, resetPassword remain the same
+// Make sure getMe middleware is correctly passing req.user
+const getMe = async (req, res) => {
+    try {
+        if (!req.user) return res.status(404).json({ message: "User not found" });
+        return res.status(200).json(sanitizeUser(req.user));
+    } catch (error) {
+        return res.status(500).json({ message: "Server error" });
+    }
+};
+
+const signout = async (req, res) => {
+    res.clearCookie("token", { ...cookieOptions, maxAge: 0 });
+    return res.status(200).json({ message: "Logged out successfully" });
+};
 // Send OTP
 const sendOtp = async (req, res) => {
     try {
