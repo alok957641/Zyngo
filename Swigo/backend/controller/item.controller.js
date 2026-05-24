@@ -15,7 +15,7 @@ const AddItem = async (req, res) => {
             // agar path leta hai, toh yahan logic change karna hoga.
             // Agar cloudinary upload function buffer leta hai toh:
             const cloudResponse = await uploadoncloudinary(req.file.buffer); 
-            image = cloudResponse?.secure_url;
+            image = secureUrl;
         }
 
         const shop = await Shop.findOne({ owner: ownerId });
@@ -55,7 +55,7 @@ const EditItem = async (req, res) => {
             const cloudResponse = await uploadoncloudinary(req.file.buffer); 
             
             // ✅ Kyunki tumhari utility abhi seedha secure_url resolve kar rahi hai
-            updateData.image = cloudResponse; 
+            updateData.image = secureUrl; 
         }
 
         const item = await Item.findByIdAndUpdate(itemId, updateData, { new: true });
