@@ -195,6 +195,8 @@ const handleLogout = async () => {
         window.location.href = "/signin"; // Force redirect
     }
 };
+
+
     const handleStartFinish = async () => {
         try {
             if (!activeOrder?.orderId || !activeOrder?.shopOrder?._id) return;

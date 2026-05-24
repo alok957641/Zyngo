@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-// ✅ STRICT RE-FIXED ICONS: Saare icons sahi package nodes se link kar diye hain bhai
 import { MdOutlinePendingActions, MdAddCircleOutline, MdFastfood } from "react-icons/md";
 import { FiLogOut } from "react-icons/fi";
 import { setUserData } from "../redux/userSlice";
+import axios from "axios";
+
+const apiClient = axios.create({
+  baseURL: "https://zyngo.onrender.com",
+  withCredentials: true,
+});
+
 
 function OwnerNav() {
   const dispatch = useDispatch();
@@ -25,19 +31,26 @@ function OwnerNav() {
     return currentStatus === "pending" || currentStatus === "preparing";
   }).length;
 
+
 const handleLogout = async () => {
     try {
-        // Backend se cookie delete karwao
+        // ✅ ab apiClient kaam karega
         await apiClient.get(`/api/auth/signout`); 
+        console.log("Logged out from server");
     } catch (err) {
-        console.error("Logout API failed, but forcing local cleanup");
+        console.error("Logout API failed, forcing local cleanup", err);
     } finally {
-        // Hamesha local data saaf karo, chahe API fail ho
+        // Local state saaf karo
         localStorage.clear();
         dispatch(setUserData(null)); 
-        window.location.href = "/signin"; // Force redirect
+        
+        // Browser session/cookie force clear karne ke liye
+        // Redirect se pehle thoda wait kar sakte ho agar zaroori ho
+        window.location.href = "/signin"; 
     }
 };
+
+
   return (
     <nav className="bg-white shadow-md border-b-2 border-orange-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

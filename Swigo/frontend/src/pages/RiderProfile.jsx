@@ -20,18 +20,19 @@ const RiderProfile = () => {
         : "May 2026";
 
     // 🔐 LOGOUT LOGIC
-    const handleLogout = async () => {
-       
-        try {
-            await axios.get(`${serverurl}/api/user/logout`, { withCredentials: true });
-            localStorage.clear();
-            window.location.href = "/signin";
-        } catch (err) {
-            console.error("Logout error");
-            localStorage.clear();
-            window.location.href = "/signin";
-        }
-    };
+const handleLogout = async () => {
+    try {
+        // Backend se cookie delete karwao
+        await apiClient.get(`/api/auth/signout`); 
+    } catch (err) {
+        console.error("Logout API failed, but forcing local cleanup");
+    } finally {
+        // Hamesha local data saaf karo, chahe API fail ho
+        localStorage.clear();
+        dispatch(setUserData(null)); 
+        window.location.href = "/signin"; // Force redirect
+    }
+};
 
     return (
         <div className="min-h-screen bg-[#020617] font-sans pb-32 text-slate-200 selection:bg-orange-500/20 overflow-x-hidden">
