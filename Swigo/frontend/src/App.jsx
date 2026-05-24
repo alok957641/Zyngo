@@ -56,7 +56,21 @@ function App() {
   useGetMyOrders();
   useGetUpdateLocation();
 
-  const { userData } = useSelector((state) => state.user);
+  // ✅ Add loading state from Redux
+  const { userData, loading } = useSelector((state) => state.user);
+
+  // ✅ Show loader while checking authentication
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-orange-50 to-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">Loading Swiddy...</p>
+          <p className="text-sm text-gray-400 mt-1">Please wait</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -107,19 +121,17 @@ function App() {
         />
 
         {/* 👑 ADMIN PANEL MESH */}
-<Route path="/admin" element={
-    <AdminRoute>
-       <AdminSidebar /> 
-    </AdminRoute>
-}>
-  <Route path="dashboard" element={<AdminDashboardOverview />} />
-  <Route path="payouts" element={<AdminPayouts />} />
-  <Route path="riders" element={<AdminRiderManagement />} />
-  <Route path="restaurants" element={<AdminShopManagement />} />
-  <Route path="settings" element={<AdminSettings />} />
-</Route>
-
-
+        <Route path="/admin" element={
+          <AdminRoute>
+            <AdminSidebar /> 
+          </AdminRoute>
+        }>
+          <Route path="dashboard" element={<AdminDashboardOverview />} />
+          <Route path="payouts" element={<AdminPayouts />} />
+          <Route path="riders" element={<AdminRiderManagement />} />
+          <Route path="restaurants" element={<AdminShopManagement />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
 
         {/* 🔒 Protected User/Customer Portal Matrix */}
         <Route
