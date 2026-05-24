@@ -15,7 +15,7 @@ import { FiEdit3, FiPlus, FiStar, FiRadio, FiPower } from "react-icons/fi";
 import { FaMapLocationDot } from "react-icons/fa6";
 import OwnerItemCard from "./OwnerItemCard";
 
-const serverurl = "http://localhost:8000";
+const serverurl = "https://zyngo.onrender.com";
 
 function OwnerDeshboard() {
   const navigate = useNavigate();
@@ -41,31 +41,27 @@ function OwnerDeshboard() {
   const orders = myOrders || [];
 
   // Revenue Calculate (Safe Logic)
- const totalRevenue = orders.reduce((acc, order) => {
+const totalRevenue = orders.reduce((acc, order) => {
     // Har order ke andar jitne shopOrders hain, unka subtotal add karo
     const shopTotal = order.shopOrders.reduce((sum, so) => sum + (Number(so.subtotal) || 0), 0);
     return acc + shopTotal;
 }, 0);
 
   // 🔥 CORE LIVE/OFFLINE NETWORK SWITCH INTERCEPTOR
-const handleStatusToggle = async () => {
+  const handleStatusToggle = async () => {
     try {
       setToggleLoading(true);
       
-      const res = await apiClient.post(`/api/user/toggle-availability`, {}, { withCredentials: true });
+      // Backend global endpoint pipeline ko hit kiya state invert karne ke liye
+      const res = await axios.post(`${serverurl}/api/user/toggle-availability`, {}, { withCredentials: true });
       
       if (res.data.success) {
-        // Backend se aaye hue status ko use karo
-        setIsShopOnline(res.data.isOnline); 
-        
-        // Agar zaroori ho toh Redux state bhi update kar do
-        // dispatch(setUserData({ ...userData, isOnline: res.data.isOnline }));
-        
-        console.log("Status updated successfully");
+        setIsShopOnline(res.data.isOnline);
+        alert(`🎉 Store status updated to: ${res.data.isOnline ? "ONLINE" : "OFFLINE"}`);
       }
     } catch (err) {
-      console.error("Status update fail:", err);
-      alert("Status sync failed!");
+      console.error("Network Status Switch Mismatch:", err);
+      alert("Status update sync failed with core node!");
     } finally {
       setToggleLoading(false);
     }
