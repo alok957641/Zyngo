@@ -81,38 +81,43 @@ function DelevryBoyDeshboard() {
     };
 
     // 📡 ASLI DATA SYNC (Polling)
- const fetchEverything = async () => {
-        if (!isOnline || !userData) return;
-        try {
-            // ✅ Yahan bhi apiClient use karo
-            const [statsRes, missionRes, activeRes] = await Promise.all([
-                apiClient.get(`/api/order/rider-stats`),
-                apiClient.get(`/api/order/get-delivery-assignments`),
-                apiClient.get(`/api/order/get-current-order`)
-            ]);
+const fetchEverything = async () => {
+    if (!isOnline || !userData) return;
+    try {
+        // ✅ apiClient use karna sahi hai. 
+        // Agar yahan se 401 aata hai, toh iska matlab cookie expire ho gayi hai.
+        const [statsRes, missionRes, activeRes] = await Promise.all([
+            apiClient.get(`/api/order/rider-stats`),
+            apiClient.get(`/api/order/get-delivery-assignments`),
+            apiClient.get(`/api/order/get-current-order`)
+        ]);
 
-            if (statsRes.data.success) setRealStats(statsRes.data.stats);
-            
-            // Backend raw array response wrapper
-            const rawMissions = missionRes.data || [];
-            
-            // 🔥 UNIQUE LOGIC FILTER LAYER: Duplicate orders ko render block karne ke liye Map logic lagaya
-            const uniqueMissionsMap = {};
-            rawMissions.forEach((mission) => {
-                // Agar assignment ke andar order string metadata unique h toh use map me store karo
-                const orderIdKey = mission.order?._id || mission.order;
-                if (orderIdKey && !uniqueMissionsMap[orderIdKey]) {
-                    uniqueMissionsMap[orderIdKey] = mission; 
-                }
-            });
+        if (statsRes.data.success) setRealStats(statsRes.data.stats);
+        
+        const rawMissions = missionRes.data || [];
+        
+        const uniqueMissionsMap = {};
+        rawMissions.forEach((mission) => {
+            const orderIdKey = mission.order?._id || mission.order;
+            if (orderIdKey && !uniqueMissionsMap[orderIdKey]) {
+                uniqueMissionsMap[orderIdKey] = mission; 
+            }
+        });
 
-            // Map data ko wapas simple clean filter list array me unpack kiya
-            setAvailableMissions(Object.values(uniqueMissionsMap));
-            setActiveOrder(activeRes.data?.success ? activeRes.data : null);
-        } catch (err) { 
-            console.error("Syncing Error..."); 
+        setAvailableMissions(Object.values(uniqueMissionsMap));
+        setActiveOrder(activeRes.data?.success ? activeRes.data : null);
+    } catch (err) { 
+        // ✅ Yahan error details print karwao, sirf "Syncing Error" mat likho
+        const status = err.response?.status;
+        console.error("Syncing Error Status:", status);
+        
+        if (status === 401) {
+            console.warn("Session expired! Redirecting to signin...");
+            // Yahan automatic logout kar sakte ho agar session khatam ho gaya hai
+            handleLogout(); 
         }
-    };
+    }
+};
 
     useEffect(() => {
         if (userData) {
