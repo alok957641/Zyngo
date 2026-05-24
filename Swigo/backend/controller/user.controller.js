@@ -34,7 +34,7 @@ const getcurruser = async (req, res) => {
 };
 
 // backend/controller/user.controller.js
-export const updateUserLocation = async (req, res) => {
+ const updateUserLocation = async (req, res) => {
     try {
         const { latitude, longitude } = req.body; // Yahan match karo
         const userId = req.userId; // Middleware se aana chahiye
