@@ -1,9 +1,18 @@
-const User = require("../models/user/usermodel.js")
-const generatetocken = require("../utils/tocken.js")
-const bscrypt = require("bcryptjs");
-const { sendOtpEmail} = require("../utils/mail.js");
+const User = require("../models/user/usermodel.js");
+const generateToken = require("../utils/tocken.js");  
+const bcrypt = require("bcryptjs");                   
+const { sendOtpEmail } = require("../utils/mail.js");
 
-
+// ✅ Add this helper function
+const sanitizeUser = (user) => {
+    return {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        mobile: user.mobile,
+        role: user.role
+    };
+};
 
 // Signup
 const signup = async (req, res) => {
@@ -33,6 +42,7 @@ const signup = async (req, res) => {
     }
 };
 
+// Rest of your code remains same... (signin, signout, etc.)
 // Signin
 const signin = async (req, res) => {
     try {
