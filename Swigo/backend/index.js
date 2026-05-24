@@ -55,17 +55,17 @@ app.get("/", (req, res) => {
 });
 
 // 🚀 Server Start
+// Server Start Logic - Update this block
 const startServer = async () => {
   try {
     await database();
-    app.listen(port, () => {
-      console.log(`Server running on port ${port} 🚀`);
+    app.listen(port, '0.0.0.0', () => { // '0.0.0.0' add kiya hai taaki external connections allow ho
+      console.log(`Server is running on port ${port} 🚀`);
     });
   } catch (err) {
-    console.log("Server start error:", err);
+    console.error("Server start error:", err);
   }
 };
-
 startServer();
 
 module.exports = app;
