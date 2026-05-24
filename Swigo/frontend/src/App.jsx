@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
-
+import axios from "axios";
 
 // Pages & Components Imports
 import Signup from "./pages/Signup.jsx";
