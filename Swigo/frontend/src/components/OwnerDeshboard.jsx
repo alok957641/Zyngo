@@ -41,23 +41,31 @@ function OwnerDeshboard() {
   const orders = myOrders || [];
 
   // Revenue Calculate (Safe Logic)
-  const totalRevenue = orders.reduce((acc, curr) => acc + (Number(curr.totalAmount) || 0), 0);
+ const totalRevenue = orders.reduce((acc, order) => {
+    // Har order ke andar jitne shopOrders hain, unka subtotal add karo
+    const shopTotal = order.shopOrders.reduce((sum, so) => sum + (Number(so.subtotal) || 0), 0);
+    return acc + shopTotal;
+}, 0);
 
   // 🔥 CORE LIVE/OFFLINE NETWORK SWITCH INTERCEPTOR
-  const handleStatusToggle = async () => {
+const handleStatusToggle = async () => {
     try {
       setToggleLoading(true);
       
-      // Backend global endpoint pipeline ko hit kiya state invert karne ke liye
-      const res = await axios.post(`${serverurl}/api/user/toggle-availability`, {}, { withCredentials: true });
+      const res = await apiClient.post(`/api/user/toggle-availability`, {}, { withCredentials: true });
       
       if (res.data.success) {
-        setIsShopOnline(res.data.isOnline);
-        alert(`🎉 Store status updated to: ${res.data.isOnline ? "ONLINE" : "OFFLINE"}`);
+        // Backend se aaye hue status ko use karo
+        setIsShopOnline(res.data.isOnline); 
+        
+        // Agar zaroori ho toh Redux state bhi update kar do
+        // dispatch(setUserData({ ...userData, isOnline: res.data.isOnline }));
+        
+        console.log("Status updated successfully");
       }
     } catch (err) {
-      console.error("Network Status Switch Mismatch:", err);
-      alert("Status update sync failed with core node!");
+      console.error("Status update fail:", err);
+      alert("Status sync failed!");
     } finally {
       setToggleLoading(false);
     }
