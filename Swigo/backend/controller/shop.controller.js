@@ -3,10 +3,6 @@ const Shop = require("../models/shop/shopmodel.js");
 const Order = require("../models/order/ordermodel.js"); 
 
 const CreateAndEditShop = async (req, res) => {
-      console.log("🔥 CreateAndEditShop called");  // ✅ Debug line
-    console.log("req.body:", req.body);
-    console.log("req.file:", req.file);
-    console.log("ownerId:", req.user?._id);
     try {
         const { name, city, state, address, latitude, longitude } = req.body;
         const ownerId = req.user?._id || req.userId || req.id;
@@ -17,8 +13,8 @@ const CreateAndEditShop = async (req, res) => {
 
         let image;
         if (req.file) {
-            const cloudResponse = await uploadoncloudinary(req.file.path);
-            image = typeof cloudResponse === "string" ? cloudResponse : cloudResponse?.secure_url;
+            // ✅ buffer se direct cloudinary pe upload (no fs)
+            image = await uploadoncloudinary(req.file.buffer);
         }
 
         let shopData = await Shop.findOne({ owner: ownerId });
