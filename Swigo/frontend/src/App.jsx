@@ -51,12 +51,12 @@ import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 function App() {
   // 🔥 Hooks are kept flat to comply with core React alignment rules
   useGetCurruser();
-  // useGetCity();
-  // useGetMyShop();
-  // useGetShopbyCity();
-  // useGetItemByCity();
-  // useGetMyOrders();
-  // useGetUpdateLocation();
+  useGetCity();
+  useGetMyShop();
+  useGetShopbyCity();
+  useGetItemByCity();
+  useGetMyOrders();
+  useGetUpdateLocation();
 
 
   // ✅ Add loading state from Redux
@@ -91,8 +91,7 @@ function App() {
           },
         }}
       />
-
-  <Routes>
+<Routes>
         {/* ✅ Sab kuch iske andar hona chahiye */}
         <Route
           path="/"
@@ -111,6 +110,7 @@ function App() {
           }
         />
 
+        
         {/* 🔓 Public Auth Routes */}
         <Route
           path="/signup"
