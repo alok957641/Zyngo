@@ -13,6 +13,13 @@ import {
 import { RiMotorbikeFill, RiWallet3Fill } from "react-icons/ri";
 import { setUserData } from "../redux/userSlice"; // Check if imported correctly
 
+
+const apiClient = axios.create({
+    baseURL: serverurl,
+    withCredentials: true
+});
+
+
 const serverurl = "https://zyngo.onrender.com";
 
 // --- Custom Icons (Sharp Style) ---
@@ -110,29 +117,43 @@ function DelevryBoyDeshboard() {
         }
     }, [userData]);
 
-    useEffect(() => {
-        if(!userData) return;
+useEffect(() => {
+        if (!userData) return;
 
         let watchId;
+        
+        // 1. Availability check and Location tracking
         if (isOnline) {
-            watchId = navigator.geolocation.watchPosition((pos) => {
-                const { latitude, longitude } = pos.coords;
-                setRiderPos({ lat: latitude, lng: longitude });
-                axios.post(`${serverurl}/api/user/update-location`, { latitude, longitude }, { withCredentials: true });
-            }, (err) => console.log(err), { enableHighAccuracy: true });
+            watchId = navigator.geolocation.watchPosition(
+                async (pos) => {
+                    const { latitude, longitude } = pos.coords;
+                    setRiderPos({ lat: latitude, lng: longitude });
+
+                    // ✅ apiClient use karo jo 'withCredentials: true' ke saath bana hai
+                    try {
+                        await apiClient.post(`/api/user/update-location`, { latitude, longitude });
+                    } catch (err) {
+                        console.error("Location update failed:", err.response?.status);
+                    }
+                },
+                (err) => console.error("Geolocation Error:", err),
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
 
             fetchEverything();
         } else {
-            setAvailableMissions([]); 
+            setAvailableMissions([]);
         }
 
+        // 2. Polling for other data
         const poll = setInterval(() => {
             if (isOnline) fetchEverything();
         }, 4000);
 
-        return () => { 
-            clearInterval(poll); 
-            if (watchId) navigator.geolocation.clearWatch(watchId); 
+        // 3. Cleanup
+        return () => {
+            clearInterval(poll);
+            if (watchId) navigator.geolocation.clearWatch(watchId);
         };
     }, [isOnline, userData]);
 
