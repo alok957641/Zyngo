@@ -5,34 +5,40 @@ import { setMyOrders } from "../redux/userSlice";
 
 export const serverurl = "https://zyngo.onrender.com";
 
+// 🔥 FIX: apiClient yahan bana lo taaki hamesha same config use ho
+const apiClient = axios.create({
+  baseURL: serverurl,
+  withCredentials: true,
+});
+
 function useGetMyOrders() {
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.user);
 
   useEffect(() => {
+    // 🛡️ Guard Clause: Agar userData nahi hai, toh request mat bhejo
+    if (!userData?._id) return;
+
     const fetchOrders = async () => {
-      if (!userData) return;
-
       try {
-        const { data } = await axios.get(`${serverurl}/api/order/my-orders`, {
-          withCredentials: true,
-        });
-
+        const { data } = await apiClient.get(`/api/order/my-orders`);
         dispatch(setMyOrders(data || []));
-        console.log("📦 Orders Loaded:", data);
-
       } catch (error) {
-       
         const status = error.response?.status;
         
-        if (status === 404) dispatch(setMyOrders([]));
+        // 🛡️ Agar 401 hai, toh interceptor handle karega (App.jsx mein)
+        if (status === 401) {
+          console.warn("Session expired in useGetMyOrders");
+          return; 
+        }
         
-        console.log(`❌ Fetch Error (${status}):`, error.message);
+        if (status === 404) dispatch(setMyOrders([]));
+        console.error(`❌ Fetch Error (${status}):`, error.message);
       }
     };
 
     fetchOrders();
-  }, [userData, dispatch]);
+  }, [userData?._id, dispatch]); // 🔥 Dependency mein sirf ID rakho
 }
 
 export default useGetMyOrders;

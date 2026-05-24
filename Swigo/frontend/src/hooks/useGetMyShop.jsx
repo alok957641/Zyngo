@@ -5,43 +5,44 @@ import { setMyShopData } from "../redux/ownerSlice";
 
 export const serverurl = "https://zyngo.onrender.com";
 
+// ✅ Global instance
+const apiClient = axios.create({
+  baseURL: serverurl,
+  withCredentials: true,
+});
+
 function useGetMyShop() {
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.user);
-  const { myShopData } = useSelector((state) => state.owner || {});
+  const myShopData = useSelector((state) => state.owner?.myShopData);
 
   useEffect(() => {
-    // 🚀 Logic: Sirf Owner ke liye call karo aur tabhi jab data na ho
+    // 🚀 Logic: Sirf Owner ke liye call karo
     if (!userData || userData.role !== "owner") return;
     
-    // ✅ Agar already data hai ya false set hai toh dubara mat call karo
+    // ✅ Agar already data loaded hai, toh dubara fetch mat karo
     if (myShopData !== undefined && myShopData !== null) return;
 
     const fetchShop = async () => {
       try {
-        const result = await axios.get(`${serverurl}/api/shop/getMyShop`, {
-          withCredentials: true,
-        });
-        if (result.data && result.data._id) {
+        const result = await apiClient.get(`/api/shop/getMyShop`);
+        if (result.data) {
           dispatch(setMyShopData(result.data));
-        } else {
-          dispatch(setMyShopData(null)); // ✅ null set karo, false nahi
         }
       } catch (error) {
+        // 🛡️ Error 404 ka matlab hai shop abhi tak bani nahi hai, jo normal hai
         if (error.response?.status === 404) {
-          console.log("No shop found for this owner");
-          dispatch(setMyShopData(null)); // ✅ null set karo
-        } else {
-          console.error("Error fetching shop:", error);
           dispatch(setMyShopData(null));
         }
+        console.error("Error fetching shop:", error);
       }
     };
 
     fetchShop();
-  }, [userData, dispatch, myShopData]); // ✅ myShopData dependency daalo taaki ek baar fetch ho
+    // ✅ Dependency mein sirf userData aur dispatch rakho
+  }, [userData?._id, dispatch]); 
 
-  return myShopData; // ✅ Return bhi karo for convenience
+  return myShopData;
 }
 
 export default useGetMyShop;
