@@ -24,7 +24,7 @@ const markerIcon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-export const serverurl = "https://zyngo.onrender.com";
+ const serverurl = "https://zyngo.onrender.com";
 
 function CreateAndEditShop() {
   const navigate = useNavigate();
