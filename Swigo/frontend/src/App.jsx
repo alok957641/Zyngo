@@ -92,22 +92,24 @@ function App() {
         }}
       />
 
-   <Route
-  path="/"
-  element={
-    loading ? (
-      <div className="flex h-screen items-center justify-center">Loading...</div>
-    ) : !userData ? (
-      <Navigate to="/signin" replace />
-    ) : userData.role === "admin" ? (
-      <Navigate to="/admin/dashboard" replace />
-    ) : userData.role === "deliveryboy" ? (
-      <Navigate to="/rider/dashboard" replace />
-    ) : (
-      <Home />
-    )
-  }
-/>
+  <Routes>
+        {/* ✅ Sab kuch iske andar hona chahiye */}
+        <Route
+          path="/"
+          element={
+            loading ? (
+              <div className="flex h-screen items-center justify-center">Loading...</div>
+            ) : !userData ? (
+              <Navigate to="/signin" replace />
+            ) : userData.role === "admin" ? (
+              <Navigate to="/admin/dashboard" replace />
+            ) : userData.role === "deliveryboy" ? (
+              <Navigate to="/rider/dashboard" replace />
+            ) : (
+              <Home />
+            )
+          }
+        />
 
         {/* 🔓 Public Auth Routes */}
         <Route
