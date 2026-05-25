@@ -68,7 +68,7 @@ function App() {
       <div className="flex justify-center items-center h-screen bg-gradient-to-br from-orange-50 to-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-orange-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600 font-medium">Loading Swiddy...</p>
+          <p className="mt-4 text-gray-600 font-medium">Loading Zyngo...</p>
           <p className="text-sm text-gray-400 mt-1">Please wait</p>
         </div>
       </div>

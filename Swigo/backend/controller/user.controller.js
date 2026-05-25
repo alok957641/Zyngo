@@ -56,10 +56,13 @@ const getcurruser = async (req, res) => {
 // Toggle Availability Status
 const toggleAvailabilityStatus = async (req, res) => {
     try {
-        const userId = getUserIdFromToken(req); // ✅ Use helper function
+        // 🔥 DEBUG: Log cookies to see what the server is receiving
+        console.log("Cookies received:", req.cookies); 
+
+        const userId = getUserIdFromToken(req);
         
         if (!userId) {
-            return res.status(401).json({ success: false, message: "Session expired" });
+            return res.status(401).json({ success: false, message: "Session expired or no token" });
         }
 
         const user = await User.findById(userId);

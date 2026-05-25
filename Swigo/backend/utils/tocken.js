@@ -1,22 +1,18 @@
 const jwt = require("jsonwebtoken");
 
-const generateToken = (userid) => {
-    try {
-        // Spelling mistake fix: tocken -> token
-        // JWT_SECRET ka check laga lo taaki agar .env load na ho toh pata chale
-        if (!process.env.JWT_SECRET) {
-            throw new Error("JWT_SECRET is not defined in environment variables");
-        }
+const getUserIdFromToken = (req) => {
+    const token = req.cookies?.token; 
+    
+    if (!token) return null;
 
-        const token = jwt.sign({ userid }, process.env.JWT_SECRET, { 
-            expiresIn: "7d" 
-        });
-        
-        return token;
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // ✅ Yahan "userid" use karo, kyunki generateToken mein tumne yahi key rakhi hai
+        return decoded.userid; 
     } catch (err) {
-        console.error("Token generation error:", err.message);
+        console.log("JWT Verification Failed:", err.message);
         return null;
     }
-}
+};
 
 module.exports = generateToken;

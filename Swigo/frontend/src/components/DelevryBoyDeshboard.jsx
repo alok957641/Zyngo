@@ -165,21 +165,27 @@ useEffect(() => {
         };
     }, [isOnline, userData]);
 
-    const handleAvailabilityToggle = async () => {
-        try {
-            setStatusToggleLoading(true);
-            const res = await axios.post(`${serverurl}/api/user/toggle-availability`, {}, { withCredentials: true });
-            if (res.data.success) {
-                setIsOnline(res.data.isOnline);
-                triggerMessage(`Node Status Switch: Now ${res.data.isOnline ? "ONLINE" : "IDLE (OFFLINE)"}`);
-            }
-        } catch (err) {
-            console.error(err);
-            triggerMessage("Failed to sync radar status with database!", true);
-        } finally {
-            setStatusToggleLoading(false);
+  const handleAvailabilityToggle = async () => {
+    try {
+        setStatusToggleLoading(true);
+        
+        // 🔥 FIX: Global 'axios' ki jagah 'apiClient' use karo
+        const res = await apiClient.post(`/api/user/toggle-availability`);
+        
+        if (res.data.success) {
+            setIsOnline(res.data.isOnline);
+            triggerMessage(`Radar Status: ${res.data.isOnline ? "ONLINE" : "IDLE (OFFLINE)"}`);
         }
-    };
+    } catch (err) {
+        console.error("Toggle Error Details:", err.response?.data || err.message);
+        
+        // Agar 401 aata hai, toh interceptor handle karega, 
+        // par agar 500 hai toh yahan error dikhao
+        triggerMessage("Server sync failed! Check connection.", true);
+    } finally {
+        setStatusToggleLoading(false);
+    }
+};
 
     
 const handleLogout = async () => {
