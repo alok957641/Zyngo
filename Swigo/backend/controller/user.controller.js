@@ -56,14 +56,9 @@ const getcurruser = async (req, res) => {
 // Toggle Availability Status
 const toggleAvailabilityStatus = async (req, res) => {
     try {
-        // 🔥 YE LINE TERI PROBLEM SOLVE KAREGI
-        console.log("Cookies received at server:", req.cookies); 
-        
-        const userId = getUserIdFromToken(req);
+        const userId = req.user?._id || req.userId;
         
         if (!userId) {
-            // Log karo ki token kyun nahi mila
-            console.log("Token validation failed for user");
             return res.status(401).json({ success: false, message: "Session expired" });
         }
 
@@ -83,5 +78,6 @@ const toggleAvailabilityStatus = async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error occurred" });
     }
 };
+
 
 module.exports = { getcurruser, updateUserLocation, toggleAvailabilityStatus };

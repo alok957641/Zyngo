@@ -165,23 +165,46 @@ useEffect(() => {
         };
     }, [isOnline, userData]);
 
-  const handleAvailabilityToggle = async () => {
+const handleAvailabilityToggle = async () => {
     try {
         setStatusToggleLoading(true);
         
-        // 🔥 FIX: Global 'axios' ki jagah 'apiClient' use karo
+        console.log("🔄 Toggling availability...");
+        
+        // ✅ Debug: Check if token exists
+        console.log("📡 Making API call to:", `${serverurl}/api/user/toggle-availability`);
+        
         const res = await apiClient.post(`/api/user/toggle-availability`);
+        
+        console.log("✅ Response:", res.data);
         
         if (res.data.success) {
             setIsOnline(res.data.isOnline);
             triggerMessage(`Radar Status: ${res.data.isOnline ? "ONLINE" : "IDLE (OFFLINE)"}`);
+            
+            // ✅ Update userData in Redux
+            dispatch(setUserData({ ...userData, isOnline: res.data.isOnline }));
+        } else {
+            triggerMessage(res.data.message || "Status update failed!", true);
         }
     } catch (err) {
-        console.error("Toggle Error Details:", err.response?.data || err.message);
+        console.error("❌ Toggle Error Details:", {
+            status: err.response?.status,
+            data: err.response?.data,
+            message: err.message
+        });
         
-        // Agar 401 aata hai, toh interceptor handle karega, 
-        // par agar 500 hai toh yahan error dikhao
-        triggerMessage("Server sync failed! Check connection.", true);
+        // ✅ Better error messages based on status code
+        if (err.response?.status === 401) {
+            triggerMessage("Session expired! Please login again.", true);
+            setTimeout(() => handleLogout(), 2000);
+        } else if (err.response?.status === 404) {
+            triggerMessage("API route not found! Check backend /api/user/toggle-availability", true);
+        } else if (err.response?.status === 500) {
+            triggerMessage("Server error! Please try again later.", true);
+        } else {
+            triggerMessage("Failed to sync radar status!", true);
+        }
     } finally {
         setStatusToggleLoading(false);
     }
