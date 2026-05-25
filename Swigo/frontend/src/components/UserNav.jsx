@@ -4,9 +4,15 @@ import { useSelector, useDispatch } from "react-redux";
 import { FaMapMarkerAlt, FaSearch, FaShoppingCart, FaShoppingBag } from "react-icons/fa";
 import { MdKeyboardArrowDown, MdClose, MdMyLocation } from "react-icons/md";
 import { FiLogOut } from "react-icons/fi";
-
+import axios from "axios";
 // ✅ setSearchTerm import kiya
 import { setUserData, setSearchTerm } from "../redux/userSlice"; 
+
+
+const apiClient = axios.create({
+  baseURL: "https://zyngo.onrender.com",
+  withCredentials: true,
+});
 
 function UserNav() {
   const { userData, City, cartItems, searchTerm } = useSelector((state) => state.user);
@@ -15,17 +21,21 @@ function UserNav() {
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+
 const handleLogout = async () => {
     try {
-        // Backend se cookie delete karwao
+        // Backend se session clear karwao
         await apiClient.get(`/api/auth/signout`); 
     } catch (err) {
-        console.error("Logout API failed, but forcing local cleanup");
+        console.error("Logout API failed, but forcing local cleanup", err);
     } finally {
-        // Hamesha local data saaf karo, chahe API fail ho
+        // Local state saaf karo
         localStorage.clear();
         dispatch(setUserData(null)); 
-        window.location.href = "/signin"; // Force redirect
+        
+        // Force reload to clear all states
+        window.location.href = "/signin"; 
     }
 };
 

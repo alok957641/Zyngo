@@ -22,4 +22,3 @@ const generateToken = (userid) => {
 
 module.exports = generateToken;
 
-module.exports = generateToken;
