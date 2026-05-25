@@ -107,7 +107,7 @@ function Forgetpassword() {
               <FaArrowLeftLong className="text-xl font-bold " />
             </Link>
           </div>
-          <h1 className="text-3xl font-extrabold text-red-600">Swigo</h1>
+          <h1 className="text-3xl font-extrabold text-red-600">Zyngo</h1>
 
           <p className="text-gray-500 text-xs font-medium mt-1 uppercase tracking-widest">
             Forget Password

@@ -47,7 +47,7 @@ const handleLogout = async () => {
           {/* 1. Logo & Desktop Location */}
           <div className="flex-shrink-0 flex items-center gap-4">
             <Link to="/" className="text-3xl sm:text-4xl font-extrabold text-red-600 tracking-tighter hover:scale-105 transition-transform">
-              Swigo
+              Zyngo
             </Link>
 
             <div className="hidden md:flex items-center gap-1 text-gray-600 hover:text-orange-500 cursor-pointer group ml-4">

@@ -22,7 +22,7 @@ function useGetCity() {
               `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
               {
                 headers: {
-                  'User-Agent': 'Swigo-App' // Nominatim ko User-Agent chahiye hota hai
+                  'User-Agent': 'Zyngo-App' // Nominatim ko User-Agent chahiye hota hai
                 }
               }
             );

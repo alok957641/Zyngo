@@ -2,7 +2,7 @@ import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
-
+import Layout from "../src/Layout.jsx";
 
 
 // Pages & Components Imports
@@ -91,6 +91,7 @@ function App() {
           },
         }}
       />
+      <Layout>
 <Routes>
         {/* ✅ Sab kuch iske andar hona chahiye */}
         <Route
@@ -241,6 +242,7 @@ function App() {
         {/* 🚫 Catch-all Route Safety Net */}
         <Route path="*" element={<Navigate to="/signin" replace />} />
       </Routes>
+      </Layout>
     </>
   );
 }

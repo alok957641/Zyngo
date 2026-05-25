@@ -20,10 +20,10 @@ const sendOtpEmail = async (to, otp) => {
         await transporter.sendMail({
             from: process.env.EMAIL, 
             to: to,
-            subject: "RESET Your Password - Swigo",
+            subject: "RESET Your Password - Zyngo",
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                    <h2 style="color: #ea580c;">Swigo Password Reset</h2>
+                    <h2 style="color: #ea580c;">Zyngo Password Reset</h2>
                     <p>Your OTP for password reset is:</p>
                     <h1 style="color: #dc2626; letter-spacing: 5px;">${otp}</h1>
                     <p style="color: #666; font-size: 12px;">This OTP will expire in 5 minutes.</p>
@@ -43,10 +43,10 @@ const sendDeliveryOtpEmail = async (user, otp) => {
         await transporter.sendMail({
             from: process.env.EMAIL, 
             to: user.email,
-            subject: "Delivery OTP - Swigo",
+            subject: "Delivery OTP - Zyngo",
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                    <h2 style="color: #ea580c;">Swigo Delivery OTP</h2>
+                    <h2 style="color: #ea580c;">Zyngo Delivery OTP</h2>
                     <p>Your OTP for delivery is:</p>
                     <h1 style="color: #dc2626; letter-spacing: 5px;">${otp}</h1>
                     <p style="color: #666; font-size: 12px;">This OTP will expire in 5 minutes.</p>

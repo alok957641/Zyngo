@@ -93,7 +93,7 @@ function CheckOut() {
       key: "rzp_test_SoP0awKZdS5zFG", 
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
-      name: "Swigo Bhagalpur",
+      name: "Zyngo Bhagalpur",
       description: "Food Order",
       order_id: razorpayOrder.id,
       handler: async (response) => {

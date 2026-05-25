@@ -70,7 +70,7 @@ function Signin() {
       <div className="relative z-10 w-full max-w-[380px] bg-white/70 backdrop-blur-lg p-7 rounded-[2.5rem] shadow-2xl border border-white/40 mx-4">
         {/* Header Section */}
         <div className="text-center mb-5">
-          <h1 className="text-3xl font-extrabold text-red-600">Swigo</h1>
+          <h1 className="text-3xl font-extrabold text-red-600">Zyngo</h1>
           <p className="text-gray-500 text-xs font-medium mt-1 uppercase tracking-widest">
             Login Account
           </p>

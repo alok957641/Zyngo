@@ -38,7 +38,7 @@ function Home() {
           <source src="frontvideo.mp4" type="video/mp4" />
        </video>
        <div className="relative z-10 text-center">
-          <h1 className="text-white text-8xl font-black italic">Swigo</h1>
+          <h1 className="text-white text-8xl font-black italic">Zyngo</h1>
           <Link to="/signin" className="mt-5 bg-orange-500 text-white px-10 py-3 rounded-xl font-bold">Go to Login</Link>
        </div>
     </div>
