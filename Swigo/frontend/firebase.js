@@ -1,21 +1,17 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey:import.meta.env.VITE_FIREBASE_APIKEY,
+  apiKey: "AIzaSyAadk3sag83qGUWGKc1XSUYirCkvFVwC0k",
   authDomain: "swigo-3da7c.firebaseapp.com",
-  projectId: "swigo-17827",
-  storageBucket: "swigo-17827.firebasestorage.app",
-  messagingSenderId: "619345443414",
-  appId: "1:619345443414:web:61ba408395dfd13f3559f7"
+  projectId: "swigo-3da7c",
+  storageBucket: "swigo-3da7c.firebasestorage.app",
+  messagingSenderId: "746859288518",
+  appId: "1:746859288518:web:6e71b83cd1f4a159aec4c7"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-export { auth , app};
