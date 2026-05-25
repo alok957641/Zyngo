@@ -1,7 +1,7 @@
 // components/Layout.jsx
 import React from "react";
 import UserNav from "./UserNav"; // Ya jo bhi tera nav hai
-import Footer from "./Footer";
+import Footer from "../src/components/Footer";
 
 const Layout = ({ children }) => {
   return (
