@@ -59,20 +59,75 @@ const signin = async (req, res) => {
     }
 };
 
-// Google Auth
+// Google Auth (Debug Version)
 const googleAuth = async (req, res) => {
     try {
+        console.log("📥 Google Auth Request Body:", req.body);
+        
         const { fullname, email, mobile, role } = req.body;
+        
+        // ✅ Validation - Check if required fields exist
+        if (!email) {
+            console.error("❌ Email missing in request");
+            return res.status(400).json({ 
+                success: false, 
+                message: "Email is required for Google Auth" 
+            });
+        }
+        
+        if (!fullname) {
+            console.error("❌ Name missing in request");
+            return res.status(400).json({ 
+                success: false, 
+                message: "Name is required for Google Auth" 
+            });
+        }
+        
+        console.log("🔍 Looking for user with email:", email);
         let user = await User.findOne({ email });
+        
         if (!user) {
-            user = await User.create({ fullname, email, mobile, role });
+            console.log("👤 User not found, creating new user...");
+            // ✅ Ensure mobile is provided or set default
+            const userMobile = mobile || "9999999999"; // Temporary mobile if not provided
+            const userRole = role || "user";
+            
+            user = await User.create({ 
+                fullname, 
+                email, 
+                mobile: userMobile, 
+                role: userRole 
+            });
+            console.log("✅ New user created:", user._id);
+        } else {
+            console.log("✅ Existing user found:", user._id);
         }
 
+        console.log("🔑 Generating token for user:", user._id);
         const token = generateToken(user._id);
-        res.cookie("token", token, cookieOptions);
+        
+        console.log("🍪 Setting cookie with token");
+        res.cookie("token", token, {
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+        });
+        
+        console.log("✅ Google Auth successful for:", email);
         return res.status(200).json(sanitizeUser(user));
+        
     } catch (error) {
-        return res.status(500).json({ message: "Google auth error", error: error.message });
+        console.error("❌ Google Auth Error:", error);
+        console.error("❌ Error Stack:", error.stack);
+        
+        // ✅ Send detailed error for debugging
+        return res.status(500).json({ 
+            success: false,
+            message: "Google auth error", 
+            error: error.message,
+            stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+        });
     }
 };
 
