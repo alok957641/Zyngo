@@ -9,10 +9,7 @@ shoprouter.post("/CreateAndEditShop", isAuth, (req, res, next) => {
     next();
 }, Upload.single("image"), CreateAndEditShop);
 
-shoprouter.get("/getMyShop", isAuth, (req, res, next) => {
-    console.log("getMyShop Route Triggered");
-    next();
-}, getMyShop);
+shoprouter.get("/getShopByCity/:city", getShopByCity);
 
 shoprouter.get("/getShopByCity/:city", (req, res, next) => {
     console.log("getShopByCity Route Triggered for:", req.params.city);

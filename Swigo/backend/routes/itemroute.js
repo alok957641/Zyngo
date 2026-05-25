@@ -11,6 +11,6 @@ itemrouter.post("/AddItem", isAuth,upload.single("image") , AddItem);
 itemrouter.put("/EditItem/:id", isAuth, upload.single("image"), EditItem);
 itemrouter.get("/getbyid/:itemId", isAuth, getitembyid);
 itemrouter.delete("/delete/:itemId", isAuth, deleteitem);
-itemrouter.get("/getbycity/:city", isAuth, getItembycity);
+itemrouter.get("/getbycity/:city", getItembycity); 
 
 module.exports = itemrouter;
