@@ -1,46 +1,56 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
-// ✅ Brevo v5.0+ compatible code
+// ✅ ES Module style import ko CommonJS (require) mein aise handle karo
 const brevo = require('@getbrevo/brevo');
 
-// ✅ Correct way to set API Key (v5.0+)
+// ✅ Constructor ko direct access karo
 const apiInstance = new brevo.TransactionalEmailsApi();
-apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
-// ✅ Sender Info
+// ✅ API Key set karne ka v5.x tareeka
+apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+// --- DEBUG: Checking Config ---
+console.log("🛠 [MAIL DEBUG] Initializing Brevo...");
+console.log("🛠 [MAIL DEBUG] API Key Loaded:", process.env.BREVO_API_KEY ? "YES" : "NO");
+
+
+
 const sender = {
     name: "Zyngo",
     email: process.env.BREVO_SENDER_EMAIL || "zyngo7541@gmail.com"
 };
 
-// ✅ Send OTP for Password Reset
 const sendOtpEmail = async (to, otp) => {
+    console.log(`📩 [MAIL DEBUG] Attempting to send OTP email to: ${to}`);
     try {
         let sendSmtpEmail = new brevo.SendSmtpEmail();
         sendSmtpEmail.subject = "Reset Your Password - Zyngo";
-        sendSmtpEmail.htmlContent = `
-            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                <h2 style="color: #ea580c;">Zyngo Password Reset</h2>
-                <p>Your OTP for password reset is:</p>
-                <h1 style="color: #dc2626; letter-spacing: 5px;">${otp}</h1>
-                <p style="color: #666; font-size: 12px;">This OTP will expire in 5 minutes.</p>
-            </div>
-        `;
+        sendSmtpEmail.htmlContent = `<h1>OTP: ${otp}</h1>`;
         sendSmtpEmail.sender = sender;
         sendSmtpEmail.to = [{ email: to }];
         
+        console.log("📩 [MAIL DEBUG] Calling API...");
         const response = await apiInstance.sendTransacEmail(sendSmtpEmail);
-        console.log("✅ OTP Email sent to:", to);
+        
+        console.log("✅ [MAIL DEBUG] Success! Response:", JSON.stringify(response.body));
         return response;
     } catch (error) {
-        console.error("❌ Brevo Error:", error.response?.body || error.message);
+        // 🔥 Yahan error ki asli wajah khul kar aayegi
+        console.error("❌ [MAIL DEBUG] API FAILED!");
+        if (error.response) {
+            console.error("❌ [MAIL DEBUG] Response Body:", JSON.stringify(error.response.body));
+        } else {
+            console.error("❌ [MAIL DEBUG] Raw Error:", error.message);
+        }
         throw new Error("Failed to send email");
     }
 };
 
+
+
 // ✅ Send Delivery OTP for Rider
 const sendDeliveryOtpEmail = async (user, otp) => {
+    console.log(`📩 [MAIL DEBUG] Attempting to send delivery OTP email to: ${user.email}`);
     try {
         let sendSmtpEmail = new brevo.SendSmtpEmail();
         sendSmtpEmail.subject = "Delivery OTP - Zyngo";
