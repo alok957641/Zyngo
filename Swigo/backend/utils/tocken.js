@@ -1,18 +1,25 @@
 const jwt = require("jsonwebtoken");
 
-const getUserIdFromToken = (req) => {
-    const token = req.cookies?.token; 
-    
-    if (!token) return null;
+
+const generateToken = (userid) => {
+    // 1. JWT_SECRET ka check
+    if (!process.env.JWT_SECRET) {
+        console.error("CRITICAL: JWT_SECRET is not defined!");
+        return null;
+    }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        // ✅ Yahan "userid" use karo, kyunki generateToken mein tumne yahi key rakhi hai
-        return decoded.userid; 
+        // 2. Token generation
+        const token = jwt.sign({ userid }, process.env.JWT_SECRET, { 
+            expiresIn: "7d" 
+        });
+        return token;
     } catch (err) {
-        console.log("JWT Verification Failed:", err.message);
+        console.error("Token generation error:", err.message);
         return null;
     }
 };
+
+module.exports = generateToken;
 
 module.exports = generateToken;
