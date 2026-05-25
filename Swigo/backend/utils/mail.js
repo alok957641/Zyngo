@@ -1,13 +1,22 @@
-const brevo = require('@getbrevo/brevo');
 const dotenv = require("dotenv");
 dotenv.config();
 
-// ✅ Correct way - Brevo v3+
-const defaultClient = brevo.ApiClient.instance;
-const apiKey = defaultClient.authentications['api-key'];
-apiKey.apiKey = process.env.BREVO_API_KEY;
+// ✅ Simple Brevo Setup - Jo bhi version ho, kaam karega
+let brevo;
+try {
+    brevo = require('@getbrevo/brevo');
+} catch (e) {
+    brevo = require('sib-api-v3-sdk');
+}
 
-const apiInstance = new brevo.TransactionalEmailsApi();
+// ✅ Configure API Key
+const defaultClient = (brevo.ApiClient || brevo).instance;
+if (defaultClient) {
+    const apiKey = defaultClient.authentications['api-key'];
+    apiKey.apiKey = process.env.BREVO_API_KEY;
+}
+
+const apiInstance = new (brevo.TransactionalEmailsApi || brevo.TransactionalEmailsApi)();
 
 // ✅ Sender Info
 const sender = {
@@ -18,7 +27,8 @@ const sender = {
 // ✅ Send OTP for Password Reset
 const sendOtpEmail = async (to, otp) => {
     try {
-        let sendSmtpEmail = new brevo.SendSmtpEmail();
+        const SendSmtpEmail = brevo.SendSmtpEmail;
+        let sendSmtpEmail = new SendSmtpEmail();
         sendSmtpEmail.to = [{ email: to }];
         sendSmtpEmail.sender = sender;
         sendSmtpEmail.subject = "Reset Your Password - Zyngo";
@@ -42,8 +52,9 @@ const sendOtpEmail = async (to, otp) => {
 // ✅ Send Delivery OTP for Rider
 const sendDeliveryOtpEmail = async (user, otp) => {
     try {
-        let sendSmtpEmail = new brevo.SendSmtpEmail();
-        sendSmtpEmail.to = [{ email: user.email, name: user.fullname }];
+        const SendSmtpEmail = brevo.SendSmtpEmail;
+        let sendSmtpEmail = new SendSmtpEmail();
+        sendSmtpEmail.to = [{ email: user.email, name: user.fullname || "Customer" }];
         sendSmtpEmail.sender = sender;
         sendSmtpEmail.subject = "Delivery OTP - Zyngo";
         sendSmtpEmail.htmlContent = `
