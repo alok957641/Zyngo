@@ -56,13 +56,15 @@ const getcurruser = async (req, res) => {
 // Toggle Availability Status
 const toggleAvailabilityStatus = async (req, res) => {
     try {
-        // 🔥 DEBUG: Log cookies to see what the server is receiving
-        console.log("Cookies received:", req.cookies); 
-
+        // 🔥 YE LINE TERI PROBLEM SOLVE KAREGI
+        console.log("Cookies received at server:", req.cookies); 
+        
         const userId = getUserIdFromToken(req);
         
         if (!userId) {
-            return res.status(401).json({ success: false, message: "Session expired or no token" });
+            // Log karo ki token kyun nahi mila
+            console.log("Token validation failed for user");
+            return res.status(401).json({ success: false, message: "Session expired" });
         }
 
         const user = await User.findById(userId);
