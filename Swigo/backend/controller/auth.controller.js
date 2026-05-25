@@ -60,26 +60,31 @@ const signin = async (req, res) => {
 };
 
 // Google Auth (Debug Version)
+// Google Auth - Debug Version
 const googleAuth = async (req, res) => {
     try {
-        console.log("📥 Google Auth Request Body:", req.body);
+        console.log("========================================");
+        console.log("📥 GOOGLE AUTH HIT!");
+        console.log("📦 Request Body:", JSON.stringify(req.body, null, 2));
+        console.log("🍪 Cookies:", req.cookies);
+        console.log("========================================");
         
         const { fullname, email, mobile, role } = req.body;
         
-        // ✅ Validation - Check if required fields exist
+        // ✅ Check if email exists
         if (!email) {
-            console.error("❌ Email missing in request");
+            console.error("❌ ERROR: Email is missing in request!");
             return res.status(400).json({ 
                 success: false, 
-                message: "Email is required for Google Auth" 
+                message: "Email is required" 
             });
         }
         
         if (!fullname) {
-            console.error("❌ Name missing in request");
+            console.error("❌ ERROR: Fullname is missing!");
             return res.status(400).json({ 
                 success: false, 
-                message: "Name is required for Google Auth" 
+                message: "Fullname is required" 
             });
         }
         
@@ -88,44 +93,62 @@ const googleAuth = async (req, res) => {
         
         if (!user) {
             console.log("👤 User not found, creating new user...");
-            // ✅ Ensure mobile is provided or set default
-            const userMobile = mobile || "9999999999"; // Temporary mobile if not provided
+            console.log("📝 Data to create:", { fullname, email, mobile, role });
+            
+            // ✅ Handle missing mobile
+            const userMobile = mobile && mobile.length === 10 ? mobile : "9999999999";
             const userRole = role || "user";
             
-            user = await User.create({ 
-                fullname, 
-                email, 
-                mobile: userMobile, 
-                role: userRole 
-            });
-            console.log("✅ New user created:", user._id);
+            try {
+                user = await User.create({ 
+                    fullname, 
+                    email, 
+                    mobile: userMobile, 
+                    role: userRole 
+                });
+                console.log("✅ User created successfully! ID:", user._id);
+            } catch (createError) {
+                console.error("❌ User creation failed:", createError.message);
+                return res.status(500).json({ 
+                    success: false, 
+                    message: "Failed to create user: " + createError.message 
+                });
+            }
         } else {
             console.log("✅ Existing user found:", user._id);
         }
 
+        // ✅ Generate token
         console.log("🔑 Generating token for user:", user._id);
         const token = generateToken(user._id);
         
-        console.log("🍪 Setting cookie with token");
-        res.cookie("token", token, {
+        // ✅ Set cookie
+        const cookieOptions = {
+            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true,
-        });
+            maxAge: 7 * 24 * 60 * 60 * 1000
+        };
         
-        console.log("✅ Google Auth successful for:", email);
-        return res.status(200).json(sanitizeUser(user));
+        res.cookie("token", token, cookieOptions);
+        console.log("🍪 Cookie set successfully");
+        
+        const sanitizedUser = sanitizeUser(user);
+        console.log("✅ Google Auth SUCCESS for:", email);
+        console.log("📤 Response:", JSON.stringify(sanitizedUser, null, 2));
+        
+        return res.status(200).json(sanitizedUser);
         
     } catch (error) {
-        console.error("❌ Google Auth Error:", error);
+        console.error("========================================");
+        console.error("❌ GOOGLE AUTH ERROR!");
+        console.error("❌ Error Message:", error.message);
         console.error("❌ Error Stack:", error.stack);
+        console.error("========================================");
         
-        // ✅ Send detailed error for debugging
         return res.status(500).json({ 
-            success: false,
-            message: "Google auth error", 
-            error: error.message,
+            success: false, 
+            message: error.message || "Google auth failed",
             stack: process.env.NODE_ENV === "development" ? error.stack : undefined
         });
     }
