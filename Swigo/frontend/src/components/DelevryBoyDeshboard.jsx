@@ -372,12 +372,7 @@ const handleLogout = async () => {
                                         </div>
                                     </div>
 
-                                    <div className="bg-white/[0.02] border border-white/5 p-2.5 rounded-xl flex justify-between items-center">
-                                        <p className="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-1.5"><FiActivity size={12} className="text-orange-500" /> Your Payout For Delivery</p>
-                                        <span className="text-[10px] font-black text-green-400 font-mono bg-green-500/10 px-2 py-0.5 rounded border border-green-500/10">
-                                            +₹{activeOrder.deliveryCharge || 40}
-                                        </span>
-                                    </div>
+                                  
                                 </div>
 
                                 <div className="divide-y divide-white/[0.02] bg-white/[0.01]">
@@ -437,7 +432,7 @@ const handleLogout = async () => {
                                         {isOnline ? "Radar Scanning" : "System Sleeping"}
                                     </h3>
                                     <p className="text-[8px] text-slate-500 font-black uppercase tracking-[2px] mt-1">
-                                        {isOnline ? "Bhagalpur Sector Node Active" : "Go Live To Catch Assignments"}
+                                        {isOnline ? " Node Active" : "Go Live To Catch Assignments"}
                                     </p>
                                 </div>
                             </div>
