@@ -1,59 +1,172 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { FaFacebook, FaInstagram, FaTwitter, FaLinkedin } from "react-icons/fa";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { 
+  FiHeart, FiMapPin, FiPhone, FiMail, 
+  FiFacebook, FiTwitter, FiInstagram, FiGithub,
+  FiShoppingBag, FiTruck, FiUsers, FiShield,
+  FiChevronRight, FiClock
+} from 'react-icons/fi';
 
-function Footer() {
+const Footer = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="bg-gray-900 text-gray-300 py-12 px-6">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-        
-        {/* 1. Brand Section */}
-        <div>
-          <h2 className="text-3xl font-extrabold text-white mb-4">Zyngo</h2>
-          <p className="text-sm text-gray-400">
-            © 2026 Zyngo Technologies Private Limited.
-          </p>
-        </div>
-
-        {/* 2. Company Links */}
-        <div>
-          <h4 className="text-white font-bold mb-4 uppercase text-xs tracking-widest">Company</h4>
-          <ul className="space-y-2 text-sm">
-            <li><Link to="/about" className="hover:text-orange-500">About Us</Link></li>
-            <li><Link to="/careers" className="hover:text-orange-500">Careers</Link></li>
-            <li><Link to="/blog" className="hover:text-orange-500">Blog</Link></li>
-          </ul>
-        </div>
-
-        {/* 3. Support Links */}
-        <div>
-          <h4 className="text-white font-bold mb-4 uppercase text-xs tracking-widest">Support</h4>
-          <ul className="space-y-2 text-sm">
-            <li><Link to="/help" className="hover:text-orange-500">Help Center</Link></li>
-            <li><Link to="/safety" className="hover:text-orange-500">Safety</Link></li>
-            <li><Link to="/terms" className="hover:text-orange-500">Terms & Conditions</Link></li>
-          </ul>
-        </div>
-
-        {/* 4. Social & Apps */}
-        <div>
-          <h4 className="text-white font-bold mb-4 uppercase text-xs tracking-widest">Connect</h4>
-          <div className="flex gap-4 mb-6">
-            <a href="#" className="text-xl hover:text-orange-500"><FaFacebook /></a>
-            <a href="#" className="text-xl hover:text-orange-500"><FaInstagram /></a>
-            <a href="#" className="text-xl hover:text-orange-500"><FaTwitter /></a>
+    <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white/80">
+      {/* Main Footer */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+          
+          {/* Brand Column */}
+          <div className="space-y-4">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="relative">
+                <div className="absolute inset-0 bg-orange-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-all" />
+                <div className="relative w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                  <FiShoppingBag className="text-white text-xl" />
+                </div>
+              </div>
+              <span className="text-2xl font-black tracking-tight text-white">
+                Zyngo<span className="text-orange-500">.</span>
+              </span>
+            </Link>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Delivering happiness to your doorstep. Fast, fresh, and always on time.
+            </p>
+            <div className="flex items-center gap-3 pt-2">
+              <a href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
+                <FiFacebook className="text-gray-400 group-hover:text-white text-sm" />
+              </a>
+              <a href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
+                <FiTwitter className="text-gray-400 group-hover:text-white text-sm" />
+              </a>
+              <a href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
+                <FiInstagram className="text-gray-400 group-hover:text-white text-sm" />
+              </a>
+              <a href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
+                <FiGithub className="text-gray-400 group-hover:text-white text-sm" />
+              </a>
+            </div>
           </div>
-          <button className="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold text-xs hover:bg-orange-700 transition">
-            Get Partner App
-          </button>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+              <span className="w-1 h-5 bg-orange-500 rounded-full" />
+              Quick Links
+            </h3>
+            <ul className="space-y-2">
+              <FooterLink to="/" text="Home" />
+              <FooterLink to="/my-orders" text="My Orders" />
+              <FooterLink to="/cart" text="Cart" />
+              <FooterLink to="/" text="Offers" />
+            </ul>
+          </div>
+
+          {/* Support */}
+          <div>
+            <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+              <span className="w-1 h-5 bg-orange-500 rounded-full" />
+              Support
+            </h3>
+            <ul className="space-y-2">
+              <FooterLink to="/" text="Help Center" />
+              <FooterLink to="/" text="Terms of Service" />
+              <FooterLink to="/" text="Privacy Policy" />
+              <FooterLink to="/" text="Refund Policy" />
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+              <span className="w-1 h-5 bg-orange-500 rounded-full" />
+              Contact Us
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 text-gray-400 text-sm">
+                <FiMapPin className="text-orange-500 text-base" />
+                <span>Bhagalpur, Bihar, India</span>
+              </div>
+              <div className="flex items-center gap-3 text-gray-400 text-sm">
+                <FiPhone className="text-orange-500 text-base" />
+                <a href="tel:+919876543210" className="hover:text-orange-500 transition-all">
+                  +91 7541840606
+                </a>
+              </div>
+              <div className="flex items-center gap-3 text-gray-400 text-sm">
+                <FiMail className="text-orange-500 text-base" />
+                <a href="mailto:support@zyngo.com" className="hover:text-orange-500 transition-all">
+                  support@zyngo.com
+                </a>
+              </div>
+              <div className="flex items-center gap-3 text-gray-400 text-sm">
+                <FiClock className="text-orange-500 text-base" />
+                <span>9 AM - 11 PM | All Days</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 pt-8 border-t border-white/10">
+          <div className="text-center">
+            <p className="text-2xl font-black text-orange-500">500+</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Partner Restaurants</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-black text-orange-500">10k+</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Happy Customers</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-black text-orange-500">50+</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Delivery Partners</p>
+          </div>
+          <div className="text-center">
+            <p className="text-2xl font-black text-orange-500">30min</p>
+            <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Avg Delivery Time</p>
+          </div>
         </div>
       </div>
-      
-      {/* Bottom Line */}
-      <div className="max-w-7xl mx-auto mt-12 pt-8 border-t border-gray-800 text-center text-xs text-gray-500">
-        Built with passion for the people of Bhagalpur.
+
+      {/* Bottom Bar */}
+      <div className="border-t border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center">
+            <p className="text-xs text-gray-500">
+              © {currentYear} Zyngo. All rights reserved. Made with{' '}
+              <FiHeart className="inline text-red-500 animate-pulse" size={12} /> in India
+            </p>
+            <div className="flex gap-4">
+              <span className="text-[9px] text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                <FiShield size={10} /> Secure Payments
+              </span>
+              <span className="text-[9px] text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                <FiTruck size={10} /> Fast Delivery
+              </span>
+              <span className="text-[9px] text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                <FiUsers size={10} /> 24/7 Support
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </footer>
+  );
+};
+
+// Footer Link Component
+function FooterLink({ to, text }) {
+  return (
+    <li>
+      <Link 
+        to={to} 
+        className="text-gray-400 text-sm hover:text-orange-500 transition-all flex items-center gap-1 group"
+      >
+        <FiChevronRight className="text-orange-500 opacity-0 group-hover:opacity-100 transition-all text-xs" />
+        {text}
+      </Link>
+    </li>
   );
 }
 

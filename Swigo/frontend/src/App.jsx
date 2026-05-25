@@ -2,8 +2,9 @@ import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
-import Layout from "../src/Layout.jsx";
 
+// ✅ Import Footer
+import Footer from "./components/Footer.jsx";
 
 // Pages & Components Imports
 import Signup from "./pages/Signup.jsx";
@@ -58,7 +59,6 @@ function App() {
   useGetMyOrders();
   useGetUpdateLocation();
 
-
   // ✅ Add loading state from Redux
   const { userData, loading } = useSelector((state) => state.user);
 
@@ -91,8 +91,8 @@ function App() {
           },
         }}
       />
-      <Layout>
-<Routes>
+  
+      <Routes>
         {/* ✅ Sab kuch iske andar hona chahiye */}
         <Route
           path="/"
@@ -111,7 +111,6 @@ function App() {
           }
         />
 
-        
         {/* 🔓 Public Auth Routes */}
         <Route
           path="/signup"
@@ -242,7 +241,9 @@ function App() {
         {/* 🚫 Catch-all Route Safety Net */}
         <Route path="*" element={<Navigate to="/signin" replace />} />
       </Routes>
-      </Layout>
+
+      {/* ✅ Footer - Har page ke neeche dikhega (except loading state) */}
+      <Footer />
     </>
   );
 }
