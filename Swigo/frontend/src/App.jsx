@@ -1,18 +1,58 @@
+import React from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import { useSelector } from "react-redux";
+
+// ✅ Import Footer
+import Footer from "./components/Footer.jsx";
+
+// Pages & Components Imports
+import Signup from "./pages/Signup.jsx";
+import Signin from "./pages/Signin.jsx";
+import Home from "./pages/Home.jsx";
+import Forgetpassword from "./pages/Forgetpassword.jsx";
+import CreateAndEditShop from "./pages/CreateAndEditShop.jsx";
+import AddItem from "./pages/AddItem.jsx";
+import EditItem from "./pages/EditItem.jsx";
+import Cartpage from "./pages/Cartpage.jsx";
+import CheckOut from "./pages/CheckOut.jsx";
+import OrderSuccess from "./pages/OrderSuccess.jsx";
+import MyOrders from "./pages/MyOrders.jsx";
+import TrackOrderPage from "./pages/TrackOrderPage.jsx";
+import CategoryPage from "./pages/CategoryPage.jsx";
+import ShopPage from "./pages/ShopPage.jsx";
+
+// Rider Panel Pages
+import DelevryBoyDeshboard from "./components/DelevryBoyDeshboard.jsx";
+import RiderEarnings from "./pages/RiderEarnings";
+import RiderHistory from "./pages/RiderHistory";
+import RiderProfile from "./pages/RiderProfile";
+
+// Owner & Billing Pages
+import OwnerEarnings from "./pages/OwnerEarnings.jsx";
+import AdminPayouts from "./pages/AdminPayouts.jsx";
+
+// Admin System Protectors & Components
+import AdminRoute from "./components/AdminRoute.jsx";
+import AdminSidebar from "./components/AdminSidebar.jsx";
+import AdminDashboardOverview from "./pages/AdminDashboardOverview.jsx";
+import AdminRiderManagement from "./pages/AdminRiderManagement.jsx";
+import AdminShopManagement from "./pages/AdminShopManagement.jsx";
+import AdminSettings from "./pages/AdminSettings.jsx";
+
+// Global Live Sync Hooks
+import useGetCurruser from "./hooks/useGetCurruser.jsx";
+import useGetCity from "./hooks/useGetCity.jsx";
+import useGetMyShop from "./hooks/useGetMyShop.jsx";
+import useGetShopbyCity from "./hooks/useGetShopbyCity.jsx";
+import useGetItemByCity from "./hooks/useGetItemByCity.jsx";
+import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
+import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
+
 import React, { useEffect, useState } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector, useDispatch } from "react-redux";
-
-import Footer from "./components/Footer.jsx";
-
-// Pages Imports (same as before)
-import Signup from "./pages/Signup.jsx";
-import Signin from "./pages/Signin.jsx";
-import Home from "./pages/Home.jsx";
-// ... rest of your imports
-
-// ✅ Only ONE hook - rest will load lazily
-import useGetCurruser from "./hooks/useGetCurruser.jsx";
 
 function App() {
   const dispatch = useDispatch();
