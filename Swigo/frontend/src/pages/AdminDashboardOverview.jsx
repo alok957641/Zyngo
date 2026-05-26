@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios"; 
-import { FiUsers, FiShoppingBag, FiTruck, FiActivity, FiLoader } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { FiUsers, FiShoppingBag, FiTruck, FiActivity, FiLoader, FiLogOut } from "react-icons/fi";
+import { setUserData } from "../redux/userSlice";
 
 const serverurl = "https://zyngo.onrender.com";
 
 const AdminDashboardOverview = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [stats, setStats] = useState({ totalUsers: 0, totalShops: 0, totalRiders: 0, activeOrders: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -19,17 +24,42 @@ const AdminDashboardOverview = () => {
     fetchRealStats();
   }, []);
 
+  // ✅ Logout Handler
+  const handleLogout = async () => {
+    try {
+      await axios.get(`${serverurl}/api/auth/signout`, { withCredentials: true });
+      localStorage.clear();
+      dispatch(setUserData(null));
+      navigate("/signin");
+    } catch (error) {
+      localStorage.clear();
+      dispatch(setUserData(null));
+      navigate("/signin");
+    }
+  };
+
   if (loading) return <div className="flex justify-center py-20 text-orange-500"><FiLoader className="animate-spin text-3xl" /></div>;
 
   return (
     <div className="w-full text-slate-200 animate-in fade-in duration-500">
-      {/* 🔝 TITLE SECTION */}
-      <div className="mb-10">
-        <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter">Live System Pulse</h2>
-        <p className="text-orange-500 text-[10px] font-black tracking-[4px] uppercase italic">Real-time DB Analytics</p>
+      {/* 🔝 TITLE SECTION WITH LOGOUT */}
+      <div className="flex justify-between items-center mb-10">
+        <div>
+          <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter">Live System Pulse</h2>
+          <p className="text-orange-500 text-[10px] font-black tracking-[4px] uppercase italic">Real-time DB Analytics</p>
+        </div>
+        
+        {/* ✅ Logout Button - Top Right */}
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs font-black uppercase tracking-wider hover:bg-red-500/20 hover:border-red-500/50 transition-all"
+        >
+          <FiLogOut size={14} />
+          Logout
+        </button>
       </div>
 
-      {/* 📊 GRID - Sirf ek baar render hoga */}
+      {/* 📊 GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard icon={<FiActivity className="text-orange-500" />} label="Active Orders" value={stats.activeOrders} />
         <StatCard icon={<FiTruck className="text-blue-500" />} label="Delivery Boys" value={stats.totalRiders} />
@@ -46,7 +76,7 @@ const AdminDashboardOverview = () => {
   );
 };
 
-// Helper Component to avoid code duplication
+// Helper Component
 const StatCard = ({ icon, label, value }) => (
   <div className="bg-white/[0.01] border border-white/5 p-8 rounded-[2rem] hover:bg-white/[0.03] transition-all">
     <div className="mb-4 text-2xl">{icon}</div>
