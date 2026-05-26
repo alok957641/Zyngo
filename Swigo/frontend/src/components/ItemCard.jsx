@@ -17,8 +17,12 @@ const ItemCard = ({ item = {} }) => {
   const originalPrice = item?.originalPrice || itemPrice * 1.2;
   const discount = item?.discount || Math.round(((originalPrice - itemPrice) / originalPrice) * 100);
   const shopName = item?.shop?.shopName || item?.shop?.name || "Restaurant";
-  const rating = item?.rating || 4.2;
-  const isVeg = item?.isVeg !== false; // Default true
+  
+  // ✅ FIX: Handle rating object properly
+  const ratingValue = item?.rating?.average || item?.averageRating || 4.2;
+  const ratingCount = item?.rating?.count || 0;
+  
+  const isVeg = item?.isVeg !== false;
 
   const handleAddToCart = () => {
     if (!isInCart) {
@@ -59,10 +63,13 @@ const ItemCard = ({ item = {} }) => {
           </div>
         )}
         
-        {/* Rating Badge */}
+        {/* Rating Badge - Fixed */}
         <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-md flex items-center gap-0.5">
           <FaStar className="text-green-600 text-[8px]" />
-          <span className="text-[10px] font-black text-gray-800">{rating}</span>
+          <span className="text-[10px] font-black text-gray-800">{ratingValue}</span>
+          {ratingCount > 0 && (
+            <span className="text-[8px] text-gray-500 ml-0.5">({ratingCount})</span>
+          )}
         </div>
         
         {/* Price Badge */}
