@@ -27,7 +27,7 @@ const HeroVideo = () => {
         className="absolute top-0 left-0 w-full h-full object-cover"
       >
         {/* ✅ Replace with your video URL */}
-        <source src="/videos/zyngo-bg.mp4" type="video/mp4" />
+        <source src="Swigo/frontend/public/zyngo-bg.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
