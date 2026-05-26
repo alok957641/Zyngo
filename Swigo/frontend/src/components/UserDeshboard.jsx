@@ -33,7 +33,7 @@ function UserDeshboard() {
       
       if (cachedShops && cachedItems && cacheTime) {
         const age = Date.now() - parseInt(cacheTime);
-        if (age < 30000) { // 30 seconds cache
+        if (age < 30000) {
           setLiveShops(JSON.parse(cachedShops));
           setLiveItems(JSON.parse(cachedItems));
           setUiLoading(false);
@@ -44,18 +44,13 @@ function UserDeshboard() {
     return false;
   }, [City]);
 
-  // 📡 Fetch Data with Cache
   const fetchLiveClusterData = useCallback(async () => {
     if (!City) return;
-    
-    // ✅ Show cached data immediately
     const hasCache = loadCachedData();
     if (hasCache) {
-      // Background refresh
       setTimeout(() => refreshData(), 100);
       return;
     }
-    
     await refreshData();
   }, [City, loadCachedData]);
 
@@ -83,7 +78,6 @@ function UserDeshboard() {
       setLiveShops(extractedShops);
       setLiveItems(extractedItems);
       
-      // ✅ Update cache
       localStorage.setItem(`shops_${City}`, JSON.stringify(extractedShops));
       localStorage.setItem(`items_${City}`, JSON.stringify(extractedItems));
       localStorage.setItem(`cache_time_${City}`, Date.now().toString());
@@ -101,7 +95,7 @@ function UserDeshboard() {
 
     const autoRefreshTimer = setInterval(() => {
       if (isMounted) refreshData();
-    }, 30000); // ✅ 30 seconds refresh (instead of 5)
+    }, 30000);
 
     return () => {
       setIsMounted(false);
@@ -136,33 +130,29 @@ function UserDeshboard() {
     }
   };
 
-  // ✅ Fast loading - skeleton UI
+  // Skeleton Loading
   if (uiLoading) {
     return (
       <div className="w-full min-h-screen bg-[#FAFAFA]">
         <UserNav />
-        <div className="w-full max-w-[1440px] mx-auto p-6 md:px-16 mt-4">
-          {/* Skeleton Categories */}
-          <div className="w-full mb-10">
-            <div className="flex justify-between mb-4">
-              <div className="h-7 w-48 bg-gray-200 rounded-full animate-pulse"></div>
+        <div className="w-full px-4 sm:px-6 md:px-8 lg:px-16 mt-4">
+          <div className="animate-pulse space-y-6">
+            <div className="flex justify-between">
+              <div className="h-6 w-32 bg-gray-200 rounded-full"></div>
               <div className="flex gap-2">
-                <div className="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
-                <div className="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+                <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
               </div>
             </div>
-            <div className="flex gap-4">
+            <div className="flex gap-3 overflow-x-auto">
               {[1,2,3,4,5,6].map(i => (
-                <div key={i} className="h-24 w-24 bg-gray-200 rounded-2xl animate-pulse shrink-0"></div>
+                <div key={i} className="h-20 w-20 bg-gray-200 rounded-2xl shrink-0"></div>
               ))}
             </div>
-          </div>
-          {/* Skeleton Shops */}
-          <div className="w-full">
-            <div className="h-7 w-56 bg-gray-200 rounded-full animate-pulse mb-4"></div>
-            <div className="flex gap-4">
+            <div className="h-6 w-40 bg-gray-200 rounded-full"></div>
+            <div className="grid grid-cols-2 gap-3">
               {[1,2,3,4].map(i => (
-                <div key={i} className="h-48 w-72 bg-gray-200 rounded-2xl animate-pulse shrink-0"></div>
+                <div key={i} className="h-40 bg-gray-200 rounded-2xl"></div>
               ))}
             </div>
           </div>
@@ -172,103 +162,148 @@ function UserDeshboard() {
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col bg-[#FAFAFA] overflow-x-hidden selection:bg-orange-500/10">
+    <div className="w-full min-h-screen flex flex-col bg-[#FAFAFA]">
       <UserNav />
 
-      <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-10 p-6 md:px-16 mt-4">
-        
-        {/* 1. CATEGORIES SECTOR */}
-        <div className="w-full">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
-              Inspiration for your <span className="text-orange-600">order</span>
-            </h1>
-            <div className="flex gap-3">
-              <button onClick={() => scroll(categoryScrollRef, "left")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all"><FiArrowLeft className="text-lg" /></button>
-              <button onClick={() => scroll(categoryScrollRef, "right")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all"><FiArrowRight className="text-lg" /></button>
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 lg:px-16 py-4 sm:py-6">
+        <div className="flex flex-col gap-6 sm:gap-8 md:gap-10">
+          
+          {/* ========== 1. CATEGORIES ========== */}
+          <div className="w-full">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <h1 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
+                <span className="text-orange-600">order</span>
+              </h1>
+              <div className="flex gap-2">
+                <button onClick={() => scroll(categoryScrollRef, "left")} className="p-1.5 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all">
+                  <FiArrowLeft className="text-sm sm:text-lg" />
+                </button>
+                <button onClick={() => scroll(categoryScrollRef, "right")} className="p-1.5 sm:p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all">
+                  <FiArrowRight className="text-sm sm:text-lg" />
+                </button>
+              </div>
+            </div>
+            <div ref={categoryScrollRef} className="w-full flex overflow-x-auto gap-3 sm:gap-6 md:gap-10 pb-3 scroll-smooth [&::-webkit-scrollbar]:hidden">
+              {categories.map((cate, index) => (
+                <div key={index} className="shrink-0">
+                  <CategoryCard data={cate} />
+                </div>
+              ))}
             </div>
           </div>
-          <div ref={categoryScrollRef} className="w-full flex overflow-x-auto gap-6 md:gap-10 pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden">
-            {categories.map((cate, index) => <CategoryCard data={cate} key={index} />)}
-          </div>
-        </div>
 
-        {/* 2. RESTAURANTS PANEL DOCK */}
-        <div className="border-t border-gray-100 pt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">Top restaurants in {City}</h2>
-            <div className="flex gap-3">
-              <button onClick={() => scroll(shopScrollRef, "left")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200"><FiArrowLeft /></button>
-              <button onClick={() => scroll(shopScrollRef, "right")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200"><FiArrowRight /></button>
+          {/* ========== 2. RESTAURANTS - MOBILE GRID (2 per row) ========== */}
+          <div className="border-t border-gray-100 pt-6 sm:pt-8">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
+                Top restaurants in {City}
+              </h2>
+              <div className="hidden sm:flex gap-3">
+                <button onClick={() => scroll(shopScrollRef, "left")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200">
+                  <FiArrowLeft />
+                </button>
+                <button onClick={() => scroll(shopScrollRef, "right")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200">
+                  <FiArrowRight />
+                </button>
+              </div>
             </div>
-          </div>
-          <div ref={shopScrollRef} className="flex overflow-x-auto gap-8 pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden">
-            {filteredShops?.length > 0 ? (
-              filteredShops.map((shop) => {
-                const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
-                return (
-                  <div key={shop._id} className={`shrink-0 w-[280px] relative rounded-[2rem] transition-all duration-500 overflow-hidden ${isClosed ? 'opacity-95 pointer-events-none select-none scale-[0.98]' : 'opacity-100 hover:scale-[1.02]'}`}>
-                    {isClosed && (
-                      <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-slate-950/80 to-red-950/70 backdrop-blur-[5px] z-30 flex flex-col items-center justify-center p-6 transition-all duration-300 border border-red-500/10 shadow-inner">
-                        <div className="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-red-600 via-rose-500 to-red-600 shadow-[0_2px_10px_rgba(239,68,68,0.5)] animate-pulse" />
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-red-600/20 to-rose-500/10 border border-red-500/40 flex items-center justify-center mb-3.5 shadow-xl shadow-red-950 animate-bounce">
-                          <FiClock size={24} className="text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+            
+            {/* ✅ Mobile: 2 columns grid, Desktop: Horizontal scroll */}
+            <div className="block md:hidden">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {filteredShops?.slice(0, 6).map((shop) => {
+                  const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
+                  return (
+                    <div key={shop._id} className="relative">
+                      {isClosed && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-black/85 to-red-950/70 backdrop-blur-[3px] z-20 flex flex-col items-center justify-center rounded-2xl">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-red-600/20 to-rose-500/10 border border-red-500/40 flex items-center justify-center mb-1">
+                            <FiClock size={18} className="text-red-500" />
+                          </div>
+                          <span className="text-red-400 font-black text-[8px] uppercase tracking-wider">Closed</span>
                         </div>
-                        <h4 className="bg-gradient-to-r from-red-400 via-rose-500 to-amber-500 bg-clip-text text-transparent font-sans font-black text-base tracking-[0.25em] uppercase text-center drop-shadow-sm">CLOSED NOW</h4>
-                        <span className="text-red-400/90 font-mono font-black text-[9px] uppercase tracking-[0.2em] mt-3 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20 shadow-md">Kitchen Offline</span>
-                      </div>
-                    )}
-                    <ShopCard shop={shop} />
-                  </div>
-                );
-              })
-            ) : (
+                      )}
+                      <ShopCard shop={shop} />
+                    </div>
+                  );
+                })}
+              </div>
+              {filteredShops?.length > 6 && (
+                <button className="w-full mt-3 py-2 text-center text-orange-500 text-xs font-black uppercase tracking-wider">
+                  View All Restaurants →
+                </button>
+              )}
+            </div>
+
+            {/* Desktop Horizontal Scroll */}
+            <div className="hidden md:block">
+              <div ref={shopScrollRef} className="flex overflow-x-auto gap-5 lg:gap-8 pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden">
+                {filteredShops?.map((shop) => {
+                  const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
+                  return (
+                    <div key={shop._id} className={`shrink-0 w-[260px] lg:w-[280px] relative rounded-2xl transition-all duration-500 ${isClosed ? 'opacity-95 pointer-events-none' : 'hover:scale-[1.02]'}`}>
+                      {isClosed && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-slate-950/80 to-red-950/70 backdrop-blur-[5px] z-30 flex flex-col items-center justify-center p-4 rounded-2xl">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-red-600/20 to-rose-500/10 border border-red-500/40 flex items-center justify-center mb-2">
+                            <FiClock size={22} className="text-red-500" />
+                          </div>
+                          <h4 className="text-red-400 font-black text-xs tracking-wide uppercase text-center">CLOSED</h4>
+                        </div>
+                      )}
+                      <ShopCard shop={shop} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {filteredShops?.length === 0 && (
               <div className="w-full py-10 text-center">
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">No Restaurants Found</p>
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No Restaurants Found</p>
               </div>
             )}
           </div>
-        </div>
 
-        {/* 3. FOOD ITEMS GRID MATRIX */}
-        <div className="border-t border-gray-100 pt-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
-              {selectedCategory !== "All" ? `${selectedCategory} Specials` : `Best Dishes in ${City}`}
-            </h2>
-            {selectedCategory !== "All" && (
-              <button onClick={() => dispatch(setSelectedCategory("All"))} className="text-xs font-black text-orange-600 border-b-2 border-orange-600 uppercase">SHOW ALL</button>
-            )}
-          </div>
+          {/* ========== 3. FOOD ITEMS - MOBILE GRID (2 per row) ========== */}
+          <div className="border-t border-gray-100 pt-6 sm:pt-8">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
+                {selectedCategory !== "All" ? `${selectedCategory}` : `Best Dishes`}
+              </h2>
+              {selectedCategory !== "All" && (
+                <button onClick={() => dispatch(setSelectedCategory("All"))} className="text-[10px] sm:text-xs font-black text-orange-600 border-b-2 border-orange-600 uppercase">
+                  SHOW ALL
+                </button>
+              )}
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-10 gap-x-6 justify-items-center mb-20">
-            {filteredItems && filteredItems.length > 0 ? (
-              filteredItems.map((item) => {
-                const targetShopId = item.shop?._id?.toString() || item.shop?.toString();
-                const isItemUnavailable = closedShopIds.has(targetShopId);
-                return (
-                  <div key={item._id} className={`w-full relative transition-all duration-500 rounded-3xl overflow-hidden ${isItemUnavailable ? 'opacity-90 pointer-events-none select-none scale-[0.97]' : 'opacity-100'}`}>
-                    {isItemUnavailable && (
-                      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 to-black/90 backdrop-blur-[3.5px] z-20 flex flex-col items-center justify-center p-3 text-center border border-white/5">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500/20 to-red-500/10 border border-orange-500/30 flex items-center justify-center mb-2 shadow-md">
-                          <FiLock size={14} className="text-orange-500 drop-shadow-[0_0_5px_rgba(249,115,22,0.4)]" />
+            {/* ✅ Mobile: 2 columns grid - Swiggy/Zomato style */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+              {filteredItems && filteredItems.length > 0 ? (
+                filteredItems.map((item) => {
+                  const targetShopId = item.shop?._id?.toString() || item.shop?.toString();
+                  const isItemUnavailable = closedShopIds.has(targetShopId);
+                  return (
+                    <div key={item._id} className={`relative transition-all duration-500 ${isItemUnavailable ? 'opacity-70' : ''}`}>
+                      {isItemUnavailable && (
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/80 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center rounded-xl">
+                          <FiLock size={14} className="text-orange-400 mb-1" />
+                          <span className="text-orange-400 font-black text-[7px] uppercase tracking-wider">Closed</span>
                         </div>
-                        <span className="bg-gradient-to-r from-orange-400 via-rose-400 to-red-500 bg-clip-text text-transparent font-sans font-black text-[10px] tracking-[0.15em] uppercase leading-none">UNAVAILABLE</span>
-                        <p className="text-[8px] font-mono text-rose-400/80 font-bold uppercase mt-2 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 truncate max-w-full">Shop is Closed</p>
-                      </div>
-                    )}
-                    <ItemCard item={item} />
-                  </div>
-                );
-              })
-            ) : (
-              <div className="col-span-full py-20 text-center w-full bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                <p className="text-gray-400 font-bold uppercase tracking-widest text-sm italic">No Items Found</p>
-              </div>
-            )}
+                      )}
+                      <ItemCard item={item} />
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="col-span-2 py-16 text-center w-full bg-gray-50 rounded-2xl border border-gray-200">
+                  <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No Items Found</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
 
+        </div>
       </div>
     </div>
   );
