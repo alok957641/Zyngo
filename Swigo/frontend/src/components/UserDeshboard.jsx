@@ -193,24 +193,76 @@ function UserDeshboard() {
           </div>
 
           {/* ========== 2. RESTAURANTS - MOBILE GRID (2 per row) ========== */}
-      {/* SHOPS SECTION - Mobile Grid (2 per row) */}
-<div className="grid grid-cols-2 gap-3 sm:gap-4">
-  {filteredShops?.map((shop) => {
-    const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
-    return (
-      <div key={shop._id} className={`relative ${isClosed ? 'opacity-60' : ''}`}>
-        {isClosed && (
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
-            <span className="text-white font-black text-[10px] uppercase tracking-wider bg-black/60 px-2 py-1 rounded-full">
-              CLOSED
-            </span>
+          <div className="border-t border-gray-100 pt-6 sm:pt-8">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
+                Top restaurants in {City}
+              </h2>
+              <div className="hidden sm:flex gap-3">
+                <button onClick={() => scroll(shopScrollRef, "left")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200">
+                  <FiArrowLeft />
+                </button>
+                <button onClick={() => scroll(shopScrollRef, "right")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200">
+                  <FiArrowRight />
+                </button>
+              </div>
+            </div>
+            
+            {/* ✅ Mobile: 2 columns grid, Desktop: Horizontal scroll */}
+            <div className="block md:hidden">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {filteredShops?.slice(0, 6).map((shop) => {
+                  const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
+                  return (
+                    <div key={shop._id} className="relative">
+                      {isClosed && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-black/85 to-red-950/70 backdrop-blur-[3px] z-20 flex flex-col items-center justify-center rounded-2xl">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-red-600/20 to-rose-500/10 border border-red-500/40 flex items-center justify-center mb-1">
+                            <FiClock size={18} className="text-red-500" />
+                          </div>
+                          <span className="text-red-400 font-black text-[8px] uppercase tracking-wider">Closed</span>
+                        </div>
+                      )}
+                      <ShopCard shop={shop} />
+                    </div>
+                  );
+                })}
+              </div>
+              {filteredShops?.length > 6 && (
+                <button className="w-full mt-3 py-2 text-center text-orange-500 text-xs font-black uppercase tracking-wider">
+                  View All Restaurants →
+                </button>
+              )}
+            </div>
+
+            {/* Desktop Horizontal Scroll */}
+            <div className="hidden md:block">
+              <div ref={shopScrollRef} className="flex overflow-x-auto gap-5 lg:gap-8 pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden">
+                {filteredShops?.map((shop) => {
+                  const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
+                  return (
+                    <div key={shop._id} className={`shrink-0 w-[260px] lg:w-[280px] relative rounded-2xl transition-all duration-500 ${isClosed ? 'opacity-95 pointer-events-none' : 'hover:scale-[1.02]'}`}>
+                      {isClosed && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-slate-950/80 to-red-950/70 backdrop-blur-[5px] z-30 flex flex-col items-center justify-center p-4 rounded-2xl">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-red-600/20 to-rose-500/10 border border-red-500/40 flex items-center justify-center mb-2">
+                            <FiClock size={22} className="text-red-500" />
+                          </div>
+                          <h4 className="text-red-400 font-black text-xs tracking-wide uppercase text-center">CLOSED</h4>
+                        </div>
+                      )}
+                      <ShopCard shop={shop} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {filteredShops?.length === 0 && (
+              <div className="w-full py-10 text-center">
+                <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No Restaurants Found</p>
+              </div>
+            )}
           </div>
-        )}
-        <ShopCard shop={shop} />
-      </div>
-    );
-  })}
-</div>
 
           {/* ========== 3. FOOD ITEMS - MOBILE GRID (2 per row) ========== */}
           <div className="border-t border-gray-100 pt-6 sm:pt-8">
