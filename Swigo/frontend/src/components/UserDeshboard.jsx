@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from "react"; 
+import React, { useRef, useEffect, useState, useCallback } from "react"; 
 import { useSelector, useDispatch } from "react-redux";
 import UserNav from "../components/UserNav.jsx";
 import { categories } from "../category.js";
@@ -18,70 +18,114 @@ function UserDeshboard() {
 
   const { City, searchTerm, selectedCategory } = useSelector((state) => state.user);
 
-  // 🚀 LIVE CLUSTER STATES
   const [liveShops, setLiveShops] = useState([]);
   const [liveItems, setLiveItems] = useState([]);
   const [uiLoading, setUiLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(true);
 
-  // 📡 AUTOMATIC POLLING REFRESH ENGINE (Silent Backend Worker)
-  const fetchLiveClusterData = async () => {
+  // ✅ Cache data in localStorage
+  const loadCachedData = useCallback(() => {
+    if (!City) return false;
+    try {
+      const cachedShops = localStorage.getItem(`shops_${City}`);
+      const cachedItems = localStorage.getItem(`items_${City}`);
+      const cacheTime = localStorage.getItem(`cache_time_${City}`);
+      
+      if (cachedShops && cachedItems && cacheTime) {
+        const age = Date.now() - parseInt(cacheTime);
+        if (age < 30000) { // 30 seconds cache
+          setLiveShops(JSON.parse(cachedShops));
+          setLiveItems(JSON.parse(cachedItems));
+          setUiLoading(false);
+          return true;
+        }
+      }
+    } catch (e) {}
+    return false;
+  }, [City]);
+
+  // 📡 Fetch Data with Cache
+  const fetchLiveClusterData = useCallback(async () => {
     if (!City) return;
+    
+    // ✅ Show cached data immediately
+    const hasCache = loadCachedData();
+    if (hasCache) {
+      // Background refresh
+      setTimeout(() => refreshData(), 100);
+      return;
+    }
+    
+    await refreshData();
+  }, [City, loadCachedData]);
+
+  const refreshData = async () => {
+    if (!City || !isMounted) return;
     try {
       const cleanCity = City.trim();
       
       const [shopRes, itemRes] = await Promise.all([
-        axios.get(`${serverurl}/api/shop/getShopByCity/${cleanCity}`, { withCredentials: true }),
-        axios.get(`${serverurl}/api/item/getbycity/${cleanCity}`, { withCredentials: true })
+        axios.get(`${serverurl}/api/shop/getShopByCity/${cleanCity}`, { 
+          withCredentials: true,
+          timeout: 8000 
+        }),
+        axios.get(`${serverurl}/api/item/getbycity/${cleanCity}`, { 
+          withCredentials: true,
+          timeout: 8000 
+        })
       ]);
 
-      if (shopRes.data) {
-        let extractedShops = Array.isArray(shopRes.data) ? shopRes.data : shopRes.data.shops || [];
-        setLiveShops(extractedShops);
-      }
+      if (!isMounted) return;
 
-      if (itemRes.data) {
-        let extractedItems = Array.isArray(itemRes.data) ? itemRes.data : itemRes.data.items || [];
-        setLiveItems(extractedItems);
-      }
+      let extractedShops = Array.isArray(shopRes.data) ? shopRes.data : shopRes.data?.shops || [];
+      let extractedItems = Array.isArray(itemRes.data) ? itemRes.data : itemRes.data?.items || [];
+
+      setLiveShops(extractedShops);
+      setLiveItems(extractedItems);
+      
+      // ✅ Update cache
+      localStorage.setItem(`shops_${City}`, JSON.stringify(extractedShops));
+      localStorage.setItem(`items_${City}`, JSON.stringify(extractedItems));
+      localStorage.setItem(`cache_time_${City}`, Date.now().toString());
+      
     } catch (err) {
-      console.error("📡 Live Sync Matrix Fail: Core nodes are desynced.", err.message);
+      console.error("📡 Fetch Error:", err?.message);
     } finally {
-      setUiLoading(false);
+      if (isMounted) setUiLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLiveClusterData(); 
+    setIsMounted(true);
+    fetchLiveClusterData();
 
     const autoRefreshTimer = setInterval(() => {
-      fetchLiveClusterData(); 
-    }, 5000);
+      if (isMounted) refreshData();
+    }, 30000); // ✅ 30 seconds refresh (instead of 5)
 
-    return () => clearInterval(autoRefreshTimer); 
-  }, [City]);
+    return () => {
+      setIsMounted(false);
+      clearInterval(autoRefreshTimer);
+    };
+  }, [City, fetchLiveClusterData]);
 
-  // 🔥 CRITICAL PROTECTION LAYER: Closed dukano ki dynamic list/set taiyar karo logic matrix ke liye
   const closedShopIds = new Set(
     liveShops
       .filter(shop => shop.owner?.isOnline === false || shop.isOnline === false)
       .map(shop => shop._id?.toString())
   );
 
-  // 1. SHOPS REAL-TIME FILTER
   const filteredShops = liveShops.filter((shop) => {
     const name = shop.shopName || shop.name || "";
     return name.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
-  // 2. ITEMS REAL-TIME FILTER
   const filteredItems = liveItems.filter((item) => {
     const name = item.name || item.itemName || "";
     const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
-    
     const itemCat = item.category?.toLowerCase().trim() || "";
     const selectedCat = selectedCategory?.toLowerCase().trim() || "all";
     const matchesCategory = selectedCat === "all" || itemCat === selectedCat;
-
     return matchesSearch && matchesCategory;
   });
 
@@ -92,12 +136,40 @@ function UserDeshboard() {
     }
   };
 
-  if (uiLoading) return (
-    <div className="w-full h-screen flex flex-col items-center justify-center bg-white">
-      <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
-      <p className="text-[10px] font-mono font-black uppercase tracking-[4px] text-slate-400 mt-4">Connecting Bhagalpur Nodes...</p>
-    </div>
-  );
+  // ✅ Fast loading - skeleton UI
+  if (uiLoading) {
+    return (
+      <div className="w-full min-h-screen bg-[#FAFAFA]">
+        <UserNav />
+        <div className="w-full max-w-[1440px] mx-auto p-6 md:px-16 mt-4">
+          {/* Skeleton Categories */}
+          <div className="w-full mb-10">
+            <div className="flex justify-between mb-4">
+              <div className="h-7 w-48 bg-gray-200 rounded-full animate-pulse"></div>
+              <div className="flex gap-2">
+                <div className="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
+                <div className="h-9 w-9 bg-gray-200 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              {[1,2,3,4,5,6].map(i => (
+                <div key={i} className="h-24 w-24 bg-gray-200 rounded-2xl animate-pulse shrink-0"></div>
+              ))}
+            </div>
+          </div>
+          {/* Skeleton Shops */}
+          <div className="w-full">
+            <div className="h-7 w-56 bg-gray-200 rounded-full animate-pulse mb-4"></div>
+            <div className="flex gap-4">
+              {[1,2,3,4].map(i => (
+                <div key={i} className="h-48 w-72 bg-gray-200 rounded-2xl animate-pulse shrink-0"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen flex flex-col bg-[#FAFAFA] overflow-x-hidden selection:bg-orange-500/10">
@@ -134,33 +206,16 @@ function UserDeshboard() {
             {filteredShops?.length > 0 ? (
               filteredShops.map((shop) => {
                 const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
-
                 return (
-                  <div 
-                    key={shop._id} 
-                    className={`shrink-0 w-[280px] relative rounded-[2rem] transition-all duration-500 overflow-hidden ${
-                      isClosed 
-                        ? 'opacity-95 pointer-events-none select-none scale-[0.98]' 
-                        : 'opacity-100 hover:scale-[1.02]'
-                    }`}
-                  >
-                    {/* 🛑 TAGDA NEON GRADIENT GLASSMORPHIC OVERLAY FOR CLOSED SHOPS */}
+                  <div key={shop._id} className={`shrink-0 w-[280px] relative rounded-[2rem] transition-all duration-500 overflow-hidden ${isClosed ? 'opacity-95 pointer-events-none select-none scale-[0.98]' : 'opacity-100 hover:scale-[1.02]'}`}>
                     {isClosed && (
                       <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-slate-950/80 to-red-950/70 backdrop-blur-[5px] z-30 flex flex-col items-center justify-center p-6 transition-all duration-300 border border-red-500/10 shadow-inner">
-                        {/* Flashing premium glowing border line at top */}
                         <div className="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-red-600 via-rose-500 to-red-600 shadow-[0_2px_10px_rgba(239,68,68,0.5)] animate-pulse" />
-                        
                         <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-red-600/20 to-rose-500/10 border border-red-500/40 flex items-center justify-center mb-3.5 shadow-xl shadow-red-950 animate-bounce">
                           <FiClock size={24} className="text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
                         </div>
-                        
-                        <h4 className="bg-gradient-to-r from-red-400 via-rose-500 to-amber-500 bg-clip-text text-transparent font-sans font-black text-base tracking-[0.25em] uppercase text-center drop-shadow-sm">
-                          CLOSED NOW
-                        </h4>
-                        
-                        <span className="text-red-400/90 font-mono font-black text-[9px] uppercase tracking-[0.2em] mt-3 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20 shadow-md">
-                          Kitchen Offline
-                        </span>
+                        <h4 className="bg-gradient-to-r from-red-400 via-rose-500 to-amber-500 bg-clip-text text-transparent font-sans font-black text-base tracking-[0.25em] uppercase text-center drop-shadow-sm">CLOSED NOW</h4>
+                        <span className="text-red-400/90 font-mono font-black text-[9px] uppercase tracking-[0.2em] mt-3 bg-red-500/10 px-3 py-1 rounded-full border border-red-500/20 shadow-md">Kitchen Offline</span>
                       </div>
                     )}
                     <ShopCard shop={shop} />
@@ -191,30 +246,15 @@ function UserDeshboard() {
               filteredItems.map((item) => {
                 const targetShopId = item.shop?._id?.toString() || item.shop?.toString();
                 const isItemUnavailable = closedShopIds.has(targetShopId);
-
                 return (
-                  <div 
-                    key={item._id}
-                    className={`w-full relative transition-all duration-500 rounded-3xl overflow-hidden ${
-                      isItemUnavailable 
-                        ? 'opacity-90 pointer-events-none select-none scale-[0.97]' 
-                        : 'opacity-100'
-                    }`}
-                  >
-                    {/* 🛑 TAGDA PREMIUM FROSTED OVERLAY FOR DISHES */}
+                  <div key={item._id} className={`w-full relative transition-all duration-500 rounded-3xl overflow-hidden ${isItemUnavailable ? 'opacity-90 pointer-events-none select-none scale-[0.97]' : 'opacity-100'}`}>
                     {isItemUnavailable && (
                       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 to-black/90 backdrop-blur-[3.5px] z-20 flex flex-col items-center justify-center p-3 text-center border border-white/5">
                         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500/20 to-red-500/10 border border-orange-500/30 flex items-center justify-center mb-2 shadow-md">
                           <FiLock size={14} className="text-orange-500 drop-shadow-[0_0_5px_rgba(249,115,22,0.4)]" />
                         </div>
-                        
-                        <span className="bg-gradient-to-r from-orange-400 via-rose-400 to-red-500 bg-clip-text text-transparent font-sans font-black text-[10px] tracking-[0.15em] uppercase leading-none">
-                          UNAVAILABLE
-                        </span>
-                        
-                        <p className="text-[8px] font-mono text-rose-400/80 font-bold uppercase mt-2 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 truncate max-w-full">
-                          Shop is Closed
-                        </p>
+                        <span className="bg-gradient-to-r from-orange-400 via-rose-400 to-red-500 bg-clip-text text-transparent font-sans font-black text-[10px] tracking-[0.15em] uppercase leading-none">UNAVAILABLE</span>
+                        <p className="text-[8px] font-mono text-rose-400/80 font-bold uppercase mt-2 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20 truncate max-w-full">Shop is Closed</p>
                       </div>
                     )}
                     <ItemCard item={item} />

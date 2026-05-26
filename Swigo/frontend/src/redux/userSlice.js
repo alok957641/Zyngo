@@ -33,15 +33,15 @@ const loadTotalAmountFromStorage = () => {
 };
 
 const initialState = {
-    userData: loadUserFromStorage(), // ✅ localStorage se load
-    loading: false, // ✅ false kar diya kyunki localStorage se already load ho gaya
+    userData: loadUserFromStorage(),
+    loading: false, // ✅ Already false because we have cached data
     City: null,
     ShopsOfMyCity: null,
     itemsInMyCity: null,
     searchTerm: "",
     selectedCategory: "All",
-    cartItems: loadCartFromStorage(), // ✅ localStorage se load
-    totalAmount: loadTotalAmountFromStorage(), // ✅ localStorage se load
+    cartItems: loadCartFromStorage(),
+    totalAmount: loadTotalAmountFromStorage(),
     myOrders: [],
 };
 
@@ -52,7 +52,6 @@ const userSlice = createSlice({
         setUserData: (state, action) => {
             state.userData = action.payload;
             state.loading = false;
-            // ✅ Save to localStorage
             if (action.payload) {
                 localStorage.setItem('user', JSON.stringify(action.payload));
             } else {
@@ -86,7 +85,6 @@ const userSlice = createSlice({
                 state.cartItems.push(cartItem); 
             }
             state.totalAmount = state.cartItems.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            // ✅ Save to localStorage
             localStorage.setItem('cart', JSON.stringify(state.cartItems));
             localStorage.setItem('totalAmount', JSON.stringify(state.totalAmount));
         },
@@ -97,21 +95,18 @@ const userSlice = createSlice({
                 item.quantity = quantity; 
             }
             state.totalAmount = state.cartItems.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            // ✅ Save to localStorage
             localStorage.setItem('cart', JSON.stringify(state.cartItems));
             localStorage.setItem('totalAmount', JSON.stringify(state.totalAmount));
         },
         removecartItem: (state, action) => {
             state.cartItems = state.cartItems.filter(i => (i._id || i.id) !== action.payload);
             state.totalAmount = state.cartItems.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            // ✅ Save to localStorage
             localStorage.setItem('cart', JSON.stringify(state.cartItems));
             localStorage.setItem('totalAmount', JSON.stringify(state.totalAmount));
         },
-        clearCart: (state, action) => {
+        clearCart: (state) => {
             state.cartItems = [];
             state.totalAmount = 0;
-            // ✅ Clear from localStorage
             localStorage.removeItem('cart');
             localStorage.removeItem('totalAmount');
         },
@@ -122,7 +117,9 @@ const userSlice = createSlice({
             if (action.payload) { 
                 state.myOrders = [action.payload, ...state.myOrders]; 
             }
-        }
+        },
+        // ✅ Reset entire state on logout
+        resetUserState: () => initialState,
     }
 });
 
@@ -137,9 +134,10 @@ export const {
     addToCart, 
     updateQuantity, 
     removecartItem,
-    clearCart,  // ✅ Export clearCart
+    clearCart,
     setMyOrders, 
-    addMyOrder 
+    addMyOrder,
+    resetUserState  // ✅ New action for logout
 } = userSlice.actions;
 
 export default userSlice.reducer;
