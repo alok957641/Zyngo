@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
 
@@ -64,6 +64,8 @@ const LoadingSpinner = () => (
 );
 
 function App() {
+  const location = useLocation();
+  
   // 🔥 Hooks
   useGetCurruser();
   useGetCity();
@@ -74,6 +76,29 @@ function App() {
   useGetUpdateLocation();
 
   const { userData, loading } = useSelector((state) => state.user);
+
+  // ✅ Check if footer should be shown (only for user and owner panels)
+  const shouldShowFooter = () => {
+    // Don't show footer on auth pages
+    if (location.pathname === "/signin" || 
+        location.pathname === "/signup" || 
+        location.pathname === "/forgetpassword") {
+      return false;
+    }
+    
+    // Don't show footer on admin panel
+    if (location.pathname.startsWith("/admin")) {
+      return false;
+    }
+    
+    // Don't show footer on rider panel
+    if (location.pathname.startsWith("/rider")) {
+      return false;
+    }
+    
+    // Show footer only for user and owner dashboards
+    return true;
+  };
 
   // ✅ Loading state
   if (loading) {
@@ -102,8 +127,6 @@ function App() {
         <Route
           path="/"
           element={
-            // ✅ If user NOT logged in → Show Hero Video (Welcome Screen)
-            // ✅ If user logged in → Redirect to dashboard based on role
             !userData ? (
               <HeroVideo />
             ) : userData.role === "admin" ? (
@@ -240,8 +263,8 @@ function App() {
         <Route path="*" element={<Navigate to="/signin" replace />} />
       </Routes>
 
-      {/* ✅ Footer - Har page ke neeche dikhega */}
-      <Footer />
+      {/* ✅ Footer - Sirf user aur owner panel mein dikhega */}
+      {shouldShowFooter() && <Footer />}
     </>
   );
 }

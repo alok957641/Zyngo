@@ -12,7 +12,7 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gradient-to-b from-gray-900 to-gray-950 text-white/80">
+    <footer className="bg-white border-t border-gray-100 mt-12">
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
@@ -26,32 +26,32 @@ const Footer = () => {
                   <FiShoppingBag className="text-white text-xl" />
                 </div>
               </div>
-              <span className="text-2xl font-black tracking-tight text-white">
+              <span className="text-2xl font-black tracking-tight text-gray-800">
                 Zyngo<span className="text-orange-500">.</span>
               </span>
             </Link>
-            <p className="text-gray-400 text-sm leading-relaxed">
+            <p className="text-gray-500 text-sm leading-relaxed">
               Delivering happiness to your doorstep. Fast, fresh, and always on time.
             </p>
             <div className="flex items-center gap-3 pt-2">
-              <a href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
-                <FiFacebook className="text-gray-400 group-hover:text-white text-sm" />
+              <a href="#" className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
+                <FiFacebook className="text-gray-500 group-hover:text-white text-sm" />
               </a>
-              <a href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
-                <FiTwitter className="text-gray-400 group-hover:text-white text-sm" />
+              <a href="#" className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
+                <FiTwitter className="text-gray-500 group-hover:text-white text-sm" />
               </a>
-              <a href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
-                <FiInstagram className="text-gray-400 group-hover:text-white text-sm" />
+              <a href="#" className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
+                <FiInstagram className="text-gray-500 group-hover:text-white text-sm" />
               </a>
-              <a href="#" className="w-9 h-9 bg-white/5 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
-                <FiGithub className="text-gray-400 group-hover:text-white text-sm" />
+              <a href="#" className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center hover:bg-orange-500 transition-all group">
+                <FiGithub className="text-gray-500 group-hover:text-white text-sm" />
               </a>
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-2">
               <span className="w-1 h-5 bg-orange-500 rounded-full" />
               Quick Links
             </h3>
@@ -65,7 +65,7 @@ const Footer = () => {
 
           {/* Support */}
           <div>
-            <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-2">
               <span className="w-1 h-5 bg-orange-500 rounded-full" />
               Support
             </h3>
@@ -79,28 +79,28 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-black text-gray-800 mb-4 flex items-center gap-2">
               <span className="w-1 h-5 bg-orange-500 rounded-full" />
               Contact Us
             </h3>
             <div className="space-y-3">
-              <div className="flex items-center gap-3 text-gray-400 text-sm">
+              <div className="flex items-center gap-3 text-gray-500 text-sm">
                 <FiMapPin className="text-orange-500 text-base" />
                 <span>Bhagalpur, Bihar, India</span>
               </div>
-              <div className="flex items-center gap-3 text-gray-400 text-sm">
+              <div className="flex items-center gap-3 text-gray-500 text-sm">
                 <FiPhone className="text-orange-500 text-base" />
                 <a href="tel:+919876543210" className="hover:text-orange-500 transition-all">
                   +91 7541840606
                 </a>
               </div>
-              <div className="flex items-center gap-3 text-gray-400 text-sm">
+              <div className="flex items-center gap-3 text-gray-500 text-sm">
                 <FiMail className="text-orange-500 text-base" />
                 <a href="mailto:support@zyngo.com" className="hover:text-orange-500 transition-all">
                   support@zyngo.com
                 </a>
               </div>
-              <div className="flex items-center gap-3 text-gray-400 text-sm">
+              <div className="flex items-center gap-3 text-gray-500 text-sm">
                 <FiClock className="text-orange-500 text-base" />
                 <span>9 AM - 11 PM | All Days</span>
               </div>
@@ -109,7 +109,7 @@ const Footer = () => {
         </div>
 
         {/* Stats Section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 pt-8 border-t border-white/10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12 pt-8 border-t border-gray-100">
           <div className="text-center">
             <p className="text-2xl font-black text-orange-500">500+</p>
             <p className="text-[10px] text-gray-500 uppercase tracking-wider mt-1">Partner Restaurants</p>
@@ -130,7 +130,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-white/10">
+      <div className="border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-center">
             <p className="text-xs text-gray-500">
@@ -138,13 +138,13 @@ const Footer = () => {
               <FiHeart className="inline text-red-500 animate-pulse" size={12} /> in India
             </p>
             <div className="flex gap-4">
-              <span className="text-[9px] text-gray-600 uppercase tracking-wider flex items-center gap-1">
+              <span className="text-[9px] text-gray-500 uppercase tracking-wider flex items-center gap-1">
                 <FiShield size={10} /> Secure Payments
               </span>
-              <span className="text-[9px] text-gray-600 uppercase tracking-wider flex items-center gap-1">
+              <span className="text-[9px] text-gray-500 uppercase tracking-wider flex items-center gap-1">
                 <FiTruck size={10} /> Fast Delivery
               </span>
-              <span className="text-[9px] text-gray-600 uppercase tracking-wider flex items-center gap-1">
+              <span className="text-[9px] text-gray-500 uppercase tracking-wider flex items-center gap-1">
                 <FiUsers size={10} /> 24/7 Support
               </span>
             </div>
@@ -161,7 +161,7 @@ function FooterLink({ to, text }) {
     <li>
       <Link 
         to={to} 
-        className="text-gray-400 text-sm hover:text-orange-500 transition-all flex items-center gap-1 group"
+        className="text-gray-500 text-sm hover:text-orange-500 transition-all flex items-center gap-1 group"
       >
         <FiChevronRight className="text-orange-500 opacity-0 group-hover:opacity-100 transition-all text-xs" />
         {text}
