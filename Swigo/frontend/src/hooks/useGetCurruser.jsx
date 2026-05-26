@@ -1,17 +1,28 @@
 import { useEffect } from "react";
 import axios from "axios";
-import { useDispatch, useSelector } from "react-redux"; // ✅ Add useSelector
+import { useDispatch, useSelector } from "react-redux";
 import { setUserData, setLoading } from "../redux/userSlice"; 
 
-export const serverurl = "https://zyngo.onrender.com"; // ✅ Your Render URL
+export const serverurl = "https://zyngo.onrender.com";
 
 function useGetCurruser() {
   const dispatch = useDispatch();
-  const { userData } = useSelector((state) => state.user); // ✅ Get current user
+  const { userData } = useSelector((state) => state.user);
 
   useEffect(() => {
     const fetchUser = async () => {
-      // ✅ Agar already user hai toh API call mat karo (performance improve)
+      // ✅ Pehle localStorage check karo (fast)
+      const cachedUser = localStorage.getItem("user");
+      if (cachedUser && !userData) {
+        try {
+          const user = JSON.parse(cachedUser);
+          dispatch(setUserData(user));
+          dispatch(setLoading(false));
+          return; // ✅ API call bhi mat karo
+        } catch (e) {}
+      }
+
+      // ✅ Agar userData already hai toh API call skip
       if (userData) {
         dispatch(setLoading(false));
         return;
@@ -20,12 +31,13 @@ function useGetCurruser() {
       dispatch(setLoading(true));
       
       try {
-        // ⚠️ Route match karo - tera backend route "/api/auth/me" hai
         const result = await axios.get(`${serverurl}/api/auth/me`, {
           withCredentials: true,
+          timeout: 5000, // ✅ 5 second timeout
         });
 
         if (result.data) {
+          localStorage.setItem("user", JSON.stringify(result.data)); // ✅ Cache
           dispatch(setUserData(result.data));
         } else {
           dispatch(setUserData(null));
@@ -39,7 +51,7 @@ function useGetCurruser() {
     };
     
     fetchUser();
-  }, [dispatch, userData]); // ✅ userData dependency add kiya
+  }, [dispatch, userData]);
 }
 
 export default useGetCurruser;
