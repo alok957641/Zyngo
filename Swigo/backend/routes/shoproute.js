@@ -7,10 +7,12 @@ const { CreateAndEditShop, getMyShop, getShopByCity } = require("../controller/s
 // ✅ CREATE/EDIT SHOP
 shoprouter.post("/CreateAndEditShop", isAuth, Upload.single("image"), CreateAndEditShop);
 
-// ✅ GET MY SHOP (YEH ADD KARO - MISSING THA)
+// ✅ GET MY SHOP - YEH LINE ADD KARO (MISSING HAI)
 shoprouter.get("/getMyShop", isAuth, getMyShop);
 
 // ✅ GET SHOPS BY CITY
 shoprouter.get("/getShopByCity/:city", getShopByCity);
+
+console.log("✅ Shop routes registered: /getMyShop, /CreateAndEditShop, /getShopByCity/:city");
 
 module.exports = shoprouter;
