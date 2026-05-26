@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { useNavigate }hu } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const HeroVideo = () => {
