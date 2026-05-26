@@ -49,10 +49,7 @@ import useGetItemByCity from "./hooks/useGetItemByCity.jsx";
 import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
-import React, { useEffect, useState } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
-import { Toaster } from "react-hot-toast";
-import { useSelector, useDispatch } from "react-redux";
+
 
 function App() {
   const dispatch = useDispatch();
