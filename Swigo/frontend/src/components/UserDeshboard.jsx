@@ -23,7 +23,7 @@ function UserDeshboard() {
   const [uiLoading, setUiLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(true);
 
-  // ✅ Cache data in localStorage
+  // Cache data in localStorage
   const loadCachedData = useCallback(() => {
     if (!City) return false;
     try {
@@ -83,7 +83,7 @@ function UserDeshboard() {
       localStorage.setItem(`cache_time_${City}`, Date.now().toString());
       
     } catch (err) {
-      console.error("📡 Fetch Error:", err?.message);
+      console.error("Fetch Error:", err?.message);
     } finally {
       if (isMounted) setUiLoading(false);
     }
@@ -171,7 +171,7 @@ function UserDeshboard() {
           {/* ========== 1. CATEGORIES ========== */}
           <div className="w-full">
             <div className="flex items-center justify-between mb-3 sm:mb-4">
-              <h1 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
+              <h1 className="text-sm sm:text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
                 <span className="text-orange-600">order</span>
               </h1>
               <div className="flex gap-2">
@@ -192,35 +192,32 @@ function UserDeshboard() {
             </div>
           </div>
 
-          {/* ========== 2. RESTAURANTS - MOBILE GRID (2 per row) ========== */}
+          {/* ========== 2. RESTAURANTS - Fully Responsive ========== */}
           <div className="border-t border-gray-100 pt-6 sm:pt-8">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <h2 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
                 Top restaurants in {City}
               </h2>
-              <div className="hidden sm:flex gap-3">
-                <button onClick={() => scroll(shopScrollRef, "left")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200">
+              <div className="flex gap-3">
+                <button onClick={() => scroll(shopScrollRef, "left")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all">
                   <FiArrowLeft />
                 </button>
-                <button onClick={() => scroll(shopScrollRef, "right")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200">
+                <button onClick={() => scroll(shopScrollRef, "right")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all">
                   <FiArrowRight />
                 </button>
               </div>
             </div>
             
-            {/* ✅ Mobile: 2 columns grid, Desktop: Horizontal scroll */}
-            <div className="block md:hidden">
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                {filteredShops?.slice(0, 6).map((shop) => {
+            {/* Mobile: 2 columns grid */}
+            <div className="block sm:hidden">
+              <div className="grid grid-cols-2 gap-3">
+                {filteredShops?.map((shop) => {
                   const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
                   return (
                     <div key={shop._id} className="relative">
                       {isClosed && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-black/85 to-red-950/70 backdrop-blur-[3px] z-20 flex flex-col items-center justify-center rounded-2xl">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-red-600/20 to-rose-500/10 border border-red-500/40 flex items-center justify-center mb-1">
-                            <FiClock size={18} className="text-red-500" />
-                          </div>
-                          <span className="text-red-400 font-black text-[8px] uppercase tracking-wider">Closed</span>
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
+                          <span className="text-white font-black text-[8px] uppercase bg-black/50 px-2 py-0.5 rounded-full">Closed</span>
                         </div>
                       )}
                       <ShopCard shop={shop} />
@@ -228,26 +225,35 @@ function UserDeshboard() {
                   );
                 })}
               </div>
-              {filteredShops?.length > 6 && (
-                <button className="w-full mt-3 py-2 text-center text-orange-500 text-xs font-black uppercase tracking-wider">
-                  View All Restaurants →
-                </button>
-              )}
             </div>
 
-            {/* Desktop Horizontal Scroll */}
+            {/* Tablet: 3 columns grid */}
+            <div className="hidden sm:grid md:hidden grid-cols-3 gap-4">
+              {filteredShops?.map((shop) => {
+                const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
+                return (
+                  <div key={shop._id} className="relative">
+                    {isClosed && (
+                      <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
+                        <span className="text-white font-black text-[9px] uppercase bg-black/50 px-2 py-0.5 rounded-full">Closed</span>
+                      </div>
+                    )}
+                    <ShopCard shop={shop} />
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Desktop: Horizontal scroll */}
             <div className="hidden md:block">
-              <div ref={shopScrollRef} className="flex overflow-x-auto gap-5 lg:gap-8 pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden">
+              <div ref={shopScrollRef} className="flex overflow-x-auto gap-5 lg:gap-6 pb-4 scroll-smooth [&::-webkit-scrollbar]:hidden">
                 {filteredShops?.map((shop) => {
                   const isClosed = shop.owner?.isOnline === false || shop.isOnline === false;
                   return (
-                    <div key={shop._id} className={`shrink-0 w-[260px] lg:w-[280px] relative rounded-2xl transition-all duration-500 ${isClosed ? 'opacity-95 pointer-events-none' : 'hover:scale-[1.02]'}`}>
+                    <div key={shop._id} className={`shrink-0 w-[280px] relative transition-all duration-500 ${isClosed ? 'opacity-90' : 'hover:scale-[1.02]'}`}>
                       {isClosed && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-black/85 via-slate-950/80 to-red-950/70 backdrop-blur-[5px] z-30 flex flex-col items-center justify-center p-4 rounded-2xl">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-red-600/20 to-rose-500/10 border border-red-500/40 flex items-center justify-center mb-2">
-                            <FiClock size={22} className="text-red-500" />
-                          </div>
-                          <h4 className="text-red-400 font-black text-xs tracking-wide uppercase text-center">CLOSED</h4>
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
+                          <span className="text-white font-black text-[10px] uppercase bg-black/50 px-2 py-1 rounded-full">Closed</span>
                         </div>
                       )}
                       <ShopCard shop={shop} />
@@ -264,21 +270,21 @@ function UserDeshboard() {
             )}
           </div>
 
-          {/* ========== 3. FOOD ITEMS - MOBILE GRID (2 per row) ========== */}
+          {/* ========== 3. FOOD ITEMS - Fully Responsive ========== */}
           <div className="border-t border-gray-100 pt-6 sm:pt-8">
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <h2 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
-                {selectedCategory !== "All" ? `${selectedCategory}` : `Best Dishes`}
+                {selectedCategory !== "All" ? `${selectedCategory} Specials` : `Best Dishes in ${City}`}
               </h2>
               {selectedCategory !== "All" && (
-                <button onClick={() => dispatch(setSelectedCategory("All"))} className="text-[10px] sm:text-xs font-black text-orange-600 border-b-2 border-orange-600 uppercase">
+                <button onClick={() => dispatch(setSelectedCategory("All"))} className="text-[9px] sm:text-[10px] md:text-xs font-black text-orange-600 border-b-2 border-orange-600 uppercase">
                   SHOW ALL
                 </button>
               )}
             </div>
 
-            {/* ✅ Mobile: 2 columns grid - Swiggy/Zomato style */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+            {/* Mobile: 2 columns */}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {filteredItems && filteredItems.length > 0 ? (
                 filteredItems.map((item) => {
                   const targetShopId = item.shop?._id?.toString() || item.shop?.toString();
@@ -286,9 +292,8 @@ function UserDeshboard() {
                   return (
                     <div key={item._id} className={`relative transition-all duration-500 ${isItemUnavailable ? 'opacity-70' : ''}`}>
                       {isItemUnavailable && (
-                        <div className="absolute inset-0 bg-gradient-to-b from-black/70 to-black/80 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center rounded-xl">
-                          <FiLock size={14} className="text-orange-400 mb-1" />
-                          <span className="text-orange-400 font-black text-[7px] uppercase tracking-wider">Closed</span>
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
+                          <span className="text-white font-black text-[8px] uppercase bg-black/50 px-2 py-0.5 rounded-full">Closed</span>
                         </div>
                       )}
                       <ItemCard item={item} />
@@ -296,7 +301,7 @@ function UserDeshboard() {
                   );
                 })
               ) : (
-                <div className="col-span-2 py-16 text-center w-full bg-gray-50 rounded-2xl border border-gray-200">
+                <div className="col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5 py-16 text-center w-full bg-gray-50 rounded-2xl border border-gray-200">
                   <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">No Items Found</p>
                 </div>
               )}
