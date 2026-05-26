@@ -1,7 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import herovideo from "Swigo/frontend/public/zyngo-bg.mp4"
 const HeroVideo = () => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
@@ -27,7 +26,7 @@ const HeroVideo = () => {
         className="absolute top-0 left-0 w-full h-full object-cover"
       >
         {/* ✅ Replace with your video URL */}
-        <source src={herovideo} type="video/mp4" />
+        <source src="/zyngo-bg.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
