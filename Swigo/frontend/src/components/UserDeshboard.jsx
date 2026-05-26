@@ -331,35 +331,77 @@ function UserDeshboard() {
             </div>
 
             {/* Mobile: 2 columns */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {filteredItems && filteredItems.length > 0 ? (
-                filteredItems.map((item) => {
-                  const targetShopId =
-                    item.shop?._id?.toString() || item.shop?.toString();
-                  const isItemUnavailable = closedShopIds.has(targetShopId);
-                  return (
-                    <div
-                      key={item._id}
-                      className={`relative transition-all duration-500 ${isItemUnavailable ? "opacity-70" : ""}`}
-                    >
-                      {isItemUnavailable && (
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-xl">
-                          <span className="text-white font-black text-[8px] uppercase bg-black/50 px-2 py-0.5 rounded-full">
-                            Closed
-                          </span>
-                        </div>
-                      )}
-                      <ItemCard item={item} />
+            {/* ========== 3. FOOD ITEMS - Fully Responsive ========== */}
+            <div className="border-t border-gray-100 pt-6 sm:pt-8">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-base sm:text-xl md:text-2xl font-black text-gray-900 tracking-tight uppercase">
+                  {selectedCategory !== "All"
+                    ? `${selectedCategory} Specials`
+                    : `Best Dishes in ${City}`}
+                </h2>
+                {selectedCategory !== "All" && (
+                  <button
+                    onClick={() => dispatch(setSelectedCategory("All"))}
+                    className="text-[9px] sm:text-[10px] md:text-xs font-black text-orange-600 border-b-2 border-orange-600 uppercase hover:text-orange-700 transition-all"
+                  >
+                    SHOW ALL
+                  </button>
+                )}
+              </div>
+
+              {/* ✅ Items Grid - Responsive */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {filteredItems && filteredItems.length > 0 ? (
+                  filteredItems.map((item) => {
+                    const targetShopId =
+                      item.shop?._id?.toString() || item.shop?.toString();
+                    const isItemUnavailable = closedShopIds.has(targetShopId);
+
+                    return (
+                      <div
+                        key={item._id}
+                        className={`relative transition-all duration-300 ${isItemUnavailable ? "opacity-60" : "hover:-translate-y-1"}`}
+                      >
+                        {/* Closed Overlay */}
+                        {isItemUnavailable && (
+                          <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px] z-10 flex flex-col items-center justify-center rounded-2xl">
+                            <span className="text-white font-black text-[8px] uppercase bg-black/60 px-2 py-1 rounded-full">
+                              Shop Closed
+                            </span>
+                          </div>
+                        )}
+                        <ItemCard item={item} />
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5 py-16 text-center w-full bg-gray-50 rounded-2xl border border-gray-200">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
+                        <svg
+                          className="w-6 h-6 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                      </div>
+                      <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">
+                        No Items Found
+                      </p>
+                      <p className="text-gray-300 text-[9px]">
+                        Try searching something else
+                      </p>
                     </div>
-                  );
-                })
-              ) : (
-                <div className="col-span-2 md:col-span-3 lg:col-span-4 xl:col-span-5 py-16 text-center w-full bg-gray-50 rounded-2xl border border-gray-200">
-                  <p className="text-gray-400 font-bold uppercase tracking-widest text-xs">
-                    No Items Found
-                  </p>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

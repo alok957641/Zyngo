@@ -6,6 +6,9 @@ import { useSelector } from "react-redux";
 // ✅ Import Footer
 import Footer from "./components/Footer.jsx";
 
+// ✅ Import Hero Video Component
+import HeroVideo from "./components/HeroVideo.jsx";
+
 // Pages & Components Imports
 import Signup from "./pages/Signup.jsx";
 import Signin from "./pages/Signin.jsx";
@@ -49,7 +52,7 @@ import useGetItemByCity from "./hooks/useGetItemByCity.jsx";
 import useGetMyOrders from "./hooks/useGetMyOrders.jsx";
 import useGetUpdateLocation from "./hooks/useGetUpdateLocation.jsx";
 
-// ✅ Loading Spinner Component (inline)
+// ✅ Loading Spinner Component
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center h-screen bg-gradient-to-br from-orange-50 to-white">
     <div className="text-center">
@@ -61,7 +64,7 @@ const LoadingSpinner = () => (
 );
 
 function App() {
-  // 🔥 Hooks are kept flat to comply with core React alignment rules
+  // 🔥 Hooks
   useGetCurruser();
   useGetCity();
   useGetMyShop();
@@ -70,10 +73,9 @@ function App() {
   useGetMyOrders();
   useGetUpdateLocation();
 
-  // ✅ Add loading state from Redux
   const { userData, loading } = useSelector((state) => state.user);
 
-  // ✅ Show loader while checking authentication
+  // ✅ Loading state
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -96,12 +98,14 @@ function App() {
       />
   
       <Routes>
-        {/* 🌐 Home Route */}
+        {/* 🌐 HOME / LANDING PAGE */}
         <Route
           path="/"
           element={
+            // ✅ If user NOT logged in → Show Hero Video (Welcome Screen)
+            // ✅ If user logged in → Redirect to dashboard based on role
             !userData ? (
-              <Navigate to="/signin" replace />
+              <HeroVideo />
             ) : userData.role === "admin" ? (
               <Navigate to="/admin/dashboard" replace />
             ) : userData.role === "deliveryboy" ? (
