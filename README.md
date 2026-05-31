@@ -35,7 +35,19 @@ ZYNGO is a Full Stack Food Delivery Web Application built with modern web techno
 - Vercel
 - Render
 
+## 📸 Screenshots
 
+### Home Page
+![Home Page](screenshots/home.png)
+
+### Admin Panel
+![Admin Panel](screenshots/admin.png)
+
+### Live Tracking
+![Live Tracking](screenshots/tracking.png)
+
+### Owner Panel
+![Owner Panel](screenshots/owner.png)
 
 
 ## ⚙️ Installation
@@ -53,4 +65,11 @@ Website: https://zyngo-omega.vercel.app/
 npm install
 npm run dev 
 
-## 📂 Project Structure
+👨‍💻 Author
+Alok Kumar
+LinkedIn: https://www.linkedin.com/in/alok-kumar-304980314⁠�
+GitHub: https://github.com/your-github-alok957641
+📧 Contact
+For feedback and collaboration: Email: rajalok957641@gmail.com
+⭐ Support
+If you like this project, don't forget to give it a star ⭐
