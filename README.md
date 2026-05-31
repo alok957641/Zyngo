@@ -63,9 +63,11 @@ Website: https://zyngo-omega.vercel.app/
 
 
 npm install
-npm run dev 
+npm run dev
 
-👨‍💻 Author
+
+
+###👨‍💻 Author
 Alok Kumar
 LinkedIn: https://www.linkedin.com/in/alok-kumar-304980314⁠�
 GitHub: https://github.com/your-github-alok957641
