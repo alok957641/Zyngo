@@ -43,7 +43,9 @@
 
 ### 🏠 Home Page
 
-![Home Page](/home.png.png)
+![Uploading home.png.png…]()
+
+
 
 ### 🛠️ Admin Panel
 
