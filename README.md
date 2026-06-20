@@ -43,25 +43,27 @@
 
 ### 🏠 Home Page
 
-![Uploading home.png.png…]()
-
-
+<img width="1920" height="1008" alt="home png" src="https://github.com/user-attachments/assets/949dd14d-8f24-4627-87f3-016a461b0620" />
 
 ### 🛠️ Admin Panel
 
-![Admin Panel](admin.png.png)
+<img width="1920" height="1008" alt="admin png" src="https://github.com/user-attachments/assets/1b529a7e-2155-4a75-8815-edc7b00cb08c" />
+
 
 ### 📍 Raider panel
-
-![Live Tracking](/raider.png.png)
+<img width="1920" height="1008" alt="raider png" src="https://github.com/user-attachments/assets/8185fa94-493c-46c5-ba43-ab4f15815a5f" />
 
 ###  user Panel
 
-![user Panel](/user.png.png)
+<img width="1920" height="1008" alt="user png" src="https://github.com/user-attachments/assets/62883c00-ede7-4e0e-a9b1-a628e4dfe677" />
 
 ### 🏪 owner Panel
 
-![owner Panel](/owner.png.png)
+<img width="1920" height="1008" alt="Screenshot 2026-06-20 214731" src="https://github.com/user-attachments/assets/dedda4ec-a4f5-45b5-8b18-be0e36dee7b0" />
+
+
+### 🏪 Resturents And Foods 
+<img width="1920" height="1008" alt="Screenshot 2026-06-20 212149" src="https://github.com/user-attachments/assets/faf633e8-902c-4cdc-832f-ca6e759d5c02" />
 
 ---
 
