@@ -39,36 +39,50 @@
 
 ---
 
+## 📸 Screenshots
+
+### 🏠 Home Page
+
+![Home Page](./screenshots/home.png)
+
+### 🛠️ Admin Panel
+
+![Admin Panel](./screenshots/admin.png)
+
+### 📍 Live Tracking
+
+![Live Tracking](./screenshots/tracking.png)
+
+### 🏪 Owner Panel
+
+![Owner Panel](./screenshots/owner.png)
+
+---
+
 ## 🛠️ Built With
 
 ### Frontend
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **React.js** | 18.2.0 | UI Framework |
-| **Vite** | 5.0.0 | Build Tool |
-| **Tailwind CSS** | 3.3.5 | Styling |
-| **Framer Motion** | 10.16.0 | Animations |
-| **React Router DOM** | 6.20.0 | Navigation |
-| **Axios** | 1.4.0 | API Calls |
-| **React Icons** | 4.11.0 | Icons |
+- **React 18** - UI Framework
+- **Vite** - Build Tool
+- **Tailwind CSS** - Styling
+- **Framer Motion** - Animations
+- **React Router DOM** - Navigation
+- **Axios** - API Calls
+- **React Icons** - Icons
 
 ### Backend
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| **Node.js** | 18.x | Runtime Environment |
-| **Express.js** | 4.18.2 | API Framework |
-| **MongoDB** | 6.x | Database |
-| **Mongoose** | 7.0.0 | ODM |
-| **JWT** | 9.0.0 | Authentication |
-| **Bcryptjs** | 2.4.3 | Password Hashing |
-| **Multer** | 1.4.5 | File Upload |
+- **Node.js** - Runtime Environment
+- **Express.js** - API Framework
+- **MongoDB** - Database
+- **Mongoose** - ODM
+- **JWT** - Authentication
+- **Bcryptjs** - Password Hashing
+- **Multer** - File Upload
 
 ### Deployment
-| Platform | Purpose |
-|----------|---------|
-| **Vercel** | Frontend Hosting |
-| **Render** | Backend Hosting |
-| **MongoDB Atlas** | Cloud Database |
+- **Vercel** - Frontend Hosting
+- **Render** - Backend Hosting
+- **MongoDB Atlas** - Cloud Database
 
 ---
 
@@ -77,21 +91,21 @@
 ```
 zyngo/
 │
-├── frontend/                              # Frontend Application
+├── frontend/
 │   ├── public/
 │   │   ├── favicon.ico
 │   │   └── logo.png
 │   │
 │   ├── src/
-│   │   ├── assets/                        # Images & Icons
+│   │   ├── assets/
 │   │   │
-│   │   ├── components/                    # Reusable Components
+│   │   ├── components/
 │   │   │   ├── Navbar.jsx
 │   │   │   ├── Footer.jsx
 │   │   │   ├── Loader.jsx
 │   │   │   └── ProtectedRoute.jsx
 │   │   │
-│   │   ├── pages/                         # Application Pages
+│   │   ├── pages/
 │   │   │   ├── Home.jsx
 │   │   │   ├── Login.jsx
 │   │   │   ├── Register.jsx
@@ -104,10 +118,10 @@ zyngo/
 │   │   │   ├── DeliveryDashboard.jsx
 │   │   │   └── AdminDashboard.jsx
 │   │   │
-│   │   ├── context/                       # Context API
+│   │   ├── context/
 │   │   │   └── AuthContext.jsx
 │   │   │
-│   │   ├── utils/                         # Utilities
+│   │   ├── utils/
 │   │   │   ├── api.js
 │   │   │   └── constants.js
 │   │   │
@@ -119,7 +133,7 @@ zyngo/
 │   ├── vite.config.js
 │   └── tailwind.config.js
 │
-├── backend/                               # Backend Application
+├── backend/
 │   ├── controllers/
 │   │   ├── authController.js
 │   │   ├── restaurantController.js
@@ -150,6 +164,12 @@ zyngo/
 │   │
 │   ├── index.js
 │   └── package.json
+│
+├── screenshots/                         # Screenshots Folder
+│   ├── home.png
+│   ├── admin.png
+│   ├── tracking.png
+│   └── owner.png
 │
 ├── .env
 ├── .gitignore
