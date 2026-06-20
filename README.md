@@ -47,7 +47,7 @@
 
 ### 🛠️ Admin Panel
 
-![Admin Panel](/admin.png.png)
+![Admin Panel](admin.png.png)
 
 ### 📍 Raider panel
 
