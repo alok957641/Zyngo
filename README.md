@@ -43,19 +43,23 @@
 
 ### 🏠 Home Page
 
-![Home Page](./screenshots/home.png)
+![Home Page](/home.png.png)
 
 ### 🛠️ Admin Panel
 
-![Admin Panel](./screenshots/admin.png)
+![Admin Panel](/admin.png.png)
 
-### 📍 Live Tracking
+### 📍 Raider panel
 
-![Live Tracking](./screenshots/tracking.png)
+![Live Tracking](/raider.png.png)
 
-### 🏪 Owner Panel
+###  user Panel
 
-![Owner Panel](./screenshots/owner.png)
+![user Panel](/user.png.png)
+
+### 🏪 owner Panel
+
+![owner Panel](/owner.png.png)
 
 ---
 
