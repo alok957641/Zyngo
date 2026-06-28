@@ -1,10 +1,8 @@
 import { useEffect } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
+import { serverurl } from "../config/api.js";
 import { setItemsInMyCity } from "../redux/userSlice"; 
-
-export const serverurl = "https://zyngo.onrender.com";
-
 function useGetItemByCity() {
   // 🔥 Redux se exact Capital 'City' field nikali
   const { City } = useSelector((state) => state.user); 

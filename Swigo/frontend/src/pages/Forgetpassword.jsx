@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
-
-export const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 function Forgetpassword() {
   const [email, setEmail] = useState("");
   const [step, setStep] = useState(1);
@@ -41,18 +38,18 @@ function Forgetpassword() {
     }
   };
 
-  // varify OTP
+  // verify OTP
   const handlevarifyOtp = async () => {
     if (loading) return;
 
     setLoading(true);
     try {
       const result = await axios.post(
-        `${serverurl}/api/auth/varifyOtp`,
+        `${serverurl}/api/auth/verifyOtp`,
         { email, otp },
         { withCredentials: true },
       );
-    alert("OTP Varifyied !")
+    alert("OTP Verified!");
       setStep(3);
     } catch (error) {
       setErrorMessage(error.response.data.message);
@@ -75,7 +72,7 @@ function Forgetpassword() {
     try {
       const result = await axios.post(
         `${serverurl}/api/auth/resetpassword`,
-        { email, newpassword },
+        { email, newPassword: newpassword },
         { withCredentials: true },
       );
     alert("Password Reseted !")

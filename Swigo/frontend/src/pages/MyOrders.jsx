@@ -6,9 +6,7 @@ import UserOrderCard from "../components/UserOrderCard";
 import OwnerOrderCard from "../components/OwnerOrderCard";
 import useGetMyShop from "../hooks/useGetMyShop"; 
 import axios from "axios";
-
-const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 function MyOrders() {
   useGetMyShop(); 
   const navigate = useNavigate();

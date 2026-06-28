@@ -7,9 +7,7 @@ import {
     FiTrendingUp, FiCheckCircle, FiUser, FiX, FiAlertOctagon, FiCreditCard
 } from "react-icons/fi";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-
-const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
     const script = document.createElement("script");

@@ -7,10 +7,7 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase.js";
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice.js";
-export const serverurl = "https://zyngo.onrender.com";
-
-
-
+import { serverurl } from "../config/api.js";
 function Signup() {
   const [role, setRole] = useState("");
   const [showpassword, setShowpassword] = useState(false);
@@ -22,15 +19,21 @@ function Signup() {
  
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // signup
   const handelsignup = async (e) => {
     setLoading(true);
     e.preventDefault();
     if (!role) {
-      return setErrorMessage(
-        "Please select a Role (User, Owner, or Delivery Boy)",
-      );
+      setLoading(false);
+      setErrorMessage("Please select a Role (User, Owner, or Delivery Boy)");
+      return;
+    }
+    if (!/^\d{10}$/.test(mobile)) {
+      setLoading(false);
+      setErrorMessage("Mobile number must be 10 digits");
+      return;
     }
     setErrorMessage("");
     try {
@@ -45,8 +48,8 @@ function Signup() {
         },
         { withCredentials: true },
       );
-      alert("Signup Successful!");
       dispatch(setUserData(result.data));
+      navigate("/", { replace: true });
       setErrorMessage("");
     } catch (error) {
       setErrorMessage(error.response.data.message);
@@ -80,8 +83,8 @@ function Signup() {
         { withCredentials: true },
       );
       console.log(data);
-      alert("Signup Successful!");
       dispatch(setUserData(data));
+      navigate("/profile-verification", { replace: true });
       setErrorMessage("");
     } catch (error) {
       const msg =
@@ -193,7 +196,7 @@ function Signup() {
           {/* Submit Button */}
           <button
             disabled={loading}
-            onClick={handelsignup}
+            type="submit"
             className={`w-full ... ${loading ? "opacity-50 cursor-not-allowed w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-2xl font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all text-sm mt-2" : "w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-2xl font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all text-sm mt-2"}`}
           >
             {loading ? "loading..." : "Sign Up"}

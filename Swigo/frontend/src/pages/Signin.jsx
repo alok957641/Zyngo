@@ -5,11 +5,10 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../../firebase.js";
-import { use } from "react";
 
 import { useDispatch } from "react-redux";
 import { setUserData } from "../redux/userSlice.js";
-export const serverurl = "https://zyngo.onrender.com";
+import { serverurl } from "../config/api.js";
 
 function Signin() {
   const [showpassword, setShowpassword] = useState(false);
@@ -18,6 +17,7 @@ function Signin() {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   // signin
   const handelsignin = async (e) => {
@@ -29,8 +29,8 @@ function Signin() {
         { email, password },
         { withCredentials: true },
       );
-      alert("Sigin  Successful!");
       dispatch(setUserData(result.data));
+      navigate("/", { replace: true });
     } catch (error) {
       // 🚀 YAHAN THI GALTI: 'msg' ki jagah actual error nikalna tha
       setErrorMessage(error.response?.data?.message || "Invalid Email or Password");
@@ -49,11 +49,12 @@ function Signin() {
         `${serverurl}/api/auth/googleauth`,
         {
           email: result.user.email,
+          fullname: result.user.displayName,
         },
         { withCredentials: true },
       );
-      alert("Sigin  Successful!");
       dispatch(setUserData(data));
+      navigate("/profile-verification", { replace: true });
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "Google Signin Failed");
     }
@@ -129,7 +130,7 @@ function Signin() {
           {/* Submit Button */}
           <button
             disabled={loading}
-            onClick={handelsignin}
+            type="submit"
             className={`w-full ... ${loading ? "opacity-50 cursor-not-allowed w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-2xl font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all text-sm mt-2" : "w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-2xl font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all text-sm mt-2"}`}
           >
             {loading ? "loading..." : "Sign In"}

@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiDollarSign, FiCheck, FiLoader, FiUser, FiClock } from "react-icons/fi";
-
-const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 const AdminPayouts = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);

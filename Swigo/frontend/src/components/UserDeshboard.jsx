@@ -9,9 +9,7 @@ import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
 import { setSelectedCategory } from "../redux/userSlice";
 import axios from "axios";
 import HeroSlider from "../components/HeroSlider.jsx";
-
-const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 function UserDeshboard() {
   const dispatch = useDispatch();
   const categoryScrollRef = useRef(null);

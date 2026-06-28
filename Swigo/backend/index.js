@@ -4,6 +4,8 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const database = require("./config/db.js");
 
+dotenv.config();
+
 // Import Routes
 const authRoute = require("./routes/authroute.js");
 const userRoute = require("./routes/userroute.js");
@@ -13,8 +15,6 @@ const orderRoute = require("./routes/orderroute.js");
 const ratingRoute = require("./routes/rating.js");
 const payoutRoute = require("./routes/payoutRoute.js");
 const adminRoute = require("./routes/adminRoute.js");
-
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -35,6 +35,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use((req, res, next) => {
+  if (process.env.NODE_ENV !== "development") return next();
     console.log(`[${req.method}] ${req.url}`);
     next();
 });
@@ -42,6 +43,7 @@ app.use((req, res, next) => {
 app.use("/api/auth", authRoute);
 app.use("/api/user", userRoute);
 app.use("/api/shop", (req, res, next) => {
+    if (process.env.NODE_ENV !== "development") return next();
     console.log("Shop Route Hit:", req.url);
     next();
 }, shopRoute);

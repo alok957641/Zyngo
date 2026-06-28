@@ -2,9 +2,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setCity, setShopsOfMyCity } from "../redux/userSlice";
-
-export const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 function useGetShopbyCity() {
   // ⚠️ DHYAN RAKHNA: Redux me tune 'City' (Capital C) rakha hai ya 'city' (Small c). 
   // Agar pehle 'city' tha, toh isko small kar lena.

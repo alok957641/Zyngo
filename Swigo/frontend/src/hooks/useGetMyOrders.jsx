@@ -2,9 +2,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMyOrders } from "../redux/userSlice";
-
-export const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 // 🔥 FIX: apiClient yahan bana lo taaki hamesha same config use ho
 const apiClient = axios.create({
   baseURL: serverurl,

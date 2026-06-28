@@ -10,10 +10,29 @@ const crypto = require("crypto");
 
 dotenv.config();
 
-let instance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+let razorpayInstance;
+
+const getRazorpayInstance = () => {
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+        throw new Error("Razorpay keys are not configured");
+    }
+
+    if (!razorpayInstance) {
+        razorpayInstance = new Razorpay({
+            key_id: process.env.RAZORPAY_KEY_ID,
+            key_secret: process.env.RAZORPAY_KEY_SECRET,
+        });
+    }
+
+    return razorpayInstance;
+};
+
+const getRazorpaySecret = () => {
+    if (!process.env.RAZORPAY_KEY_SECRET) {
+        throw new Error("Razorpay secret is not configured");
+    }
+    return process.env.RAZORPAY_KEY_SECRET;
+};
 
 const placeOrder = async (req, res) => {
     try {
@@ -123,11 +142,16 @@ const placeOrder = async (req, res) => {
         if (paymentMethod === 'online') {
             const options = { amount: Math.round(finalGrandTotal * 100), currency: "INR", receipt: `receipt_${newOrder._id}` };
             try {
-                const razorpayOrder = await instance.orders.create(options);
+                const razorpayOrder = await getRazorpayInstance().orders.create(options);
                 newOrder.razorpayOrderId = razorpayOrder.id;
                 await newOrder.save();
                 notifyOwners();
-                return res.status(201).json({ success: true, order: newOrder, razorpayOrder });
+                return res.status(201).json({
+                    success: true,
+                    order: newOrder,
+                    razorpayOrder,
+                    razorpayKeyId: process.env.RAZORPAY_KEY_ID
+                });
             } catch (err) {
                 return res.status(500).json({ success: false, message: "Razorpay error: " + err.message });
             }
@@ -144,11 +168,19 @@ const placeOrder = async (req, res) => {
 const verifyPayment = async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId) {
+            return res.status(400).json({ success: false, message: "Missing payment verification data" });
+        }
+
         const body = razorpay_order_id + "|" + razorpay_payment_id;
-        const expectedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest("hex");
+        const expectedSignature = crypto.createHmac("sha256", getRazorpaySecret()).update(body.toString()).digest("hex");
 
         if (expectedSignature === razorpay_signature) {
-            const updatedOrder = await Order.findByIdAndUpdate(orderId, { paymentStatus: "paid", razorpayPaymentId: razorpay_payment_id }, { new: true });
+            await Order.findByIdAndUpdate(
+                orderId,
+                { paymentStatus: "paid", payment: true, razorpayPaymentId: razorpay_payment_id },
+                { new: true }
+            );
             
             // 🌐 Real-time: Notify User
             if(req.io) req.io.to(orderId.toString()).emit("paymentVerified", { status: "paid" });
@@ -288,15 +320,37 @@ const acceptOrder = async (req, res) => {
 const verifyDeliveryOtp = async (req, res) => {
     try {
         const { orderId, shopOrderId, otp } = req.body;
-        const order = await Order.findById(orderId);
-        const shopOrder = order?.shopOrders.id(shopOrderId);
+        const cleanOtp = String(otp || "").trim();
 
-        if (!shopOrder || shopOrder.deliveryOtp !== otp.toString()) {
-            return res.status(400).json({ success: false, message: "Wrong OTP!" });
+        if (!orderId || !shopOrderId || !cleanOtp) {
+            return res.status(400).json({ success: false, message: "Order, shop order and OTP are required" });
+        }
+
+        const order = await Order.findById(orderId);
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+
+        const shopOrder = order?.shopOrders.id(shopOrderId);
+        if (!shopOrder) return res.status(404).json({ success: false, message: "Shop order not found" });
+
+        if (!shopOrder.deliveryOtp) {
+            return res.status(400).json({ success: false, message: "OTP was not generated. Please send OTP again." });
+        }
+
+        if (shopOrder.otpExpires && shopOrder.otpExpires < Date.now()) {
+            return res.status(400).json({ success: false, message: "OTP expired. Please send OTP again." });
+        }
+
+        if (String(shopOrder.deliveryOtp).trim() !== cleanOtp) {
+            return res.status(400).json({
+                success: false,
+                message: "Wrong OTP!",
+                ...(process.env.NODE_ENV !== "production" ? { expectedOtp: shopOrder.deliveryOtp } : {})
+            });
         }
 
         shopOrder.status = "delivered";
         shopOrder.deliveryOtp = undefined;
+        shopOrder.otpExpires = undefined;
         order.markModified('shopOrders');
         await order.save();
 
@@ -496,15 +550,34 @@ const sendDeliveryOtp = async (req, res) => {
         const { orderId, shopOrderId } = req.body;
         const order = await Order.findById(orderId).populate("user");
         const shopOrder = order?.shopOrders.id(shopOrderId);
-        if (!shopOrder) return res.status(400).json({ message: "Bhai IDs galat hain!" });
+        if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+        if (!shopOrder) return res.status(400).json({ success: false, message: "Shop order not found" });
+
         const otp = Math.floor(1000 + Math.random() * 9000).toString();
         shopOrder.deliveryOtp = otp;
         shopOrder.otpExpires = Date.now() + 10 * 60 * 1000;
         order.markModified('shopOrders'); 
         await order.save();
-        await sendDeliveryOtpEmail(order.user, otp);
-        res.status(200).json({ success: true, message: "OTP Sent Successfully!" });
-    } catch (error) { res.status(500).json({ message: error.message }); }
+
+        let emailSent = false;
+        let emailError = "";
+        try {
+            await sendDeliveryOtpEmail(order.user, otp);
+            emailSent = true;
+        } catch (mailError) {
+            emailError = mailError.message;
+            console.error("Delivery OTP email failed:", emailError);
+        }
+
+        res.status(200).json({
+            success: true,
+            emailSent,
+            message: emailSent ? "OTP sent to customer email." : `OTP generated but email not sent: ${emailError}`,
+            ...(process.env.NODE_ENV !== "production" ? { otp } : {})
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
 };
 
 const getDeliveryBoyAssignment = async (req, res) => {
@@ -527,7 +600,11 @@ const getDeliveryBoyAssignment = async (req, res) => {
 
 const getOrderById = async (req, res) => {
     try {
-        const order = await Order.findById(req.params.orderId).populate("user shopOrders.shop").lean();
+        const order = await Order.findById(req.params.orderId)
+            .populate("user", "fullname mobile email")
+            .populate("shopOrders.shop")
+            .populate("shopOrders.assignedDeliveryBoy", "fullname mobile location isOnline")
+            .lean();
         res.status(200).json(order);
     } catch (error) { res.status(500).json({ message: error.message }); }
 };
@@ -573,7 +650,7 @@ const riderPayDebtOrder = async (req, res) => {
             receipt: `rcpt_debt_${shortId}_${Date.now().toString().slice(-6)}` // Strict under 40 chars!
         };
 
-        const razorpayOrder = await instance.orders.create(options);
+        const razorpayOrder = await getRazorpayInstance().orders.create(options);
         
         return res.status(200).json({ 
             success: true, 
@@ -599,7 +676,7 @@ const verifyRiderDebtPayment = async (req, res) => {
 
         const body = razorpay_order_id + "|" + razorpay_payment_id;
         const expectedSignature = crypto
-            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .createHmac("sha256", getRazorpaySecret())
             .update(body.toString())
             .digest("hex");
 

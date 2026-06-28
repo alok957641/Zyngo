@@ -46,8 +46,10 @@ const orderSchema = new mongoose.Schema({
 
     shopOrders: [shopOrderSchema],
     payment: { type: Boolean, default: false },
+    paymentStatus: { type: String, enum: ["pending", "paid", "unpaid", "failed"], default: "unpaid" },
 
     razorpayOrderId: { type: String, default: "" },
+    razorpayPaymentId: { type: String, default: "" },
     isRated: { type: Boolean, default: false },
     rating: { type: Number, default: 0 }
 }, { timestamps: true });

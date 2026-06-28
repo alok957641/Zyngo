@@ -3,6 +3,7 @@ import axios from "axios";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { serverurl } from "../config/api.js";
 import {
   FiArrowLeft,
   FiClock,
@@ -11,9 +12,6 @@ import {
   FiAlertCircle,
   FiCreditCard,
 } from "react-icons/fi";
-
-const serverurl = "https://zyngo.onrender.com";
-
 const OwnerEarnings = () => {
   const navigate = useNavigate();
   const { userData } = useSelector((state) => state.user);

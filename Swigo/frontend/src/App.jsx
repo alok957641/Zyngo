@@ -12,6 +12,7 @@ import HeroVideo from "./components/HeroVideo.jsx";
 // Pages & Components Imports
 import Signup from "./pages/Signup.jsx";
 import Signin from "./pages/Signin.jsx";
+import ProfileVerification from "./pages/ProfileVerification.jsx";
 import Home from "./pages/Home.jsx";
 import Forgetpassword from "./pages/Forgetpassword.jsx";
 import CreateAndEditShop from "./pages/CreateAndEditShop.jsx";
@@ -82,6 +83,7 @@ function App() {
     // Don't show footer on auth pages
     if (location.pathname === "/signin" || 
         location.pathname === "/signup" || 
+        location.pathname === "/profile-verification" ||
         location.pathname === "/forgetpassword") {
       return false;
     }
@@ -103,6 +105,32 @@ function App() {
   // ✅ Loading state
   if (loading) {
     return <LoadingSpinner />;
+  }
+
+  const requiresProfileReview =
+    userData?.role !== "admin" &&
+    Boolean(userData?.profileReviewRequired);
+
+  if (userData && requiresProfileReview && location.pathname !== "/profile-verification") {
+    return (
+      <>
+        <Toaster
+          position="top-center"
+          reverseOrder={false}
+          toastOptions={{
+            style: {
+              fontSize: "12px",
+              fontWeight: "bold",
+              borderRadius: "15px",
+              background: "#1e293b",
+              color: "#fff",
+              border: "1px solid rgba(255,255,255,0.05)",
+            },
+          }}
+        />
+        <Navigate to="/profile-verification" replace />
+      </>
+    );
   }
 
   return (
@@ -151,6 +179,10 @@ function App() {
         <Route
           path="/forgetpassword"
           element={!userData ? <Forgetpassword /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/profile-verification"
+          element={userData ? <ProfileVerification /> : <Navigate to="/signin" replace />}
         />
 
         {/* 👑 ADMIN PANEL */}

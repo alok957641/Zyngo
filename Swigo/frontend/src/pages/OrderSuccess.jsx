@@ -9,6 +9,7 @@ function OrderSuccess() {
 
   // 🎉 Surprise Party: Page load hote hi hara confetti udega
   useEffect(() => {
+    window.history.replaceState(null, "", "/order-success");
     const duration = 3 * 1000;
     const end = Date.now() + duration;
 

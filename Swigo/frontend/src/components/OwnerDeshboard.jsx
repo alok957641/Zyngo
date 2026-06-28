@@ -17,9 +17,7 @@ import { FaMapLocationDot } from "react-icons/fa6";
 // Hooks
 import useGetMyOrders from "../hooks/useGetMyOrders";
 import useGetMyShop from "../hooks/useGetMyShop";
-
-const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 const apiClient = axios.create({
   baseURL: serverurl,
   withCredentials: true,

@@ -13,6 +13,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import axios from "axios";
 import { setMyShopData } from "../redux/ownerSlice";
+import { serverurl } from "../config/api.js";
 
 // Fix for Leaflet Default Icon
 const markerIcon = new L.Icon({
@@ -23,9 +24,6 @@ const markerIcon = new L.Icon({
   iconSize: [25, 41],
   iconAnchor: [12, 41],
 });
-
- const serverurl = "https://zyngo.onrender.com";
-
 function CreateAndEditShop() {
   const navigate = useNavigate();
   const dispatch = useDispatch();

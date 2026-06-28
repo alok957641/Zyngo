@@ -5,12 +5,13 @@ import { FaMapMarkerAlt, FaSearch, FaShoppingCart, FaShoppingBag } from "react-i
 import { MdKeyboardArrowDown, MdClose, MdMyLocation } from "react-icons/md";
 import { FiLogOut } from "react-icons/fi";
 import axios from "axios";
+import { serverurl } from "../config/api.js";
 // ✅ setSearchTerm import kiya
 import { setUserData, setSearchTerm } from "../redux/userSlice"; 
 
 
 const apiClient = axios.create({
-  baseURL: "https://zyngo.onrender.com",
+  baseURL: serverurl,
   withCredentials: true,
 });
 
@@ -24,19 +25,12 @@ function UserNav() {
 
 
 const handleLogout = async () => {
-    try {
-        // Backend se session clear karwao
-        await apiClient.get(`/api/auth/signout`); 
-    } catch (err) {
-        console.error("Logout API failed, but forcing local cleanup", err);
-    } finally {
-        // Local state saaf karo
-        localStorage.clear();
-        dispatch(setUserData(null)); 
-        
-        // Force reload to clear all states
-        window.location.href = "/signin"; 
-    }
+    localStorage.clear();
+    dispatch(setUserData(null));
+    navigate("/signin", { replace: true });
+    apiClient.get(`/api/auth/signout`).catch((err) => {
+        console.error("Logout API failed after local cleanup", err);
+    });
 };
 
   return (

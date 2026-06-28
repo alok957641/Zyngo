@@ -1,0 +1,1 @@
+export const serverurl = import.meta.env.VITE_API_URL || "https://zyngo.onrender.com";

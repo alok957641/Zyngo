@@ -24,10 +24,9 @@ import {
 } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { serverurl } from "../config/api.js";
 
 // ✅ Server URL (Production)
-const serverurl = "https://zyngo.onrender.com";
-
 const shopIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/3081/3081559.png",
   iconSize: [40, 40],

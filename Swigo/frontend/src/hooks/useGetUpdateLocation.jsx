@@ -1,16 +1,14 @@
 import { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import { serverurl } from "../config/api.js";
 
-export const serverurl = "https://zyngo.onrender.com";
-
-// Ek global API instance banao taaki headers/credentials baar baar na likhna pade
 const apiClient = axios.create({
   baseURL: serverurl,
-  withCredentials: true, // Cookies automatically bhejega
+  withCredentials: true,
   headers: {
-    "Content-Type": "application/json"
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 function useGetUpdateLocation() {
@@ -18,36 +16,33 @@ function useGetUpdateLocation() {
   const lastUpdate = useRef(0);
 
   useEffect(() => {
-    if (!userData) return;
+    if (userData?.role !== "deliveryboy") return;
 
     const updateLocation = async (lat, lon) => {
       const now = Date.now();
-      if (now - lastUpdate.current < 15000) return; // 15s delay
+      if (now - lastUpdate.current < 15000) return;
 
       try {
-        // Backend ke model ke hisaab se key name match karo (lat/lon)
-        const res = await apiClient.post("/api/user/update-location", { 
-          latitude: lat,  // Backend ke `user.controller.js` mein jo field naam hai wo likho
-          longitude: lon 
+        await apiClient.post("/api/user/update-location", {
+          latitude: lat,
+          longitude: lon,
         });
-        
-        if (res.status === 200) {
-          lastUpdate.current = now;
-          console.log("✅ Location Synced");
-        }
+        lastUpdate.current = now;
       } catch (error) {
-        console.error("❌ Sync Failed:", error.response?.status, error.message);
+        if (error.response?.status !== 401) {
+          console.error("Location sync failed:", error.response?.status, error.message);
+        }
       }
     };
 
     const watchId = navigator.geolocation.watchPosition(
       (pos) => updateLocation(pos.coords.latitude, pos.coords.longitude),
       (err) => console.error("GPS Error:", err.message),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
 
     return () => navigator.geolocation.clearWatch(watchId);
-  }, [userData]);
+  }, [userData?.role]);
 }
 
 export default useGetUpdateLocation;

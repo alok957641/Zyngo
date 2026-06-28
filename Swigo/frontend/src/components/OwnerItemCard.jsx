@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { FiEdit3, FiTrash2, FiLoader } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { serverurl } from "../pages/EditItem";
+import { serverurl } from "../config/api.js";
 import { useDispatch } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";
 

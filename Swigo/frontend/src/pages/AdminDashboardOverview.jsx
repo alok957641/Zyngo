@@ -4,9 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { FiUsers, FiShoppingBag, FiTruck, FiActivity, FiLoader, FiLogOut } from "react-icons/fi";
 import { setUserData } from "../redux/userSlice";
-
-const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 const AdminDashboardOverview = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();

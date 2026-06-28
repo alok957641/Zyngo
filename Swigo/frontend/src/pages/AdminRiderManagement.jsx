@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FiTruck, FiUser, FiMapPin, FiPhone, FiLoader, FiTrendingUp, FiActivity } from "react-icons/fi";
-
-const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 const AdminRiderManagement = () => {
   const [riders, setRiders] = useState([]);
   const [loading, setLoading] = useState(true);

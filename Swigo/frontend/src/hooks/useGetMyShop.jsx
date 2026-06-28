@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";
-
-export const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 // ✅ Global instance
 const apiClient = axios.create({
   baseURL: serverurl,

@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiUser, FiPhone, FiMapPin, FiChevronDown, FiLoader, FiNavigation, FiLock } from "react-icons/fi";
 import { FaIndianRupeeSign } from "react-icons/fa6";
 import axios from "axios";
-
-const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 function OwnerOrderCard({ data }) {
   if (!data || !data.shopOrders || data.shopOrders.length === 0) return null;
 

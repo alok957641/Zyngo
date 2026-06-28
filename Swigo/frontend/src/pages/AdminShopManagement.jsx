@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useSelector } from "react-redux"; 
 import { FiLoader, FiHome, FiSearch, FiShoppingBag, FiMapPin, FiPhoneCall } from "react-icons/fi";
-
-const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 const AdminShopManagement = () => {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);

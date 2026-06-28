@@ -5,9 +5,10 @@ import { MdOutlinePendingActions, MdAddCircleOutline, MdFastfood } from "react-i
 import { FiLogOut } from "react-icons/fi";
 import { setUserData } from "../redux/userSlice";
 import axios from "axios";
+import { serverurl } from "../config/api.js";
 
 const apiClient = axios.create({
-  baseURL: "https://zyngo.onrender.com",
+  baseURL: serverurl,
   withCredentials: true,
 });
 
@@ -33,21 +34,12 @@ function OwnerNav() {
 
 
 const handleLogout = async () => {
-    try {
-        // ✅ ab apiClient kaam karega
-        await apiClient.get(`/api/auth/signout`); 
-        console.log("Logged out from server");
-    } catch (err) {
-        console.error("Logout API failed, forcing local cleanup", err);
-    } finally {
-        // Local state saaf karo
-        localStorage.clear();
-        dispatch(setUserData(null)); 
-        
-        // Browser session/cookie force clear karne ke liye
-        // Redirect se pehle thoda wait kar sakte ho agar zaroori ho
-        window.location.href = "/signin"; 
-    }
+    localStorage.clear();
+    dispatch(setUserData(null));
+    navigate("/signin", { replace: true });
+    apiClient.get(`/api/auth/signout`).catch((err) => {
+        console.error("Logout API failed after local cleanup", err);
+    });
 };
 
 

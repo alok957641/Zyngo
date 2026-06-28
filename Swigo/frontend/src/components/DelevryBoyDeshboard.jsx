@@ -11,15 +11,8 @@ import {
     FiMapPin, FiUser, FiNavigation, FiLogOut, FiInfo, FiActivity
 } from "react-icons/fi";
 import { RiMotorbikeFill, RiWallet3Fill } from "react-icons/ri";
+import { serverurl } from "../config/api.js";
 import { setUserData } from "../redux/userSlice"; // Check if imported correctly
-
-
-
-
-
-const serverurl = "https://zyngo.onrender.com";
-
-
 const apiClient = axios.create({
     baseURL: serverurl,
     withCredentials: true
@@ -212,17 +205,12 @@ const handleAvailabilityToggle = async () => {
 
     
 const handleLogout = async () => {
-    try {
-        // Backend se cookie delete karwao
-        await apiClient.get(`/api/auth/signout`); 
-    } catch (err) {
-        console.error("Logout API failed, but forcing local cleanup");
-    } finally {
-        // Hamesha local data saaf karo, chahe API fail ho
-        localStorage.clear();
-        dispatch(setUserData(null)); 
-        window.location.href = "/signin"; // Force redirect
-    }
+    localStorage.clear();
+    dispatch(setUserData(null));
+    navigate("/signin", { replace: true });
+    apiClient.get(`/api/auth/signout`).catch(() => {
+        console.error("Logout API failed after local cleanup");
+    });
 };
 
 
@@ -236,10 +224,18 @@ const handleLogout = async () => {
             }, { withCredentials: true });
             if (res.data.success) {
                 setShowOtpInput(true);
-                triggerMessage("Verification token sent to customer email.");
+                if (res.data.otp) setOtp(String(res.data.otp));
+                triggerMessage(
+                    res.data.emailSent
+                        ? "OTP sent to customer email."
+                        : res.data.otp
+                            ? `Email off. Dev OTP: ${res.data.otp}`
+                            : res.data.message || "Email service is not configured.",
+                    !res.data.emailSent
+                );
             }
         } catch (err) { 
-            triggerMessage("Authentication signal failed!", true); 
+            triggerMessage(err.response?.data?.message || "Authentication signal failed!", true); 
         } finally { 
             setBtnLoading(false); 
         }
@@ -249,10 +245,16 @@ const handleLogout = async () => {
         try {
             if (!activeOrder?.orderId || !activeOrder?.shopOrder?._id) return;
             setBtnLoading(true);
+            const cleanOtp = String(otp || "").trim();
+            if (cleanOtp.length !== 4) {
+                triggerMessage("Please enter the 4 digit OTP.", true);
+                return;
+            }
+
             const res = await axios.post(`${serverurl}/api/order/verify-otp`, {
                 orderId: activeOrder.orderId,
                 shopOrderId: activeOrder.shopOrder._id,
-                otp
+                otp: cleanOtp
             }, { withCredentials: true });
             if (res.data.success) {
                 triggerMessage("Mission successful! Payout dispatched.");
@@ -262,7 +264,7 @@ const handleLogout = async () => {
                 fetchEverything();
             }
         } catch (err) { 
-            triggerMessage("Security mismatch: Invalid OTP!", true); 
+            triggerMessage(err.response?.data?.message || "Security mismatch: Invalid OTP!", true); 
         } finally { 
             setBtnLoading(false); 
         }

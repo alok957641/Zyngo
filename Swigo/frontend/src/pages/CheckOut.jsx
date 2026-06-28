@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { FiArrowLeft, FiLoader, FiMapPin, FiTruck, FiChevronRight, FiSmartphone, FiCheckCircle } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
@@ -6,13 +6,11 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
-import { addMyOrder } from "../redux/userSlice";
+import { addMyOrder, clearCart } from "../redux/userSlice";
 
 // 🚨 Icons for Online Payment
 import { SiGooglepay, SiPhonepe, SiPaytm } from "react-icons/si";
-
-export const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 // Real Distance Formula
 const calculateKm = (lat1, lon1, lat2, lon2) => {
     if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
@@ -52,6 +50,12 @@ function CheckOut() {
 
   const position = [location.lat || 25.2500, location.lon || 86.2333];
 
+  useEffect(() => {
+    if (!cartItems.length) {
+      navigate("/", { replace: true });
+    }
+  }, [cartItems.length, navigate]);
+
   // 🧮 ASLI BILLING LOGIC (Synced with Backend)
   const billingData = useMemo(() => {
     let totalDeliveryCharge = 0;
@@ -88,9 +92,19 @@ function CheckOut() {
   }, [cartItems, location, totalAmount, tip]);
 
   // 🌐 RAZORPAY PAYMENT LOGIC
-  const initPayment = (razorpayOrder, orderId) => {
+  const initPayment = (razorpayOrder, orderId, razorpayKeyId) => {
+    if (!window.Razorpay) {
+      alert("Payment gateway load nahi hua. Page refresh karke try karo.");
+      return;
+    }
+
+    if (!razorpayKeyId) {
+      alert("Payment key missing hai. Backend .env check karo.");
+      return;
+    }
+
     const options = {
-      key: "rzp_test_SoP0awKZdS5zFG", 
+      key: razorpayKeyId,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
       name: "Zyngo Bhagalpur",
@@ -103,7 +117,10 @@ function CheckOut() {
             ...response, orderId
           }, { withCredentials: true });
 
-          if (data.success) navigate("/order-success");
+          if (data.success) {
+            dispatch(clearCart());
+            navigate("/order-success", { replace: true });
+          }
         } catch (error) {
           alert("Payment Failed!");
         } finally { setLoading(false); }
@@ -136,9 +153,10 @@ function CheckOut() {
         dispatch(addMyOrder(result.data.order));
         
         if (paymentMethod === "ONLINE" && result.data.razorpayOrder) {
-            initPayment(result.data.razorpayOrder, result.data.order._id);
+            initPayment(result.data.razorpayOrder, result.data.order._id, result.data.razorpayKeyId);
         } else {
-            navigate("/order-success"); 
+            dispatch(clearCart());
+            navigate("/order-success", { replace: true }); 
         }
       }
     } catch (error) {

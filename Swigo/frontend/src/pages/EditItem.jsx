@@ -7,8 +7,7 @@ import { useDispatch } from "react-redux";
 import { setMyShopData } from "../redux/ownerSlice";
 
 import axios from "axios";
-export const serverurl = "https://zyngo.onrender.com";
-
+import { serverurl } from "../config/api.js";
 // 👈 Function ka naam theek karke EditItem kar diya
 function EditItem() {
   const navigate = useNavigate();

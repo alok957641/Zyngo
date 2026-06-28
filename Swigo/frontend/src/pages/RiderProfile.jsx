@@ -1,5 +1,5 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
@@ -7,11 +7,17 @@ import {
     FiTruck, FiShield, FiChevronRight, FiEdit2, FiPhone, FiHome, FiPieChart, FiTrendingUp
 } from "react-icons/fi";
 import axios from "axios";
+import { setUserData } from "../redux/userSlice";
+import { serverurl } from "../config/api.js";
 
-const serverurl = "https://zyngo.onrender.com";
+const apiClient = axios.create({
+    baseURL: serverurl,
+    withCredentials: true,
+});
 
 const RiderProfile = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { userData } = useSelector((state) => state.user);
 
     // 🗓️ Joining Date Logic
@@ -21,17 +27,12 @@ const RiderProfile = () => {
 
     // 🔐 LOGOUT LOGIC
 const handleLogout = async () => {
-    try {
-        // Backend se cookie delete karwao
-        await apiClient.get(`/api/auth/signout`); 
-    } catch (err) {
-        console.error("Logout API failed, but forcing local cleanup");
-    } finally {
-        // Hamesha local data saaf karo, chahe API fail ho
-        localStorage.clear();
-        dispatch(setUserData(null)); 
-        window.location.href = "/signin"; // Force redirect
-    }
+    localStorage.clear();
+    dispatch(setUserData(null));
+    navigate("/signin", { replace: true });
+    apiClient.get(`/api/auth/signout`).catch(() => {
+        console.error("Logout API failed after local cleanup");
+    });
 };
 
     return (
